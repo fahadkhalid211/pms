@@ -1,27 +1,25 @@
 import prisma from "@/lib/db";
 import { Prisma, type RoomStatus, type HousekeepingStatus, type TaskPriority, type MaintenanceStatus, type MaintenancePriority, type InvoiceStatus, type PaymentStatus } from "@prisma/client";
 import { createReservation, updateReservation, cancelReservation, checkRoomsAvailability, type CreateReservationInput } from "@/lib/reservations";
+import {
+  checkInGuest,
+  checkOutGuest,
+  reassignRoom,
+  updateHousekeepingTask,
+  createMaintenanceTicket,
+  updateMaintenanceTicket,
+  updateRoomStatus,
+  type CheckInOptions,
+  type CheckOutOptions,
+} from "@/lib/operations";
 
 export interface TenantContext {
   organizationId: string;
   propertyId?: string | null;
 }
 
-export class NotFoundError extends Error {
-  status = 404;
-  constructor(message = "Resource not found.") {
-    super(message);
-    this.status = 404;
-  }
-}
-
-export class CrossTenantViolationError extends Error {
-  status = 403;
-  constructor(message = "Cross-tenant access violation: referenced entity does not belong to your organization.") {
-    super(message);
-    this.status = 403;
-  }
-}
+import { NotFoundError, CrossTenantViolationError, DoubleBookingConflictError } from "@/lib/errors";
+export { NotFoundError, CrossTenantViolationError, DoubleBookingConflictError };
 
 export const dal = {
   properties: {
@@ -484,9 +482,18 @@ export const dal = {
           organizationId: ctx.organizationId,
           ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
         },
-        include: { room: { include: { roomType: true } } },
+        include: { room: { include: { roomType: true } }, comments: true },
         orderBy: [{ status: "asc" }, { dueAt: "asc" }],
       });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const task = await prisma.housekeepingTask.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+        include: { room: { include: { roomType: true } }, comments: true },
+      });
+      if (!task) throw new NotFoundError("Housekeeping task not found.");
+      return task;
     },
 
     async create(
@@ -502,6 +509,11 @@ export const dal = {
         dueAt?: Date | null;
       },
     ) {
+      const property = await prisma.property.findFirst({
+        where: { id: data.propertyId, organizationId: ctx.organizationId },
+      });
+      if (!property) throw new CrossTenantViolationError("Property does not belong to your organization.");
+
       const room = await prisma.room.findFirst({
         where: { id: data.roomId, organizationId: ctx.organizationId, propertyId: data.propertyId },
       });
@@ -519,6 +531,46 @@ export const dal = {
           assigneeId: data.assigneeId,
           dueAt: data.dueAt ?? null,
         },
+      });
+    },
+
+    async update(
+      ctx: TenantContext,
+      id: string,
+      data: {
+        status?: HousekeepingStatus;
+        priority?: TaskPriority;
+        assigneeId?: string | null;
+        notes?: string | null;
+        title?: string | null;
+      },
+      userId?: string,
+    ) {
+      return updateHousekeepingTask(id, ctx.organizationId, data, userId);
+    },
+
+    async addComment(
+      ctx: TenantContext,
+      taskId: string,
+      body: string,
+      authorId?: string | null,
+    ) {
+      await dal.housekeeping.findUnique(ctx, taskId);
+      return prisma.taskComment.create({
+        data: {
+          organizationId: ctx.organizationId,
+          taskId,
+          authorId: authorId ?? undefined,
+          body,
+        },
+      });
+    },
+
+    async getComments(ctx: TenantContext, taskId: string) {
+      await dal.housekeeping.findUnique(ctx, taskId);
+      return prisma.taskComment.findMany({
+        where: { taskId, organizationId: ctx.organizationId },
+        orderBy: { createdAt: "asc" },
       });
     },
   },
@@ -548,35 +600,28 @@ export const dal = {
       ctx: TenantContext,
       data: {
         propertyId: string;
-        roomId?: string;
+        roomId?: string | null;
         status?: MaintenanceStatus;
         priority?: MaintenancePriority;
         description: string;
-        assigneeId?: string;
+        assigneeId?: string | null;
+        blockRoom?: boolean;
+        startDate?: string | Date;
+        endDate?: string | Date;
+        createdBy?: string | null;
       },
     ) {
-      const property = await prisma.property.findFirst({
-        where: { id: data.propertyId, organizationId: ctx.organizationId },
-      });
-      if (!property) throw new CrossTenantViolationError("Property does not belong to your organization.");
-
-      if (data.roomId) {
-        const room = await prisma.room.findFirst({
-          where: { id: data.roomId, organizationId: ctx.organizationId, propertyId: data.propertyId },
-        });
-        if (!room) throw new CrossTenantViolationError("Room does not belong to your organization or property.");
-      }
-
-      return prisma.maintenanceTicket.create({
-        data: {
-          organizationId: ctx.organizationId,
-          propertyId: data.propertyId,
-          roomId: data.roomId,
-          status: data.status ?? "open",
-          priority: data.priority ?? "normal",
-          description: data.description,
-          assigneeId: data.assigneeId,
-        },
+      return createMaintenanceTicket({
+        organizationId: ctx.organizationId,
+        propertyId: data.propertyId,
+        roomId: data.roomId,
+        priority: data.priority,
+        description: data.description,
+        assigneeId: data.assigneeId,
+        blockRoom: data.blockRoom,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        createdBy: data.createdBy,
       });
     },
 
@@ -586,19 +631,49 @@ export const dal = {
       data: {
         status?: MaintenanceStatus;
         priority?: MaintenancePriority;
-        assigneeId?: string;
+        assigneeId?: string | null;
+        description?: string;
       },
+      userId?: string,
     ) {
-      await dal.maintenance.findUnique(ctx, id);
-      return prisma.maintenanceTicket.update({
-        where: { id },
-        data: {
-          status: data.status,
-          priority: data.priority,
-          assigneeId: data.assigneeId,
-          resolvedAt: data.status === "resolved" ? new Date() : undefined,
-        },
-      });
+      return updateMaintenanceTicket(id, ctx.organizationId, data, userId);
+    },
+  },
+
+  operations: {
+    async checkIn(
+      ctx: TenantContext,
+      reservationId: string,
+      options: CheckInOptions = {},
+    ) {
+      return checkInGuest(reservationId, ctx.organizationId, options);
+    },
+
+    async checkOut(
+      ctx: TenantContext,
+      reservationId: string,
+      options: CheckOutOptions = {},
+    ) {
+      return checkOutGuest(reservationId, ctx.organizationId, options);
+    },
+
+    async reassignRoom(
+      ctx: TenantContext,
+      reservationId: string,
+      currentRoomId: string,
+      targetRoomId: string,
+      staffUserId?: string,
+    ) {
+      return reassignRoom(reservationId, currentRoomId, targetRoomId, ctx.organizationId, staffUserId);
+    },
+
+    async updateRoomStatus(
+      ctx: TenantContext,
+      roomId: string,
+      newStatus: RoomStatus,
+      staffUserId?: string,
+    ) {
+      return updateRoomStatus(roomId, ctx.organizationId, newStatus, staffUserId);
     },
   },
 

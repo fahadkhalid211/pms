@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP4 – Reservations engine (Completed and Verified).
-- **Overall completion:** ~55%
+- **Phase:** WP5 – Front desk, housekeeping, maintenance workspaces (Completed and Verified).
+- **Overall completion:** ~65%
 
 ## Completed
 
@@ -75,13 +75,25 @@
 - [x] Idempotency key gate: `Idempotency-Key` header cached in `IdempotencyKey` table with expiration and instant replay of 201 responses.
 - [x] Automated WP4 gate test suite (`tests/reservations.test.ts`): 9 comprehensive gate tests verifying concurrency, edge cases, multi-room, state machine, cancellation, modification, search, and idempotency.
 
+### WP5 – Front desk, housekeeping, and maintenance workspaces
+- [x] Front Desk workspace (`app/(app)/frontdesk/page.tsx`): live KPI stats (arrivals, departures, occupancy rate, room readiness, outstanding balances), interactive check-in modal enforcing ID verification & balance policy with manager override, checkout modal with auto turnover cleaning dispatch, room rack with quick status management.
+- [x] Check-in rules (`/api/reservations/[id]/check-in` & `lib/operations.ts`): enforces ID verification (`IdVerificationRequiredError`), room cleanliness (`RoomNotReadyError` - room must be clean/inspected), and financial balance (`OutstandingBalanceError`).
+- [x] Checkout lifecycle (`/api/reservations/[id]/check-out`): transitions reservation to `checked_out`, room status to `dirty`, and automatically dispatches turnover `HousekeepingTask` with `high` priority and 3-hour due window.
+- [x] Housekeeping workspace (`app/(app)/housekeeping/page.tsx`, `/api/housekeeping/[id]`, `/api/housekeeping/[id]/comments`): cleaning task queue, status progression (`pending` -> `in_progress` -> `completed`), auto room transition (`dirty` -> `clean` on task completion), comments and photo attachment support.
+- [x] Maintenance workspace (`app/(app)/maintenance/page.tsx`, `/api/maintenance`, `/api/maintenance/[id]`): work order management, inventory block engine (creates `RoomNight` records with `status: "maintenance"`, moves room to `out_of_service`, blocks reservation attempts with `DoubleBookingConflictError`, and automatically releases blocks and restores room status on resolve).
+- [x] Room reassignment & move engine (`/api/reservations/[id]/reassign-room`): transfers remaining stay nights atomically, updates room statuses, and creates turnover task for vacated room.
+- [x] Interactive tape chart & calendar (`app/(app)/calendar/page.tsx`): 7/14 day room matrix with HTML5 drag-and-drop room reassignment.
+- [x] Secure uploads & attachments (`/api/uploads`, `/api/uploads/[filename]`, `lib/uploads.ts`): file size limit (<= 10MB), MIME whitelist validation, cryptographically random UUID filename generation, saved strictly outside web root (`storage/uploads`), secure streaming download.
+- [x] Activity history & notifications: `AuditLog` records for all operational transitions, and `Notification` events on status change (`reservation_checked_in`, `reservation_checked_out`, `housekeeping_task_completed`, `maintenance_urgent_ticket`).
+- [x] Shared error definitions (`lib/errors.ts`) preventing circular imports and ensuring cross-module `instanceof` fidelity.
+- [x] Automated WP5 gate test suite (`tests/frontdesk-housekeeping-maintenance.test.ts`): 7 comprehensive tests verifying check-in rules, checkout auto-housekeeping, cleaning completion room transitions, maintenance blocks, room moves, secure uploads, and tenant isolation.
+
 ## In progress
 
-- WP5 – Front desk, housekeeping, maintenance workspaces.
+- WP6 – Billing, server-side invoice calculations, payments & gateway integration.
 
 ## Pending
 
-- WP5: Front desk, housekeeping, maintenance workspaces.
 - WP6: Billing, server-side invoice calculations, payments & gateway integration.
 - WP7: Notifications service & email delivery queue.
 - WP8: AI hub, provider adapters, approval workflows.
@@ -97,6 +109,6 @@
 
 - `npm run typecheck`: Passed (0 errors).
 - `npm run lint`: Passed (0 errors).
-- `npm test`: 7 passed test files, 40 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`).
-- `npm run build`: Passed (compiled 54 dynamic/static routes successfully).
-- WP4 Gate: 9/9 tests passed in `tests/reservations.test.ts`.
+- `npm test`: 8 passed test files, 47 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`).
+- `npm run build`: Passed (compiled 56 dynamic/static routes successfully).
+- WP5 Gate: 7/7 tests passed in `tests/frontdesk-housekeeping-maintenance.test.ts`.

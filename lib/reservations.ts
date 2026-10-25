@@ -31,14 +31,8 @@ export const VALID_STATUS_TRANSITIONS: Record<ReservationStatus, ReservationStat
   no_show: [], // terminal
 };
 
-export class DoubleBookingConflictError extends Error {
-  status = 409;
-  code = "DOUBLE_BOOKING_CONFLICT";
-  constructor(message = "Room is already reserved for the selected date(s).") {
-    super(message);
-    this.status = 409;
-  }
-}
+import { DoubleBookingConflictError, NotFoundError, CrossTenantViolationError } from "@/lib/errors";
+export { DoubleBookingConflictError, NotFoundError, CrossTenantViolationError };
 
 export class InvalidStatusTransitionError extends Error {
   status = 400;

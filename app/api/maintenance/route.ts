@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/auth/session";
-import { dal } from "@/lib/dal";
+import { dal, CrossTenantViolationError } from "@/lib/dal";
+import { MaintenanceCollisionError } from "@/lib/operations";
 import { z } from "zod";
 
 const createMaintenanceSchema = z.object({
@@ -10,6 +11,9 @@ const createMaintenanceSchema = z.object({
   priority: z.enum(["low", "normal", "high", "emergency"]).optional(),
   description: z.string().trim().min(1, "Description is required"),
   assigneeId: z.string().optional().nullable(),
+  blockRoom: z.boolean().optional(),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
 });
 
 export async function GET(request: Request) {
@@ -50,10 +54,23 @@ export async function POST(request: Request) {
         priority: parsed.data.priority,
         description: parsed.data.description,
         assigneeId: parsed.data.assigneeId ?? undefined,
+        blockRoom: parsed.data.blockRoom,
+        startDate: parsed.data.startDate ?? undefined,
+        endDate: parsed.data.endDate ?? undefined,
+        createdBy: user.id,
       },
     );
     return NextResponse.json({ success: true, data: ticket }, { status: 201 });
   } catch (error: any) {
+    if (error instanceof MaintenanceCollisionError) {
+      return NextResponse.json(
+        { success: false, error: { code: "MAINTENANCE_COLLISION", message: error.message } },
+        { status: 409 },
+      );
+    }
+    if (error instanceof CrossTenantViolationError) {
+      return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
+    }
     const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 400);
     return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to create ticket" } }, { status });
   }
