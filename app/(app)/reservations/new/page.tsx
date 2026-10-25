@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
@@ -106,11 +105,11 @@ export default function NewReservationPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="adults">Adults</Label>
-              <Input id="adults" type="number" min={1} max={adults} value={adults} onChange={(e) => setAdults(Number(e.target.value))} />
+              <Input id="adults" type="number" min={1} max={12} value={adults} onChange={(e) => setAdults(parseInt(e.target.value, 10) || 1)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="children">Children</Label>
-              <Input id="children" type="number" min={0} max={children} value={children} onChange={(e) => setChildren(Number(e.target.value))} />
+              <Input id="children" type="number" min={0} max={12} value={children} onChange={(e) => setChildren(parseInt(e.target.value, 10) || 0)} />
             </div>
             {error ? <div className="sm:col-span-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div> : null}
             <div className="sm:col-span-2 flex justify-end gap-2">

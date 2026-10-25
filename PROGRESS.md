@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP3 – Properties, rooms, room types, rates (Completed and Verified).
-- **Overall completion:** ~45%
+- **Phase:** WP4 – Reservations engine (Completed and Verified).
+- **Overall completion:** ~55%
 
 ## Completed
 
@@ -62,13 +62,25 @@
 - [x] Enhanced Rooms & Room Types operational interface (`app/(app)/rooms/page.tsx`) with room category management and property filtering.
 - [x] Automated WP3 gate test suite (`tests/pricing-and-properties.test.ts`): 12 comprehensive unit and integration tests for Decimal pricing, tax rounding, season splits, discount bounds, date validations, room-type CRUD, rate plans, and atomic setup wizard.
 
+### WP4 – Reservations engine & double-booking prevention
+- [x] High-entropy crypto booking code generation (`BK-XXXXXX`) using `crypto.randomBytes`.
+- [x] Transactional `createReservation` inserting individual `RoomNight(roomId, date)` rows alongside reservation headers and room relations.
+- [x] Concurrency gate: hardware-grade ACID concurrency protection via PostgreSQL `@@unique([roomId, date])`. 8 parallel concurrent requests for the exact same room and dates result in exactly 1 commit and 7 clean `DoubleBookingConflictError` (HTTP 409) rejections.
+- [x] Overlap edge cases: back-to-back stays succeed without collisions (checkout morning = checkin afternoon); interior overlaps fail.
+- [x] Multi-room / group bookings allocate rooms and nights atomically across all selected rooms.
+- [x] State machine transition enforcement (`draft` -> `pending` -> `confirmed` -> `checked_in` -> `checked_out`), strictly rejecting invalid jumps (`checked_out` -> `confirmed`, `cancelled` -> `checked_in`).
+- [x] Cancellation lifecycle: immediate release of `RoomNight` inventory rows, automatic late-cancellation fee calculation for cancellations within 24 hours of check-in (`/api/reservations/[id]/cancel`).
+- [x] Reservation modification and extension: dynamic diffing of night intervals, releasing unneeded nights and allocating new ones with transactional rollback on conflict.
+- [x] Case-insensitive search across booking `code`, `guest.firstName`, `guest.lastName`, and `guest.email` strictly scoped to tenant.
+- [x] Idempotency key gate: `Idempotency-Key` header cached in `IdempotencyKey` table with expiration and instant replay of 201 responses.
+- [x] Automated WP4 gate test suite (`tests/reservations.test.ts`): 9 comprehensive gate tests verifying concurrency, edge cases, multi-room, state machine, cancellation, modification, search, and idempotency.
+
 ## In progress
 
-- WP4 – Reservations engine (Next up per `SUPERVISION_PLAN.md`).
+- WP5 – Front desk, housekeeping, maintenance workspaces.
 
 ## Pending
 
-- WP4: Reservations transaction engine with double-booking prevention.
 - WP5: Front desk, housekeeping, maintenance workspaces.
 - WP6: Billing, server-side invoice calculations, payments & gateway integration.
 - WP7: Notifications service & email delivery queue.
@@ -80,12 +92,11 @@
 ## Known limitations
 
 - Docker engine is not installed on this host environment; local development PostgreSQL 18.4 runs via embedded binaries on port 5432 (`localhost:5432`).
-- RoomNight reservation transaction engine enforcement across multi-room reservations will be fully integrated into the reservation workflow in WP4.
 
 ## Verified test results
 
 - `npm run typecheck`: Passed (0 errors).
 - `npm run lint`: Passed (0 errors).
-- `npm test`: 7 passed test files, 33 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`).
-- `npm run build`: Passed (compiled 53 dynamic/static routes successfully).
-- WP3 Gate: Unit tests for pricing/tax rounding, multi-season splits, discount bounds, room-type CRUD, and setup wizard onboarding all passing (12/12 tests).
+- `npm test`: 7 passed test files, 40 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`).
+- `npm run build`: Passed (compiled 54 dynamic/static routes successfully).
+- WP4 Gate: 9/9 tests passed in `tests/reservations.test.ts`.

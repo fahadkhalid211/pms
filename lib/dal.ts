@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { Prisma, type RoomStatus, type HousekeepingStatus, type TaskPriority, type MaintenanceStatus, type MaintenancePriority, type InvoiceStatus, type PaymentStatus } from "@prisma/client";
+import { createReservation, updateReservation, cancelReservation, checkRoomsAvailability, type CreateReservationInput } from "@/lib/reservations";
 
 export interface TenantContext {
   organizationId: string;
@@ -211,29 +212,50 @@ export const dal = {
   },
 
   reservations: {
-    async findMany(ctx: TenantContext, filters?: { propertyId?: string; status?: string; search?: string }) {
-      return prisma.reservation.findMany({
-        where: {
-          organizationId: ctx.organizationId,
-          ...(filters?.propertyId ? { propertyId: filters.propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
-          ...(filters?.status ? { status: filters.status as any } : {}),
-          ...(filters?.search
-            ? {
-                OR: [
-                  { code: { contains: filters.search, mode: "insensitive" } },
-                  { guest: { firstName: { contains: filters.search, mode: "insensitive" } } },
-                  { guest: { lastName: { contains: filters.search, mode: "insensitive" } } },
-                ],
-              }
-            : {}),
-        },
-        include: {
-          guest: true,
-          rooms: { include: { room: { include: { roomType: true } } } },
-          invoices: true,
-        },
-        orderBy: { checkIn: "asc" },
-      });
+    async findMany(ctx: TenantContext, filters?: { propertyId?: string; status?: string; search?: string; from?: string; to?: string; page?: number; pageSize?: number }) {
+      const page = Math.max(1, filters?.page ?? 1);
+      const pageSize = Math.min(100, Math.max(1, filters?.pageSize ?? 20));
+      const propId = filters?.propertyId ?? ctx.propertyId ?? undefined;
+
+      const where: Prisma.ReservationWhereInput = {
+        organizationId: ctx.organizationId,
+        ...(propId ? { propertyId: propId } : {}),
+        ...(filters?.status ? { status: filters.status as any } : {}),
+      };
+
+      if (filters?.from || filters?.to) {
+        where.checkIn = {};
+        if (filters?.from) where.checkIn.gte = new Date(filters.from);
+        if (filters?.to) where.checkIn.lte = new Date(filters.to);
+      }
+
+      if (filters?.search) {
+        const q = filters.search.trim();
+        where.OR = [
+          { code: { contains: q, mode: "insensitive" } },
+          { guest: { firstName: { contains: q, mode: "insensitive" } } },
+          { guest: { lastName: { contains: q, mode: "insensitive" } } },
+          { guest: { email: { contains: q, mode: "insensitive" } } },
+        ];
+      }
+
+      const [items, total] = await prisma.$transaction([
+        prisma.reservation.findMany({
+          where,
+          include: {
+            guest: true,
+            rooms: { include: { room: { include: { roomType: true } } } },
+            invoices: true,
+            property: { select: { id: true, name: true, code: true, currency: true } },
+          },
+          orderBy: { checkIn: "asc" },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.reservation.count({ where }),
+      ]);
+
+      return { items, total, page, pageSize };
     },
 
     async findUnique(ctx: TenantContext, id: string) {
@@ -241,20 +263,56 @@ export const dal = {
         where: { id, organizationId: ctx.organizationId },
         include: {
           guest: true,
-          rooms: { include: { room: true } },
+          rooms: { include: { room: { include: { roomType: true } } } },
+          roomNights: { orderBy: { date: "asc" } },
           invoices: { include: { lineItems: true, payments: true } },
+          property: true,
         },
       });
       if (!res) throw new NotFoundError("Reservation not found.");
       return res;
     },
 
-    async update(ctx: TenantContext, id: string, data: Prisma.ReservationUpdateInput) {
-      await dal.reservations.findUnique(ctx, id);
-      return prisma.reservation.update({
-        where: { id },
-        data,
+    async create(
+      ctx: TenantContext,
+      data: Omit<CreateReservationInput, "organizationId">,
+    ) {
+      return createReservation({
+        ...data,
+        organizationId: ctx.organizationId,
       });
+    },
+
+    async update(
+      ctx: TenantContext,
+      id: string,
+      data: {
+        status?: any;
+        checkIn?: Date | string;
+        checkOut?: Date | string;
+        roomIds?: string[];
+        adults?: number;
+        children?: number;
+        notes?: string | null;
+        cancelledReason?: string | null;
+      },
+      userId?: string,
+    ) {
+      return updateReservation(id, ctx.organizationId, data, userId);
+    },
+
+    async cancel(ctx: TenantContext, id: string, reason?: string, userId?: string) {
+      return cancelReservation(id, ctx.organizationId, reason, userId);
+    },
+
+    async checkAvailability(
+      ctx: TenantContext,
+      propertyId: string,
+      roomIds: string[],
+      checkIn: Date | string,
+      checkOut: Date | string,
+    ) {
+      return checkRoomsAvailability(propertyId, ctx.organizationId, roomIds, checkIn, checkOut);
     },
   },
 
