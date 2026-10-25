@@ -93,7 +93,12 @@ export async function POST(request: Request) {
     });
     const encryptedKey = encryptSecret(apiKey);
     await prisma.aiProviderCredential.create({
-      data: { providerConfigId: config.id, encryptedKey, keyHint: apiKey.slice(-4) },
+      data: {
+        organizationId: user.organizationId!,
+        providerConfigId: config.id,
+        encryptedKey,
+        keyHint: apiKey.slice(-4),
+      },
     });
     await auditLog({
       userId: user.id,

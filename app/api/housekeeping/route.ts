@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const task = await prisma.housekeepingTask.create({
       data: {
+        organizationId: user.organizationId!,
         propertyId: body.propertyId,
         roomId: body.roomId,
         status: body.status ?? "pending",

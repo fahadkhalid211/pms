@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auditLog } from "@/lib/audit";
 import { addDays, toISODate } from "@/lib/utils";
+import type { ReservationStatus, ReservationSource } from "@prisma/client";
 
 export const RESERVATION_STATUSES = [
   "pending",
@@ -108,9 +109,9 @@ interface CreateReservationInput {
   adults: number;
   children: number;
   guestId?: string | null;
-  source?: string;
+  source?: ReservationSource;
   notes?: string;
-  status?: string;
+  status?: ReservationStatus;
 }
 
 export async function createReservation(input: CreateReservationInput) {
@@ -170,7 +171,12 @@ export async function createReservation(input: CreateReservationInput) {
     });
     for (const room of roomDetails) {
       await tx.reservationRoom.create({
-        data: { reservationId: reservation.id, roomId: room.id, guestId: input.guestId ?? null },
+        data: {
+          organizationId: input.organizationId,
+          reservationId: reservation.id,
+          roomId: room.id,
+          guestId: input.guestId ?? null,
+        },
       });
     }
     return { reservation, roomDetails };

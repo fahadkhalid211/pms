@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const room = await prisma.room.create({
       data: {
+        organizationId: user.organizationId!,
         propertyId: body.propertyId,
         roomTypeId: body.roomTypeId,
         number: body.number,

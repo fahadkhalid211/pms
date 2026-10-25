@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
 import { auditLog } from "@/lib/audit";
+import type { PaymentStatus } from "@prisma/client";
 
 export async function GET(_request: Request) {
   try {
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
         reservationId: body.reservationId,
         amount: body.amount ?? 0,
         currency: body.currency ?? "USD",
-        status: body.status ?? "captured",
+        status: (body.status as PaymentStatus) ?? "captured",
         method: body.method ?? "card",
         provider: body.provider,
         providerRef: body.providerRef,

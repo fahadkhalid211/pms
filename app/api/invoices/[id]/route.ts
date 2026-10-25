@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
+import type { InvoiceStatus } from "@prisma/client";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -33,7 +34,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const body = (await request.json()) as { status?: string };
     const invoice = await prisma.invoice.update({
       where: { id },
-      data: { status: typeof body.status === "string" ? body.status : undefined },
+      data: { status: typeof body.status === "string" ? (body.status as InvoiceStatus) : undefined },
     });
     return NextResponse.json({ success: true, data: invoice });
   } catch (error: unknown) {

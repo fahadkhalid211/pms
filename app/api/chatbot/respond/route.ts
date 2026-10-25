@@ -23,7 +23,12 @@ export async function POST(request: Request) {
     });
 
     await prisma.chatbotMessage.create({
-      data: { conversationId: conversation.id, role: "user", content: message },
+      data: {
+        organizationId: conversation.organizationId,
+        conversationId: conversation.id,
+        role: "user",
+        content: message,
+      },
     });
 
     const config = await prisma.aiProviderConfig.findFirst({ where: { organizationId: user.organizationId ?? "", isEnabled: true } });
@@ -60,7 +65,12 @@ export async function POST(request: Request) {
     }
 
     await prisma.chatbotMessage.create({
-      data: { conversationId: conversation.id, role: "assistant", content: reply },
+      data: {
+        organizationId: conversation.organizationId,
+        conversationId: conversation.id,
+        role: "assistant",
+        content: reply,
+      },
     });
     await prisma.chatbotConversation.update({ where: { id: conversation.id }, data: { updatedAt: new Date() } });
 

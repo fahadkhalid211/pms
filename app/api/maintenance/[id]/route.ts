@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
+import type { MaintenanceStatus, MaintenancePriority } from "@prisma/client";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -43,8 +44,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const updated = await prisma.maintenanceTicket.update({
       where: { id },
       data: {
-        status: typeof body.status === "string" ? body.status : undefined,
-        priority: typeof body.priority === "string" ? body.priority : undefined,
+        status: typeof body.status === "string" ? (body.status as MaintenanceStatus) : undefined,
+        priority: typeof body.priority === "string" ? (body.priority as MaintenancePriority) : undefined,
         assigneeId: typeof body.assigneeId === "string" ? body.assigneeId : undefined,
         resolvedAt: body.status === "resolved" ? new Date() : undefined,
       },

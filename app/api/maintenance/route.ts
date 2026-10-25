@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const ticket = await prisma.maintenanceTicket.create({
       data: {
+        organizationId: user.organizationId!,
         propertyId: body.propertyId,
         roomId: body.roomId,
         status: body.status ?? "open",

@@ -174,6 +174,7 @@ const tools: AiTool[] = [
     run: async (ctx, args) => {
       const task = await prisma.housekeepingTask.create({
         data: {
+          organizationId: ctx.organizationId,
           propertyId: args.propertyId,
           roomId: args.roomId,
           status: "pending",
@@ -202,6 +203,7 @@ const tools: AiTool[] = [
     run: async (ctx, args) => {
       const ticket = await prisma.maintenanceTicket.create({
         data: {
+          organizationId: ctx.organizationId,
           propertyId: args.propertyId,
           roomId: args.roomId,
           status: "open",

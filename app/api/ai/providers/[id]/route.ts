@@ -87,6 +87,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       } else {
         await prisma.aiProviderCredential.create({
           data: {
+            organizationId: user.organizationId!,
             providerConfigId: config.id,
             encryptedKey,
             keyHint: body.apiKey.slice(-4),

@@ -132,6 +132,7 @@ export async function runAgent(input: {
           });
           await prisma.aiToolExecution.create({
             data: {
+              organizationId: input.organizationId,
               executionId: execution.id,
               toolName: tc.name,
               input: (tc.arguments ?? {}) as Prisma.InputJsonObject,
@@ -153,6 +154,7 @@ export async function runAgent(input: {
         const toolResult = await allowedTool!.run(ctx, tc.arguments ?? {});
         await prisma.aiToolExecution.create({
           data: {
+            organizationId: input.organizationId,
             executionId: execution.id,
             toolName: tc.name,
             input: (tc.arguments ?? {}) as Prisma.InputJsonObject,

@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       for (const line of body.lineItems) {
         await prisma.invoiceLineItem.create({
           data: {
+            organizationId: user.organizationId!,
             invoiceId: invoice.id,
             description: line.description,
             quantity: line.quantity ?? 1,
