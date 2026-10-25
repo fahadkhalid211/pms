@@ -88,8 +88,32 @@ function toGemini(messages: AiMessage[], tools: AiToolDef[], systemPrompt: strin
   return { contents, tools: toolDefs, systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined };
 }
 
+export function assertSafeBaseUrl(rawUrl: string): string {
+  const url = new URL(rawUrl);
+  if (url.protocol !== "https:" && (process.env.NODE_ENV === "production" || (url.hostname !== "localhost" && url.hostname !== "127.0.0.1"))) {
+    throw new Error("AI provider baseUrl must use HTTPS.");
+  }
+  const hostname = url.hostname.toLowerCase();
+  if (hostname === "169.254.169.254" || hostname.includes("metadata.google.internal") || hostname.startsWith("169.254.")) {
+    throw new Error("Prohibited AI provider baseUrl: cloud metadata endpoint.");
+  }
+  if (process.env.NODE_ENV === "production") {
+    if (
+      hostname === "localhost" ||
+      hostname.startsWith("127.") ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
+    ) {
+      throw new Error("Prohibited AI provider baseUrl: private or loopback IP range.");
+    }
+  }
+  return url.origin + url.pathname.replace(/\/$/, "");
+}
+
 async function callOpenAICompatible(config: AiProviderConfig, baseUrl: string, messages: AiMessage[], tools: AiToolDef[]) {
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+  const safeBase = assertSafeBaseUrl(baseUrl);
+  const res = await fetch(`${safeBase}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.apiKey}` },
     body: JSON.stringify({

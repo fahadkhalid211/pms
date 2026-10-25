@@ -1,84 +1,77 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
+import { dal } from "@/lib/dal";
 import { auditLog } from "@/lib/audit";
+import { z } from "zod";
+
+const createInvoiceSchema = z.object({
+  propertyId: z.string().min(1, "propertyId is required"),
+  reservationId: z.string().optional().nullable(),
+  number: z.string().optional(),
+  status: z.enum(["draft", "issued", "paid", "partially_paid", "overdue", "void", "refunded"]).optional(),
+  subtotal: z.number().min(0).optional(),
+  tax: z.number().min(0).optional(),
+  total: z.number().min(0).optional(),
+  currency: z.string().default("USD"),
+  dueDate: z.string().datetime().optional().nullable().or(z.string().optional().nullable()),
+  lineItems: z.array(z.object({
+    description: z.string().min(1),
+    quantity: z.number().int().min(1).default(1),
+    unitAmount: z.number().min(0),
+    total: z.number().min(0),
+  })).optional(),
+});
 
 export async function GET(request: Request) {
   try {
-    const user = await requirePermission("billing.view");
     const url = new URL(request.url);
-    const propertyId = url.searchParams.get("propertyId");
-    const status = url.searchParams.get("status");
-    const where: any = { organizationId: user.organizationId ?? "" };
-    if (propertyId) where.propertyId = propertyId;
-    if (status) where.status = status;
-    const invoices = await prisma.invoice.findMany({
-      where,
-      orderBy: { issueDate: "desc" },
-      take: 100,
-      include: { reservation: { select: { code: true } }, property: { select: { name: true } } },
-    });
-    const totals = await prisma.invoice.aggregate({
-      where: { organizationId: user.organizationId ?? "" },
-      _sum: { total: true },
-      _count: { _all: true },
-    });
-    return NextResponse.json({ success: true, data: { invoices, totals } });
+    const propertyId = url.searchParams.get("propertyId") ?? undefined;
+    const user = await requirePermission("billing.view", propertyId ? { propertyId } : undefined);
+
+    const invoices = await dal.invoices.findMany(
+      { organizationId: user.organizationId! },
+      { propertyId },
+    );
+    return NextResponse.json({ success: true, data: invoices });
   } catch (error: any) {
-    if (error?.status === 403) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
-    if (error?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to load invoices" } }, { status: 500 });
+    const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 500);
+    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to load invoices" } }, { status });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const user = await requirePermission("billing.manage");
-    const body = await request.json();
-    const invoice = await prisma.invoice.create({
-      data: {
-        organizationId: user.organizationId ?? "",
-        propertyId: body.propertyId,
-        reservationId: body.reservationId ?? null,
-        number: body.number ?? `INV-${Date.now().toString(36).toUpperCase()}`,
-        status: body.status ?? "issued",
-        issueDate: body.issueDate ? new Date(body.issueDate) : new Date(),
-        dueDate: body.dueDate ? new Date(body.dueDate) : null,
-        subtotal: body.subtotal ?? 0,
-        discount: body.discount ?? 0,
-        tax: body.tax ?? 0,
-        total: body.total ?? 0,
-        currency: body.currency ?? "USD",
-        notes: body.notes,
-      },
-    });
-    if (body.lineItems?.length) {
-      for (const line of body.lineItems) {
-        await prisma.invoiceLineItem.create({
-          data: {
-            organizationId: user.organizationId!,
-            invoiceId: invoice.id,
-            description: line.description,
-            quantity: line.quantity ?? 1,
-            unitAmount: line.unitAmount ?? 0,
-            total: line.total ?? 0,
-          },
-        });
-      }
+    const rawBody = await request.json();
+    const parsed = createInvoiceSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: { message: parsed.error.issues[0]?.message ?? "Invalid invoice payload" } },
+        { status: 400 },
+      );
     }
+
+    const user = await requirePermission("billing.manage", { propertyId: parsed.data.propertyId });
+    const invoice = await dal.invoices.create(
+      { organizationId: user.organizationId! },
+      {
+        ...parsed.data,
+        dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : null,
+      },
+    );
+
     await auditLog({
       userId: user.id,
       organizationId: user.organizationId ?? undefined,
-      propertyId: body.propertyId,
+      propertyId: parsed.data.propertyId,
       action: "invoice.created",
       entityType: "Invoice",
       entityId: invoice.id,
-      metadata: { number: invoice.number, total: invoice.total },
+      metadata: { number: invoice.number, total: Number(invoice.total) },
     });
+
     return NextResponse.json({ success: true, data: invoice }, { status: 201 });
   } catch (error: any) {
-    if (error?.status === 403) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
-    if (error?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to create invoice" } }, { status: 400 });
+    const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 400);
+    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to create invoice" } }, { status });
   }
 }

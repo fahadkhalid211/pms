@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { loginSchema } from "@/lib/auth/actions";
 import { authenticate, setSessionCookie } from "@/lib/auth/actions";
 import { auditLog } from "@/lib/audit";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const limit = rateLimit(`login:${ip}`, 10, 60_000);
+    if (!limit.success) {
+      return NextResponse.json(
+        { success: false, error: { message: `Too many login attempts. Please retry in ${limit.retryAfterSeconds} seconds.` } },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+      );
+    }
+
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {

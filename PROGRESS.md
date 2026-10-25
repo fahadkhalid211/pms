@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP1 – Schema v2 + migrations (Completed and Verified).
-- **Overall completion:** ~25%
+- **Phase:** WP2 – Auth, RBAC, tenancy (Completed and Verified).
+- **Overall completion:** ~35%
 
 ## Completed
 
@@ -37,13 +37,25 @@
 - [x] Connected `prisma.seed` in `package.json` ensuring automated seeding on `prisma migrate reset`.
 - [x] Added automated gate tests (`tests/schema-v2.test.ts`) validating 45 spec models, unique constraint violation code `P2002` on duplicate `RoomNight`, `GuestProfile`, `EncryptedCredential`, `IdempotencyKey`, and PostgreSQL FTS queries.
 
+### WP2 – Auth, RBAC, tenancy
+- [x] Central `getAuthContext(request?)` resolving `SessionUser`, `organizationId`, `propertyIds`, `isOrgAdmin`, `isCustomer`, `hasPermission()`, and `hasPropertyAccess()`.
+- [x] Granular `requirePermission(perm, { propertyId, request })` and `requireAuthContext(request?)` enforcing org scope and property scope (returning 401 for unauthorized, 403 for forbidden).
+- [x] Dynamic permissions and role sync (`lib/permissions.ts`), distinguishing `customer` role with guest-portal boundaries from internal staff/manager roles.
+- [x] Tenant-scoped Data Access Layer (`lib/dal.ts`) enforcing `organizationId` filtering and cross-tenant foreign ID ownership validation (`CrossTenantViolationError`).
+- [x] Complete security middleware (`middleware.ts`) enforcing CSRF origin verification on mutating requests, strict security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), and unauthenticated path routing.
+- [x] Secure registration route (`/api/auth/register`) with Zod schema validation, bcrypt(12) hashing, and automatic organization bootstrap with Owner/Admin role binding.
+- [x] Cryptographic password reset lifecycle (`lib/auth/passwords.ts`, `/api/auth/forgot-password`, `/api/auth/reset-password`) using SHA-256 token hashing at rest, 1-hour expiration, and simulated notification dispatch.
+- [x] Sliding-window rate limiting on auth endpoints (`lib/rate-limit.ts`).
+- [x] Remediated all audit IDORs: `/api/properties/[id]`, `/api/rooms`, `/api/housekeeping`, `/api/maintenance`, `/api/maintenance/[id]`, `/api/invoices`, `/api/invoices/[id]`, `/api/payments`, `/app/(app)/reports` (eliminated `organizations[0]` leakage), AI tools in `lib/ai/tools.ts`, and SSRF safe URL guard in `lib/ai/providers.ts`.
+- [x] High-converting, comprehensive landing page at `app/page.tsx` with Hero, operations suite, AI Hub showcase, double-booking shield architecture, multi-tenancy & security deep-dive, transparent pricing tiers, and interactive FAQ.
+- [x] Automated WP2 gate test suite (`tests/auth-rbac-tenancy.test.ts`) validating Registration & Login bootstrap, RBAC matrix, Cross-tenant DAL isolation, Property-scope boundaries, Rate limiting, and Crypto-hashed password reset lifecycles.
+
 ## In progress
 
-- WP2 – Auth, RBAC, tenancy (Next up per `SUPERVISION_PLAN.md`).
+- WP3 – Properties, rooms, room types, rates (Next up per `SUPERVISION_PLAN.md`).
 
 ## Pending
 
-- WP2: Central `getAuthContext()`, RBAC permissions matrix, multi-tenant DAL, security middleware.
 - WP3: Properties, rooms, room types CRUD, rate plans, pricing engine.
 - WP4: Reservations transaction engine with double-booking prevention.
 - WP5: Front desk, housekeeping, maintenance workspaces.
@@ -63,7 +75,6 @@
 
 - `npm run typecheck`: Passed (0 errors).
 - `npm run lint`: Passed (0 errors, 86 lint warnings).
-- `npm test`: 5 passed test files, 15 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`).
+- `npm test`: 6 passed test files, 21 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`).
 - `npm run build`: Passed (compiled 46 dynamic/static routes successfully).
-- `npx prisma migrate reset --force`: Passed (resets database, applies migration cleanly from scratch, generates client, and executes seed).
-- WP1 Gate: All 45 spec models verified, `RoomNight(roomId, date)` unique constraint verified rejecting double-bookings with Prisma P2002 error, and PostgreSQL FTS verified.
+- WP2 Gate: Registration/login, RBAC matrix, Cross-tenant isolation (Org A cannot read/write Org B across all modules), Property-scope boundaries, Auth rate limiting, and Crypto-hashed password reset lifecycle all passing.

@@ -1,46 +1,45 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
-import type { InvoiceStatus } from "@prisma/client";
+import { dal } from "@/lib/dal";
+import { z } from "zod";
+
+const updateInvoiceSchema = z.object({
+  status: z.enum(["draft", "issued", "paid", "partially_paid", "overdue", "void", "refunded"]).optional(),
+});
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requirePermission("billing.view");
     const { id } = await params;
-    const invoice = await prisma.invoice.findFirst({
-      where: { id, organizationId: user.organizationId ?? "" },
-    });
-    if (!invoice) return NextResponse.json({ success: false, error: { message: "Invoice not found." } }, { status: 404 });
-    const lineItems = await prisma.invoiceLineItem.findMany({ where: { invoiceId: id } });
-    const payments = await prisma.payment.findMany({ where: { invoiceId: id } });
-    return NextResponse.json({ success: true, data: { invoice, lineItems, payments } });
-  } catch (error: unknown) {
-    const err = error as { status?: number; message?: string };
-    if (err?.status === 403) return NextResponse.json({ success: false, error: { message: err.message ?? "Forbidden" } }, { status: 403 });
-    if (err?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: err?.message ?? "Failed to load invoice" } }, { status: 404 });
+    const user = await requirePermission("billing.view");
+    const invoice = await dal.invoices.findUnique({ organizationId: user.organizationId! }, id);
+    return NextResponse.json({ success: true, data: { invoice, lineItems: invoice.lineItems, payments: invoice.payments } });
+  } catch (error: any) {
+    const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 500);
+    return NextResponse.json({ success: false, error: { message: error?.message ?? "Invoice not found" } }, { status });
   }
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requirePermission("billing.manage");
     const { id } = await params;
-    const existing = await prisma.invoice.findFirst({
-      where: { id, organizationId: user.organizationId ?? "" },
-    });
-    if (!existing) return NextResponse.json({ success: false, error: { message: "Invoice not found." } }, { status: 404 });
+    const user = await requirePermission("billing.manage");
+    const rawBody = await request.json();
+    const parsed = updateInvoiceSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: { message: parsed.error.issues[0]?.message ?? "Invalid invoice update payload" } },
+        { status: 400 },
+      );
+    }
 
-    const body = (await request.json()) as { status?: string };
-    const invoice = await prisma.invoice.update({
-      where: { id },
-      data: { status: typeof body.status === "string" ? (body.status as InvoiceStatus) : undefined },
-    });
-    return NextResponse.json({ success: true, data: invoice });
-  } catch (error: unknown) {
-    const err = error as { status?: number; message?: string };
-    if (err?.status === 403) return NextResponse.json({ success: false, error: { message: err.message ?? "Forbidden" } }, { status: 403 });
-    if (err?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: err?.message ?? "Failed to update invoice" } }, { status: 500 });
+    const updated = await dal.invoices.update(
+      { organizationId: user.organizationId! },
+      id,
+      { status: parsed.data.status },
+    );
+    return NextResponse.json({ success: true, data: updated });
+  } catch (error: any) {
+    const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 500);
+    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to update invoice" } }, { status });
   }
 }

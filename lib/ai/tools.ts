@@ -172,7 +172,12 @@ const tools: AiTool[] = [
     description: "Create a housekeeping task for a room.",
     requiresPermission: "housekeeping.manage",
     run: async (ctx, args) => {
-      const task = await prisma.housekeepingTask.create({
+      const room = await prisma.room.findFirst({
+        where: { id: args.roomId, organizationId: ctx.organizationId, propertyId: args.propertyId },
+      });
+      if (!room) return { content: `Error: Room ${args.roomId} not found in your property.` };
+
+      await prisma.housekeepingTask.create({
         data: {
           organizationId: ctx.organizationId,
           propertyId: args.propertyId,
@@ -192,8 +197,16 @@ const tools: AiTool[] = [
     description: "Update a room status (available, occupied, dirty, clean, inspected, out_of_service).",
     requiresPermission: "rooms.manage",
     run: async (ctx, args) => {
-      const room = await prisma.room.update({ where: { id: args.roomId }, data: { status: args.status } });
-      return { content: `Room ${room.number} status set to ${room.status}.` };
+      const room = await prisma.room.findFirst({
+        where: { id: args.roomId, organizationId: ctx.organizationId },
+      });
+      if (!room) return { content: `Error: Room ${args.roomId} not found in your organization.` };
+
+      const updated = await prisma.room.update({
+        where: { id: room.id },
+        data: { status: args.status },
+      });
+      return { content: `Room ${updated.number} status set to ${updated.status}.` };
     },
   },
   {
@@ -201,6 +214,18 @@ const tools: AiTool[] = [
     description: "Create a maintenance ticket for a room.",
     requiresPermission: "maintenance.manage",
     run: async (ctx, args) => {
+      const property = await prisma.property.findFirst({
+        where: { id: args.propertyId, organizationId: ctx.organizationId },
+      });
+      if (!property) return { content: `Error: Property ${args.propertyId} not found in your organization.` };
+
+      if (args.roomId) {
+        const room = await prisma.room.findFirst({
+          where: { id: args.roomId, organizationId: ctx.organizationId, propertyId: args.propertyId },
+        });
+        if (!room) return { content: `Error: Room ${args.roomId} not found in your property.` };
+      }
+
       const ticket = await prisma.maintenanceTicket.create({
         data: {
           organizationId: ctx.organizationId,
