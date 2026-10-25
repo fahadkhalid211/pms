@@ -1,5 +1,5 @@
 import prisma from "@/lib/db";
-import type { Prisma, RoomStatus, HousekeepingStatus, TaskPriority, MaintenanceStatus, MaintenancePriority, InvoiceStatus, PaymentStatus } from "@prisma/client";
+import { Prisma, type RoomStatus, type HousekeepingStatus, type TaskPriority, type MaintenanceStatus, type MaintenancePriority, type InvoiceStatus, type PaymentStatus } from "@prisma/client";
 
 export interface TenantContext {
   organizationId: string;
@@ -37,25 +37,109 @@ export const dal = {
     async findUnique(ctx: TenantContext, id: string) {
       const property = await prisma.property.findFirst({
         where: { id, organizationId: ctx.organizationId },
+        include: {
+          roomTypes: true,
+          ratePlans: { include: { seasons: true } },
+        },
       });
       if (!property) throw new NotFoundError("Property not found.");
       return property;
     },
 
-    async create(ctx: TenantContext, data: Omit<Prisma.PropertyUncheckedCreateInput, "organizationId">) {
+    async create(
+      ctx: TenantContext,
+      data: {
+        name: string;
+        code?: string;
+        addressLine1?: string | null;
+        addressLine2?: string | null;
+        city?: string | null;
+        state?: string | null;
+        postalCode?: string | null;
+        country?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        timezone?: string;
+        currency?: string;
+        checkInTime?: number;
+        checkOutTime?: number;
+        taxRate?: Prisma.Decimal | string | number;
+        cleaningFee?: Prisma.Decimal | string | number;
+        description?: string | null;
+      },
+    ) {
       return prisma.property.create({
         data: {
-          ...data,
           organizationId: ctx.organizationId,
+          name: data.name,
+          code: data.code ?? "PROP",
+          addressLine1: data.addressLine1 ?? null,
+          addressLine2: data.addressLine2 ?? null,
+          city: data.city ?? null,
+          state: data.state ?? null,
+          postalCode: data.postalCode ?? null,
+          country: data.country ?? null,
+          phone: data.phone ?? null,
+          email: data.email ?? null,
+          timezone: data.timezone ?? "UTC",
+          currency: data.currency ?? "USD",
+          checkInTime: data.checkInTime ?? 15,
+          checkOutTime: data.checkOutTime ?? 11,
+          taxRate: new Prisma.Decimal(data.taxRate ?? 0),
+          cleaningFee: new Prisma.Decimal(data.cleaningFee ?? 0),
+          description: data.description ?? null,
+          status: "active",
         },
       });
     },
 
-    async update(ctx: TenantContext, id: string, data: Prisma.PropertyUpdateInput) {
+    async update(
+      ctx: TenantContext,
+      id: string,
+      data: {
+        name?: string;
+        code?: string;
+        addressLine1?: string | null;
+        addressLine2?: string | null;
+        city?: string | null;
+        state?: string | null;
+        postalCode?: string | null;
+        country?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        timezone?: string;
+        currency?: string;
+        checkInTime?: number;
+        checkOutTime?: number;
+        taxRate?: Prisma.Decimal | string | number;
+        cleaningFee?: Prisma.Decimal | string | number;
+        description?: string | null;
+        status?: any;
+      },
+    ) {
       await dal.properties.findUnique(ctx, id);
       return prisma.property.update({
         where: { id },
-        data,
+        data: {
+          ...(data.name !== undefined ? { name: data.name } : {}),
+          ...(data.code !== undefined ? { code: data.code } : {}),
+          ...(data.addressLine1 !== undefined ? { addressLine1: data.addressLine1 } : {}),
+          ...(data.addressLine2 !== undefined ? { addressLine2: data.addressLine2 } : {}),
+          ...(data.city !== undefined ? { city: data.city } : {}),
+          ...(data.state !== undefined ? { state: data.state } : {}),
+          ...(data.postalCode !== undefined ? { postalCode: data.postalCode } : {}),
+          ...(data.country !== undefined ? { country: data.country } : {}),
+          ...(data.phone !== undefined ? { phone: data.phone } : {}),
+          ...(data.email !== undefined ? { email: data.email } : {}),
+          ...(data.timezone !== undefined ? { timezone: data.timezone } : {}),
+          ...(data.currency !== undefined ? { currency: data.currency } : {}),
+          ...(data.checkInTime !== undefined ? { checkInTime: data.checkInTime } : {}),
+          ...(data.checkOutTime !== undefined ? { checkOutTime: data.checkOutTime } : {}),
+          ...(data.taxRate !== undefined ? { taxRate: new Prisma.Decimal(data.taxRate) } : {}),
+          ...(data.cleaningFee !== undefined ? { cleaningFee: new Prisma.Decimal(data.cleaningFee) } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          ...(data.status !== undefined ? { status: data.status } : {}),
+        },
       });
     },
   },
@@ -520,6 +604,533 @@ export const dal = {
         occupancyPercentage: occupancy,
         adr,
       };
+    },
+  },
+
+  roomTypes: {
+    async findMany(ctx: TenantContext, propertyId?: string) {
+      return prisma.roomType.findMany({
+        where: {
+          organizationId: ctx.organizationId,
+          ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+        },
+        include: {
+          property: { select: { id: true, name: true, currency: true } },
+          _count: { select: { rooms: true } },
+        },
+        orderBy: { name: "asc" },
+      });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const roomType = await prisma.roomType.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+        include: {
+          property: true,
+          rooms: true,
+        },
+      });
+      if (!roomType) throw new NotFoundError("Room type not found.");
+      return roomType;
+    },
+
+    async create(
+      ctx: TenantContext,
+      data: {
+        propertyId: string;
+        name: string;
+        capacity?: number;
+        sizeSqm?: number | null;
+        bedType?: string | null;
+        baseRate: Prisma.Decimal | string | number;
+        depositType?: string | null;
+        depositAmount?: Prisma.Decimal | string | number;
+        cancellationPolicy?: any;
+        status?: string;
+      },
+    ) {
+      const property = await prisma.property.findFirst({
+        where: { id: data.propertyId, organizationId: ctx.organizationId },
+      });
+      if (!property) throw new CrossTenantViolationError("Property does not belong to your organization.");
+
+      return prisma.roomType.create({
+        data: {
+          organizationId: ctx.organizationId,
+          propertyId: data.propertyId,
+          name: data.name,
+          capacity: data.capacity ?? 2,
+          sizeSqm: data.sizeSqm ?? null,
+          bedType: data.bedType ?? "King",
+          baseRate: new Prisma.Decimal(data.baseRate),
+          depositType: data.depositType ?? "none",
+          depositAmount: new Prisma.Decimal(data.depositAmount ?? 0),
+          cancellationPolicy: data.cancellationPolicy ?? null,
+          status: data.status ?? "active",
+        },
+        include: {
+          property: { select: { id: true, name: true, currency: true } },
+        },
+      });
+    },
+
+    async update(
+      ctx: TenantContext,
+      id: string,
+      data: {
+        name?: string;
+        capacity?: number;
+        sizeSqm?: number | null;
+        bedType?: string | null;
+        baseRate?: Prisma.Decimal | string | number;
+        depositType?: string | null;
+        depositAmount?: Prisma.Decimal | string | number;
+        cancellationPolicy?: any;
+        status?: string;
+      },
+    ) {
+      await dal.roomTypes.findUnique(ctx, id);
+      return prisma.roomType.update({
+        where: { id },
+        data: {
+          ...(data.name !== undefined ? { name: data.name } : {}),
+          ...(data.capacity !== undefined ? { capacity: data.capacity } : {}),
+          ...(data.sizeSqm !== undefined ? { sizeSqm: data.sizeSqm } : {}),
+          ...(data.bedType !== undefined ? { bedType: data.bedType } : {}),
+          ...(data.baseRate !== undefined ? { baseRate: new Prisma.Decimal(data.baseRate) } : {}),
+          ...(data.depositType !== undefined ? { depositType: data.depositType } : {}),
+          ...(data.depositAmount !== undefined ? { depositAmount: new Prisma.Decimal(data.depositAmount) } : {}),
+          ...(data.cancellationPolicy !== undefined ? { cancellationPolicy: data.cancellationPolicy } : {}),
+          ...(data.status !== undefined ? { status: data.status } : {}),
+        },
+      });
+    },
+
+    async delete(ctx: TenantContext, id: string) {
+      await dal.roomTypes.findUnique(ctx, id);
+      const roomsCount = await prisma.room.count({
+        where: { roomTypeId: id, organizationId: ctx.organizationId },
+      });
+      if (roomsCount > 0) {
+        throw new Error("Cannot delete room type: rooms are currently assigned to this room type.");
+      }
+      return prisma.roomType.delete({
+        where: { id },
+      });
+    },
+  },
+
+  ratePlans: {
+    async findMany(ctx: TenantContext, propertyId?: string) {
+      return prisma.ratePlan.findMany({
+        where: {
+          organizationId: ctx.organizationId,
+          ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+        },
+        include: {
+          property: { select: { id: true, name: true, currency: true } },
+          seasons: { orderBy: { startDate: "asc" } },
+        },
+        orderBy: { name: "asc" },
+      });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const plan = await prisma.ratePlan.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+        include: {
+          property: true,
+          seasons: { orderBy: { startDate: "asc" } },
+        },
+      });
+      if (!plan) throw new NotFoundError("Rate plan not found.");
+      return plan;
+    },
+
+    async create(
+      ctx: TenantContext,
+      data: {
+        propertyId: string;
+        name: string;
+        type?: "fixed" | "percentage_modifier" | "seasonal";
+        amount: Prisma.Decimal | string | number;
+        currency?: string;
+        isActive?: boolean;
+        seasons?: Array<{
+          startDate: Date | string;
+          endDate: Date | string;
+          amount: Prisma.Decimal | string | number;
+        }>;
+      },
+    ) {
+      const property = await prisma.property.findFirst({
+        where: { id: data.propertyId, organizationId: ctx.organizationId },
+      });
+      if (!property) throw new CrossTenantViolationError("Property does not belong to your organization.");
+
+      return prisma.ratePlan.create({
+        data: {
+          organizationId: ctx.organizationId,
+          propertyId: data.propertyId,
+          name: data.name,
+          type: data.type ?? "fixed",
+          amount: new Prisma.Decimal(data.amount),
+          currency: data.currency ?? property.currency ?? "USD",
+          isActive: data.isActive ?? true,
+          seasons: data.seasons?.length
+            ? {
+                create: data.seasons.map((s) => ({
+                  organizationId: ctx.organizationId,
+                  startDate: new Date(s.startDate),
+                  endDate: new Date(s.endDate),
+                  amount: new Prisma.Decimal(s.amount),
+                })),
+              }
+            : undefined,
+        },
+        include: { seasons: true },
+      });
+    },
+
+    async update(
+      ctx: TenantContext,
+      id: string,
+      data: {
+        name?: string;
+        type?: "fixed" | "percentage_modifier" | "seasonal";
+        amount?: Prisma.Decimal | string | number;
+        currency?: string;
+        isActive?: boolean;
+      },
+    ) {
+      await dal.ratePlans.findUnique(ctx, id);
+      return prisma.ratePlan.update({
+        where: { id },
+        data: {
+          ...(data.name !== undefined ? { name: data.name } : {}),
+          ...(data.type !== undefined ? { type: data.type } : {}),
+          ...(data.amount !== undefined ? { amount: new Prisma.Decimal(data.amount) } : {}),
+          ...(data.currency !== undefined ? { currency: data.currency } : {}),
+          ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+        },
+        include: { seasons: true },
+      });
+    },
+
+    async delete(ctx: TenantContext, id: string) {
+      await dal.ratePlans.findUnique(ctx, id);
+      return prisma.ratePlan.delete({
+        where: { id },
+      });
+    },
+  },
+
+  seasonalRates: {
+    async create(
+      ctx: TenantContext,
+      data: {
+        ratePlanId: string;
+        startDate: Date | string;
+        endDate: Date | string;
+        amount: Prisma.Decimal | string | number;
+      },
+    ) {
+      const ratePlan = await prisma.ratePlan.findFirst({
+        where: { id: data.ratePlanId, organizationId: ctx.organizationId },
+      });
+      if (!ratePlan) throw new CrossTenantViolationError("Rate plan does not belong to your organization.");
+
+      return prisma.seasonalRate.create({
+        data: {
+          organizationId: ctx.organizationId,
+          ratePlanId: data.ratePlanId,
+          startDate: new Date(data.startDate),
+          endDate: new Date(data.endDate),
+          amount: new Prisma.Decimal(data.amount),
+        },
+      });
+    },
+
+    async delete(ctx: TenantContext, id: string) {
+      const season = await prisma.seasonalRate.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+      });
+      if (!season) throw new NotFoundError("Seasonal rate not found.");
+      return prisma.seasonalRate.delete({
+        where: { id },
+      });
+    },
+  },
+
+  discounts: {
+    async findMany(ctx: TenantContext, propertyId?: string) {
+      return prisma.discount.findMany({
+        where: {
+          organizationId: ctx.organizationId,
+          ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const discount = await prisma.discount.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+      });
+      if (!discount) throw new NotFoundError("Discount not found.");
+      return discount;
+    },
+
+    async findByCode(ctx: TenantContext, code: string, propertyId?: string) {
+      const now = new Date();
+      return prisma.discount.findFirst({
+        where: {
+          organizationId: ctx.organizationId,
+          code: { equals: code.trim(), mode: "insensitive" },
+          ...(propertyId ? { OR: [{ propertyId }, { propertyId: null }] } : {}),
+          AND: [
+            { OR: [{ validFrom: null }, { validFrom: { lte: now } }] },
+            { OR: [{ validTo: null }, { validTo: { gte: now } }] },
+          ],
+        },
+      });
+    },
+
+    async create(
+      ctx: TenantContext,
+      data: {
+        code: string;
+        type?: "percent" | "fixed";
+        value: Prisma.Decimal | string | number;
+        propertyId?: string | null;
+        maxRedemptions?: number;
+        validFrom?: Date | string | null;
+        validTo?: Date | string | null;
+      },
+    ) {
+      if (data.propertyId) {
+        const prop = await prisma.property.findFirst({
+          where: { id: data.propertyId, organizationId: ctx.organizationId },
+        });
+        if (!prop) throw new CrossTenantViolationError("Property does not belong to your organization.");
+      }
+
+      return prisma.discount.create({
+        data: {
+          organizationId: ctx.organizationId,
+          code: data.code.toUpperCase().trim(),
+          type: data.type ?? "percent",
+          value: new Prisma.Decimal(data.value),
+          propertyId: data.propertyId ?? null,
+          maxRedemptions: data.maxRedemptions ?? 0,
+          validFrom: data.validFrom ? new Date(data.validFrom) : null,
+          validTo: data.validTo ? new Date(data.validTo) : null,
+        },
+      });
+    },
+
+    async delete(ctx: TenantContext, id: string) {
+      await dal.discounts.findUnique(ctx, id);
+      return prisma.discount.delete({
+        where: { id },
+      });
+    },
+  },
+
+  amenities: {
+    async findMany(ctx: TenantContext, propertyId?: string) {
+      return prisma.amenity.findMany({
+        where: {
+          organizationId: ctx.organizationId,
+          ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+        },
+        orderBy: { name: "asc" },
+      });
+    },
+
+    async create(
+      ctx: TenantContext,
+      data: {
+        name: string;
+        category?: string | null;
+        propertyId?: string | null;
+      },
+    ) {
+      if (data.propertyId) {
+        const prop = await prisma.property.findFirst({
+          where: { id: data.propertyId, organizationId: ctx.organizationId },
+        });
+        if (!prop) throw new CrossTenantViolationError("Property does not belong to your organization.");
+      }
+
+      return prisma.amenity.create({
+        data: {
+          organizationId: ctx.organizationId,
+          name: data.name,
+          category: data.category ?? null,
+          propertyId: data.propertyId ?? null,
+        },
+      });
+    },
+
+    async assignToRoom(ctx: TenantContext, roomId: string, amenityId: string) {
+      const room = await prisma.room.findFirst({
+        where: { id: roomId, organizationId: ctx.organizationId },
+      });
+      if (!room) throw new CrossTenantViolationError("Room does not belong to your organization.");
+
+      const amenity = await prisma.amenity.findFirst({
+        where: { id: amenityId, organizationId: ctx.organizationId },
+      });
+      if (!amenity) throw new CrossTenantViolationError("Amenity does not belong to your organization.");
+
+      return prisma.roomAmenity.upsert({
+        where: {
+          roomId_amenityId: { roomId, amenityId },
+        },
+        update: {},
+        create: {
+          organizationId: ctx.organizationId,
+          roomId,
+          amenityId,
+        },
+      });
+    },
+
+    async removeFromRoom(ctx: TenantContext, roomId: string, amenityId: string) {
+      const room = await prisma.room.findFirst({
+        where: { id: roomId, organizationId: ctx.organizationId },
+      });
+      if (!room) throw new CrossTenantViolationError("Room does not belong to your organization.");
+
+      return prisma.roomAmenity.deleteMany({
+        where: {
+          organizationId: ctx.organizationId,
+          roomId,
+          amenityId,
+        },
+      });
+    },
+  },
+
+  onboarding: {
+    async setupProperty(
+      ctx: TenantContext,
+      data: {
+        property: {
+          name: string;
+          code?: string;
+          city?: string | null;
+          country?: string | null;
+          currency?: string;
+          timezone?: string;
+          checkInTime?: number;
+          checkOutTime?: number;
+          taxRate?: Prisma.Decimal | string | number;
+          cleaningFee?: Prisma.Decimal | string | number;
+        };
+        roomTypes: Array<{
+          name: string;
+          capacity: number;
+          bedType?: string;
+          baseRate: Prisma.Decimal | string | number;
+        }>;
+        rooms: Array<{
+          number: string;
+          floor?: string;
+          roomTypeName: string;
+        }>;
+        ratePlans?: Array<{
+          name: string;
+          amount: Prisma.Decimal | string | number;
+          type?: "fixed" | "percentage_modifier" | "seasonal";
+        }>;
+      },
+    ) {
+      return prisma.$transaction(async (tx) => {
+        // 1. Create property
+        const property = await tx.property.create({
+          data: {
+            organizationId: ctx.organizationId,
+            name: data.property.name,
+            code: data.property.code ?? "PROP",
+            city: data.property.city ?? null,
+            country: data.property.country ?? null,
+            currency: data.property.currency ?? "USD",
+            timezone: data.property.timezone ?? "UTC",
+            checkInTime: data.property.checkInTime ?? 15,
+            checkOutTime: data.property.checkOutTime ?? 11,
+            taxRate: new Prisma.Decimal(data.property.taxRate ?? 0),
+            cleaningFee: new Prisma.Decimal(data.property.cleaningFee ?? 0),
+            status: "active",
+          },
+        });
+
+        // 2. Create room types
+        const createdRoomTypes: Record<string, string> = {};
+        for (const rt of data.roomTypes) {
+          const created = await tx.roomType.create({
+            data: {
+              organizationId: ctx.organizationId,
+              propertyId: property.id,
+              name: rt.name,
+              capacity: rt.capacity,
+              bedType: rt.bedType ?? "King",
+              baseRate: new Prisma.Decimal(rt.baseRate),
+              status: "active",
+            },
+          });
+          createdRoomTypes[rt.name] = created.id;
+        }
+
+        // 3. Create rooms
+        const createdRooms = [];
+        for (const r of data.rooms) {
+          const roomTypeId = createdRoomTypes[r.roomTypeName];
+          if (!roomTypeId) {
+            throw new Error(`Room type "${r.roomTypeName}" not found in setup definition.`);
+          }
+          const room = await tx.room.create({
+            data: {
+              organizationId: ctx.organizationId,
+              propertyId: property.id,
+              roomTypeId,
+              number: r.number,
+              floor: r.floor ?? "1",
+              status: "available",
+            },
+          });
+          createdRooms.push(room);
+        }
+
+        // 4. Create rate plans
+        const createdRatePlans = [];
+        const plansToCreate = data.ratePlans?.length
+          ? data.ratePlans
+          : [{ name: "Standard Daily Rate", amount: data.roomTypes[0]?.baseRate ?? 100, type: "fixed" as const }];
+
+        for (const rp of plansToCreate) {
+          const plan = await tx.ratePlan.create({
+            data: {
+              organizationId: ctx.organizationId,
+              propertyId: property.id,
+              name: rp.name,
+              amount: new Prisma.Decimal(rp.amount),
+              type: rp.type ?? "fixed",
+              currency: property.currency,
+              isActive: true,
+            },
+          });
+          createdRatePlans.push(plan);
+        }
+
+        return {
+          property,
+          roomTypes: Object.entries(createdRoomTypes).map(([name, id]) => ({ id, name })),
+          rooms: createdRooms,
+          ratePlans: createdRatePlans,
+        };
+      });
     },
   },
 };

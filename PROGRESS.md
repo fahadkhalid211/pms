@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP2 – Auth, RBAC, tenancy (Completed and Verified).
-- **Overall completion:** ~35%
+- **Phase:** WP3 – Properties, rooms, room types, rates (Completed and Verified).
+- **Overall completion:** ~45%
 
 ## Completed
 
@@ -50,13 +50,24 @@
 - [x] High-converting, comprehensive landing page at `app/page.tsx` with Hero, operations suite, AI Hub showcase, double-booking shield architecture, multi-tenancy & security deep-dive, transparent pricing tiers, and interactive FAQ.
 - [x] Automated WP2 gate test suite (`tests/auth-rbac-tenancy.test.ts`) validating Registration & Login bootstrap, RBAC matrix, Cross-tenant DAL isolation, Property-scope boundaries, Rate limiting, and Crypto-hashed password reset lifecycles.
 
+### WP3 – Properties, rooms, room types, rates
+- [x] Built missing room-type CRUD routes (`/api/roomtypes`, `/api/roomtypes/[id]`) with strict tenant scoping and property ownership checks.
+- [x] Built rate plans API (`/api/rate-plans`, `/api/rate-plans/[id]`) with seasonal rate windows (`/api/rate-plans/[id]/seasons`).
+- [x] Built discounts & coupons API (`/api/discounts`) supporting percentage and fixed discounts, redemption limits, and date validity.
+- [x] Built amenities API (`/api/amenities`) with room assignment (`assign` / `unassign`).
+- [x] Designed and implemented high-precision Decimal Pricing Engine (`lib/pricing/engine.ts`) with half-up rounding, multi-season splits, extra-guest surcharges, coupons, tax calculation, and leap-year/date boundaries.
+- [x] Built real-time pricing quote calculation API (`/api/pricing/quote`).
+- [x] Real property & operations Settings page (`app/(app)/settings/page.tsx`) managing timezone, currency, check-in/out hours, tax rates, cleaning fees, and contact details.
+- [x] Step-by-step Setup Wizard & Onboarding page (`app/(app)/onboarding/page.tsx`) with atomic backend provisioning (`/api/setup-wizard` via `dal.onboarding.setupProperty`).
+- [x] Enhanced Rooms & Room Types operational interface (`app/(app)/rooms/page.tsx`) with room category management and property filtering.
+- [x] Automated WP3 gate test suite (`tests/pricing-and-properties.test.ts`): 12 comprehensive unit and integration tests for Decimal pricing, tax rounding, season splits, discount bounds, date validations, room-type CRUD, rate plans, and atomic setup wizard.
+
 ## In progress
 
-- WP3 – Properties, rooms, room types, rates (Next up per `SUPERVISION_PLAN.md`).
+- WP4 – Reservations engine (Next up per `SUPERVISION_PLAN.md`).
 
 ## Pending
 
-- WP3: Properties, rooms, room types CRUD, rate plans, pricing engine.
 - WP4: Reservations transaction engine with double-booking prevention.
 - WP5: Front desk, housekeeping, maintenance workspaces.
 - WP6: Billing, server-side invoice calculations, payments & gateway integration.
@@ -74,7 +85,7 @@
 ## Verified test results
 
 - `npm run typecheck`: Passed (0 errors).
-- `npm run lint`: Passed (0 errors, 86 lint warnings).
-- `npm test`: 6 passed test files, 21 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`).
-- `npm run build`: Passed (compiled 46 dynamic/static routes successfully).
-- WP2 Gate: Registration/login, RBAC matrix, Cross-tenant isolation (Org A cannot read/write Org B across all modules), Property-scope boundaries, Auth rate limiting, and Crypto-hashed password reset lifecycle all passing.
+- `npm run lint`: Passed (0 errors).
+- `npm test`: 7 passed test files, 33 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`).
+- `npm run build`: Passed (compiled 53 dynamic/static routes successfully).
+- WP3 Gate: Unit tests for pricing/tax rounding, multi-season splits, discount bounds, room-type CRUD, and setup wizard onboarding all passing (12/12 tests).
