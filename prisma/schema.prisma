@@ -1,0 +1,647 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "sqlite"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+// ---------------------------------------------------------------------------
+// Identity & multi-tenancy
+// ---------------------------------------------------------------------------
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String
+  passwordHash     String
+  roleKey          String?
+  organizationId   String?
+  status           String    @default("active")
+  propertyIds      Json      @default("[]")
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  memberships      OrganizationMembership[]
+  auditLogs        AuditLog[]
+  agentExecutions  AiAgentExecution[]
+  propertyMemberships PropertyMembership[] @relation("PMUser")
+}
+
+model Organization {
+  id            String                   @id @default(cuid())
+  name          String
+  slug          String                   @unique
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  memberships   OrganizationMembership[]
+  properties   Property[]
+  users        User[]
+  auditLogs    AuditLog[]
+}
+
+model OrganizationMembership {
+  id               String             @id @default(cuid())
+  organizationId  String
+  userId          String
+  roleKey         String?
+  status          String             @default("active")
+  propertyIds     Json               @default("[]")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            Role?              @relation(fields: [roleKey], references: [key], onDelete: SetNull)
+
+  @@unique([organizationId, userId])
+}
+
+model Role {
+  key          String   @id
+  name        String
+  description String?
+  permissions Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  memberships OrganizationMembership[]
+}
+
+// ---------------------------------------------------------------------------
+// Properties & rooms
+// ---------------------------------------------------------------------------
+model Property {
+  id              String  @id @default(cuid())
+  organizationId String
+  name            String
+  code            String  @default("PROP")
+  addressLine1    String?
+  addressLine2    String?
+  city            String?
+  state           String?
+  postalCode      String?
+  country         String?
+  phone           String?
+  email           String?
+  timezone        String  @default("UTC")
+  currency        String  @default("USD")
+  checkInTime     Int     @default(15)
+  checkOutTime    Int     @default(11)
+  taxRate        Decimal @default(0)
+  cleaningFee    Decimal @default(0)
+  description     String?
+  status          String  @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships      PropertyMembership[]
+  roomTypes        RoomType[]
+  rooms            Room[]
+  ratePlans        RatePlan[]
+  reservations     Reservation[]
+  invoices         Invoice[]
+  aiExecutions     AiAgentExecution[]
+  knowledgeDocs    KnowledgeBaseDocument[]
+  integrations     Integration[]
+  auditLogs       AuditLog[]
+}
+
+model PropertyMembership {
+  id          String  @id @default(cuid())
+  propertyId String
+  userId     String
+  isAdmin    Boolean @default(false)
+  status     String  @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User     @relation("PMUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, userId])
+}
+model RoomType {
+  id           String  @id @default(cuid())
+  propertyId  String
+  name         String
+  capacity     Int     @default(2)
+  sizeSqm      Int?
+  bedType     String?
+  baseRate    Decimal @default(0)
+  depositType  String? @default("none")
+  depositAmount Decimal @default(0)
+  cancellationPolicy Json?
+  status       String  @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  rooms     Room[]   @relation("RoomTypeRooms")
+
+  @@unique([propertyId, name])
+}
+
+model Room {
+  id          String  @id @default(cuid())
+  roomTypeId String
+  propertyId String
+  number      String
+  name        String?
+  floor       String?
+  status      String  @default("available")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roomType RoomType @relation("RoomTypeRooms", fields: [roomTypeId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tasks     HousekeepingTask[]
+  maintenanceTickets MaintenanceTicket[]
+  reservationRooms ReservationRoom[]
+  roomAmenities RoomAmenity[]
+}
+
+model Amenity {
+  id            String  @id @default(cuid())
+  organizationId String?
+  propertyId    String?
+  name          String
+  category      String?
+  rooms         RoomAmenity[]
+}
+
+model RoomAmenity {
+  id        String  @id @default(cuid())
+  roomId    String
+  amenityId String
+  room      Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Rates
+// ---------------------------------------------------------------------------
+model RatePlan {
+  id          String  @id @default(cuid())
+  propertyId String
+  name        String
+  type        String  @default("fixed")
+  amount      Decimal @default(0)
+  currency    String  @default("USD")
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  seasons  SeasonalRate[]
+}
+
+model SeasonalRate {
+  id         String  @id @default(cuid())
+  ratePlanId String
+  startDate DateTime
+  endDate   DateTime
+  amount     Decimal @default(0)
+
+  ratePlan RatePlan @relation(fields: [ratePlanId], references: [id], onDelete: Cascade)
+}
+
+model Discount {
+  id            String  @id @default(cuid())
+  organizationId String
+  propertyId    String?
+  code          String
+  type          String  @default("percent")
+  value         Decimal @default(0)
+  maxRedemptions Int @default(0)
+  validFrom     DateTime?
+  validTo       DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Guests & reservations
+// ---------------------------------------------------------------------------
+model Guest {
+  id             String  @id @default(cuid())
+  organizationId String
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  requests GuestRequest[]
+  reservationRooms ReservationRoom[]
+  reservations Reservation[]
+}
+
+model GuestRequest {
+  id        String  @id @default(cuid())
+  guestId   String
+  type      String  @default("special_request")
+  content   String
+  status    String  @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guest Guest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+}
+
+model Reservation {
+  id           String  @id @default(cuid())
+  organizationId String
+  propertyId   String
+  code         String  @unique
+  status       String  @default("pending")
+  checkIn      DateTime
+  checkOut     DateTime
+  adults       Int     @default(1)
+  children     Int     @default(0)
+  guestId      String?
+  source       String  @default("direct")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  cancelledAt  DateTime?
+  cancelledReason String?
+
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  guest        Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  rooms        ReservationRoom[]
+  invoices     Invoice[]
+}
+
+model ReservationRoom {
+  id            String  @id @default(cuid())
+  reservationId String
+  roomId        String
+  guestId       String?
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  room        Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  guest       Guest?      @relation(fields: [guestId], references: [id], onDelete: SetNull)
+
+  @@unique([reservationId, roomId])
+}
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+model Invoice {
+  id           String  @id @default(cuid())
+  organizationId String
+  propertyId   String
+  reservationId String?
+  number       String  @unique
+  status       String  @default("draft")
+  issueDate    DateTime @default(now())
+  dueDate      DateTime?
+  subtotal      Decimal @default(0)
+  discount      Decimal @default(0)
+  tax           Decimal @default(0)
+  total         Decimal @default(0)
+  currency      String  @default("USD")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  property    Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  lineItems   InvoiceLineItem[]
+  payments    Payment[]
+}
+
+model InvoiceLineItem {
+  id         String  @id @default(cuid())
+  invoiceId String
+  description String
+  quantity  Int     @default(1)
+  unitAmount Decimal @default(0)
+  total     Decimal @default(0)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id           String  @id @default(cuid())
+  organizationId String
+  propertyId   String?
+  invoiceId   String?
+  reservationId String?
+  amount       Decimal @default(0)
+  currency     String  @default("USD")
+  status       String  @default("pending")
+  method       String?
+  provider     String?
+  providerRef String?
+  failureReason String?
+  capturedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  refunds Refund[]
+}
+
+model Refund {
+  id         String  @id @default(cuid())
+  paymentId String
+  amount     Decimal @default(0)
+  status     String  @default("pending")
+  reason     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Operations
+// ---------------------------------------------------------------------------
+model HousekeepingTask {
+  id          String  @id @default(cuid())
+  propertyId  String
+  roomId       String
+  status       String  @default("pending")
+  priority     String  @default("normal")
+  title        String?
+  notes        String?
+  assigneeId   String?
+  dueAt        DateTime?
+  completedAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  comments TaskComment[] @relation("TaskCommentTask")
+}
+
+model TaskComment {
+  id         String  @id @default(cuid())
+  taskId     String
+  authorId   String?
+  body       String
+  createdAt DateTime @default(now())
+
+  task HousekeepingTask @relation("TaskCommentTask", fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model MaintenanceTicket {
+  id          String  @id @default(cuid())
+  propertyId  String
+  roomId       String?
+  status       String  @default("open")
+  priority     String  @default("normal")
+  description  String
+  createdBy   String?
+  assigneeId   String?
+  resolvedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  room Room? @relation(fields: [roomId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+model Notification {
+  id            String  @id @default(cuid())
+  organizationId String
+  userId        String?
+  propertyId    String?
+  channel       String  @default("email")
+  type          String
+  status        String  @default("pending")
+  toEmail       String?
+  payload       Json?
+  relatedType   String?
+  relatedId     String?
+  sentAt        DateTime?
+  error         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Support & chatbot
+// ---------------------------------------------------------------------------
+model SupportConversation {
+  id           String  @id @default(cuid())
+  organizationId String
+  propertyId    String?
+  customerUserId String?
+  status       String  @default("open")
+  channel      String  @default("chat")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  messages SupportMessage[]
+}
+
+model SupportMessage {
+  id              String  @id @default(cuid())
+  conversationId String
+  senderType     String  @default("customer")
+  senderId       String?
+  body           String
+  createdAt      DateTime @default(now())
+
+  conversation SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model ChatbotConversation {
+  id           String  @id @default(cuid())
+  organizationId String
+  propertyId    String?
+  sessionKey   String  @unique
+  customerUserId String?
+  status       String  @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  messages ChatbotMessage[]
+}
+
+model ChatbotMessage {
+  id              String  @id @default(cuid())
+  conversationId String
+  role           String  @default("user")
+  content        String?
+  toolCalls      Json?
+  toolResults   Json?
+  createdAt      DateTime @default(now())
+
+  conversation ChatbotConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge base
+// ---------------------------------------------------------------------------
+model KnowledgeBaseDocument {
+  id            String  @id @default(cuid())
+  organizationId String
+  propertyId     String?
+  type          String  @default("faq")
+  title         String
+  content       String
+  source        String?
+  status        String  @default("active")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// AI provider hub
+// ---------------------------------------------------------------------------
+model AiProviderConfig {
+  id              String  @id @default(cuid())
+  organizationId String
+  name            String
+  provider        String  @default("openai")
+  model           String
+  baseUrl         String?
+  isEnabled       Boolean @default(true)
+  isDefault       Boolean @default(false)
+  fallbackProvider String?
+  fallbackModel   String?
+  temperature     Float   @default(0.2)
+  maxTokens       Int     @default(1024)
+  timeoutMs       Int     @default(30000)
+  capabilities    Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  credentials AiProviderCredential[]
+}
+
+model AiProviderCredential {
+  id            String  @id @default(cuid())
+  providerConfigId String
+  encryptedKey String
+  keyHint       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  providerConfig AiProviderConfig @relation(fields: [providerConfigId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// AI agent
+// ---------------------------------------------------------------------------
+model AiAgentExecution {
+  id            String  @id @default(cuid())
+  organizationId String
+  propertyId     String?
+  userId         String?
+  status         String  @default("queued")
+  requestSummary String
+  finalSummary   String?
+  error          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  startedAt      DateTime?
+  finishedAt     DateTime?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  toolExecutions AiToolExecution[]
+  approvals ApprovalRequest[]
+}
+
+model AiToolExecution {
+  id            String  @id @default(cuid())
+  executionId   String
+  toolName      String
+  input         Json
+  output        Json?
+  status        String  @default("pending")
+  approvalRequestId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  execution AiAgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  approval  ApprovalRequest? @relation("AIToolApproval", fields: [approvalRequestId], references: [id], onDelete: SetNull)
+}
+
+model ApprovalRequest {
+  id            String  @id @default(cuid())
+  organizationId String
+  userId        String?
+  executionId   String?
+  toolName      String
+  action        String
+  summary       String
+  details       Json?
+  status        String  @default("pending")
+  decidedBy     String?
+  decidedAt     DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  execution AiAgentExecution? @relation(fields: [executionId], references: [id], onDelete: SetNull)
+  toolExecutions AiToolExecution[] @relation("AIToolApproval")
+}
+
+// ---------------------------------------------------------------------------
+// Integrations
+// ---------------------------------------------------------------------------
+model Integration {
+  id            String  @id @default(cuid())
+  organizationId String
+  propertyId     String?
+  provider      String
+  name          String
+  status        String  @default("pending")
+  config        Json?
+  credentials   Json?
+  lastSyncAt    DateTime?
+  lastError     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+}
+
+model WebhookEvent {
+  id            String  @id @default(cuid())
+  integrationId String?
+  organizationId String
+  eventType     String
+  payload        Json?
+  status        String  @default("received")
+  externalId     String?
+  processedAt   DateTime?
+  createdAt     DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Audit
+// ---------------------------------------------------------------------------
+model AuditLog {
+  id            String  @id @default(cuid())
+  userId        String?
+  organizationId String?
+  propertyId    String?
+  action        String
+  entityType    String?
+  entityId      String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
