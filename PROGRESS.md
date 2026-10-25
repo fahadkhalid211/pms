@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP5 – Front desk, housekeeping, maintenance workspaces (Completed and Verified).
-- **Overall completion:** ~65%
+- **Phase:** WP6 – Billing, server-side invoice calculations, payments, refunds & gateway integration (Completed and Verified).
+- **Overall completion:** ~75%
 
 ## Completed
 
@@ -88,13 +88,23 @@
 - [x] Shared error definitions (`lib/errors.ts`) preventing circular imports and ensuring cross-module `instanceof` fidelity.
 - [x] Automated WP5 gate test suite (`tests/frontdesk-housekeeping-maintenance.test.ts`): 7 comprehensive tests verifying check-in rules, checkout auto-housekeeping, cleaning completion room transitions, maintenance blocks, room moves, secure uploads, and tenant isolation.
 
+### WP6 – Billing, server-side invoice calculations, payments & gateway integration
+- [x] Server-side invoice generation (`/api/invoices/generate`, `lib/billing.ts`): never trusts client totals, computes itemized room nights, cleaning fees, and taxes with exact `Decimal(12, 2)` arithmetic; generates sequential invoice numbers (`INV-YYYYMM-XXXX`); enforces idempotency.
+- [x] Deposits & partial payments tracking (`/api/invoices/[id]/payments`, `lib/billing.ts`): calculates net captured payments minus refunds and real-time balance due; transitions status to `partially_paid` when partial payments are received.
+- [x] Reconciled payment completion & "paid" rule: transitions invoice to `paid` status ONLY when remaining balance reaches zero; eliminates arbitrary client overrides (rejects manual `PATCH /api/invoices/[id]` status changes to `paid`/`partially_paid`/`refunded`); rejects overpayments and payments on settled folios.
+- [x] Refunds workflow & manager approval lifecycle (`/api/payments/[id]/refund`, `/api/refunds/[id]/approve`): staff requests refund with reason (`status: "pending"`), checks refundable limits against payment amount, manager approves refund (`status: "succeeded"`), transitions payment to `partially_refunded` or `refunded`, and automatically recalculates invoice status and balance.
+- [x] Payment Gateway Adapter Interface (`lib/payments/gateway.ts`): clean `PaymentGatewayAdapter` interface with `StripeGatewayAdapter` and clearly labelled `MockGatewayAdapter` for development and testing.
+- [x] Cryptographic Webhook Signature Verification (`/api/webhooks/payments`): verifies Stripe HMAC-SHA256 signatures (`t=...,v1=...`), enforces 15-minute tolerance window to prevent replay attacks, timing-safe equality checks, and reconciles invoice balances upon verified events.
+- [x] Printable Guest Folio & Receipt page (`app/(app)/billing/[id]/page.tsx`, `/api/invoices/[id]/receipt`): dedicated receipt view with property branding, guest details, room night line items, payment history, balance due, and print-ready CSS (`window.print()`).
+- [x] Enhanced Billing Workspace (`app/(app)/billing/page.tsx`): live revenue KPIs (Open Balance, Collected Revenue, Total Invoiced, Overdue Count), status filters, search, "Generate from Reservation" modal, and reconciled payment modal.
+- [x] Automated WP6 gate test suite (`tests/billing-and-payments.test.ts`): 6 comprehensive unit and integration tests verifying server-side line item math, deposit balance tracking, reconciled payment completion, refunds lifecycle, webhook signature verification, and multi-tenant isolation.
+
 ## In progress
 
-- WP6 – Billing, server-side invoice calculations, payments & gateway integration.
+- WP7 – Notifications service & email delivery queue.
 
 ## Pending
 
-- WP6: Billing, server-side invoice calculations, payments & gateway integration.
 - WP7: Notifications service & email delivery queue.
 - WP8: AI hub, provider adapters, approval workflows.
 - WP9: Customer portal & chatbot.
@@ -109,6 +119,6 @@
 
 - `npm run typecheck`: Passed (0 errors).
 - `npm run lint`: Passed (0 errors).
-- `npm test`: 8 passed test files, 47 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`).
-- `npm run build`: Passed (compiled 56 dynamic/static routes successfully).
-- WP5 Gate: 7/7 tests passed in `tests/frontdesk-housekeeping-maintenance.test.ts`.
+- `npm test`: 9 passed test files, 53 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`, `tests/billing-and-payments.test.ts`).
+- `npm run build`: Passed (compiled 62 dynamic/static routes successfully).
+- WP6 Gate: 6/6 tests passed in `tests/billing-and-payments.test.ts`.

@@ -52,17 +52,8 @@ export async function POST(request: Request) {
         provider: parsed.data.provider ?? undefined,
         providerRef: parsed.data.providerRef ?? undefined,
       },
+      user.id,
     );
-
-    await auditLog({
-      userId: user.id,
-      organizationId: user.organizationId ?? undefined,
-      propertyId: parsed.data.propertyId ?? undefined,
-      action: "payment.captured",
-      entityType: "Payment",
-      entityId: payment.id,
-      metadata: { amount: parsed.data.amount, currency: payment.currency, status: payment.status },
-    });
 
     return NextResponse.json({ success: true, data: payment }, { status: 201 });
   } catch (error: any) {

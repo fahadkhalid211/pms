@@ -5,14 +5,16 @@ import { z } from "zod";
 
 const updateInvoiceSchema = z.object({
   status: z.enum(["draft", "issued", "paid", "partially_paid", "overdue", "void", "refunded"]).optional(),
+  notes: z.string().optional().nullable(),
+  dueDate: z.string().datetime().optional().nullable().or(z.string().optional().nullable()),
 });
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const user = await requirePermission("billing.view");
-    const invoice = await dal.invoices.findUnique({ organizationId: user.organizationId! }, id);
-    return NextResponse.json({ success: true, data: { invoice, lineItems: invoice.lineItems, payments: invoice.payments } });
+    const folio = await dal.invoices.getFolio({ organizationId: user.organizationId! }, id);
+    return NextResponse.json({ success: true, data: folio });
   } catch (error: any) {
     const status = error?.status ?? (error?.message === "Unauthorized" ? 401 : 500);
     return NextResponse.json({ success: false, error: { message: error?.message ?? "Invoice not found" } }, { status });
@@ -32,10 +34,28 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
+    // Direct override to 'paid', 'partially_paid', or 'refunded' is forbidden without payment reconciliation
+    if (parsed.data.status && ["paid", "partially_paid", "refunded"].includes(parsed.data.status)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message:
+              "Invoice payment statuses ('paid', 'partially_paid', 'refunded') cannot be manually forced. They must be transitioned via verified payments, refunds, or payment gateway webhooks.",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     const updated = await dal.invoices.update(
       { organizationId: user.organizationId! },
       id,
-      { status: parsed.data.status },
+      {
+        status: parsed.data.status,
+        notes: parsed.data.notes,
+        dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
+      },
     );
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

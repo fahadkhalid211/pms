@@ -13,13 +13,43 @@ import {
   type CheckOutOptions,
 } from "@/lib/operations";
 
+import {
+  generateInvoiceFromReservation,
+  recordPayment,
+  requestRefund,
+  approveRefund,
+  getInvoiceFolio,
+} from "@/lib/billing";
+
 export interface TenantContext {
   organizationId: string;
   propertyId?: string | null;
 }
 
-import { NotFoundError, CrossTenantViolationError, DoubleBookingConflictError } from "@/lib/errors";
-export { NotFoundError, CrossTenantViolationError, DoubleBookingConflictError };
+import {
+  NotFoundError,
+  CrossTenantViolationError,
+  DoubleBookingConflictError,
+  InvalidPaymentAmountError,
+  InvoiceAlreadySettledError,
+  OverpaymentNotAllowedError,
+  InvalidRefundStateError,
+  RefundExceedsPaymentError,
+  WebhookSignatureVerificationError,
+  DirectStatusOverrideForbiddenError,
+} from "@/lib/errors";
+export {
+  NotFoundError,
+  CrossTenantViolationError,
+  DoubleBookingConflictError,
+  InvalidPaymentAmountError,
+  InvoiceAlreadySettledError,
+  OverpaymentNotAllowedError,
+  InvalidRefundStateError,
+  RefundExceedsPaymentError,
+  WebhookSignatureVerificationError,
+  DirectStatusOverrideForbiddenError,
+};
 
 export const dal = {
   properties: {
@@ -322,7 +352,14 @@ export const dal = {
           ...(filters?.propertyId ? { propertyId: filters.propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
           ...(filters?.status ? { status: filters.status } : {}),
         },
-        include: { lineItems: true, payments: true },
+        include: {
+          lineItems: true,
+          payments: {
+            include: { refunds: true },
+          },
+          reservation: { select: { code: true } },
+          property: { select: { name: true, currency: true } },
+        },
         orderBy: { createdAt: "desc" },
       });
     },
@@ -330,10 +367,29 @@ export const dal = {
     async findUnique(ctx: TenantContext, id: string) {
       const invoice = await prisma.invoice.findFirst({
         where: { id, organizationId: ctx.organizationId },
-        include: { lineItems: true, payments: true },
+        include: {
+          lineItems: true,
+          payments: {
+            include: { refunds: true },
+          },
+          reservation: { select: { code: true } },
+          property: { select: { name: true, currency: true } },
+        },
       });
       if (!invoice) throw new NotFoundError("Invoice not found.");
       return invoice;
+    },
+
+    async generateFromReservation(
+      ctx: TenantContext,
+      input: { reservationId: string; dueDate?: Date | null; notes?: string | null },
+      userId?: string,
+    ) {
+      return generateInvoiceFromReservation(ctx, { ...input, userId });
+    },
+
+    async getFolio(ctx: TenantContext, id: string) {
+      return getInvoiceFolio(ctx, id);
     },
 
     async create(
@@ -397,27 +453,45 @@ export const dal = {
       return dal.invoices.findUnique(ctx, invoice.id);
     },
 
-    async update(ctx: TenantContext, id: string, data: { status?: InvoiceStatus }) {
+    async update(ctx: TenantContext, id: string, data: { status?: InvoiceStatus; notes?: string | null; dueDate?: Date | null }) {
       await dal.invoices.findUnique(ctx, id);
       return prisma.invoice.update({
         where: { id },
         data: {
-          status: data.status,
+          ...(data.status ? { status: data.status } : {}),
+          ...(data.notes !== undefined ? { notes: data.notes } : {}),
+          ...(data.dueDate !== undefined ? { dueDate: data.dueDate } : {}),
         },
       });
     },
   },
 
   payments: {
-    async findMany(ctx: TenantContext, filters?: { propertyId?: string }) {
+    async findMany(ctx: TenantContext, filters?: { propertyId?: string; invoiceId?: string }) {
       return prisma.payment.findMany({
         where: {
           organizationId: ctx.organizationId,
           ...(filters?.propertyId ? { propertyId: filters.propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+          ...(filters?.invoiceId ? { invoiceId: filters.invoiceId } : {}),
         },
-        include: { invoice: { select: { number: true, total: true } } },
+        include: {
+          invoice: { select: { number: true, total: true } },
+          refunds: true,
+        },
         orderBy: { createdAt: "desc" },
       });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const payment = await prisma.payment.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+        include: {
+          invoice: true,
+          refunds: true,
+        },
+      });
+      if (!payment) throw new NotFoundError("Payment not found.");
+      return payment;
     },
 
     async create(
@@ -426,52 +500,69 @@ export const dal = {
         propertyId?: string;
         invoiceId?: string;
         reservationId?: string;
-        amount: number;
+        amount: number | Prisma.Decimal | string;
         currency?: string;
         status?: PaymentStatus;
         method?: string;
         provider?: string;
         providerRef?: string;
       },
+      userId?: string,
     ) {
-      if (data.invoiceId) {
-        const invoice = await prisma.invoice.findFirst({
-          where: { id: data.invoiceId, organizationId: ctx.organizationId },
-        });
-        if (!invoice) throw new CrossTenantViolationError("Invoice does not belong to your organization.");
-      }
+      return recordPayment(ctx, {
+        ...data,
+        userId,
+      });
+    },
+  },
 
-      if (data.propertyId) {
-        const property = await prisma.property.findFirst({
-          where: { id: data.propertyId, organizationId: ctx.organizationId },
-        });
-        if (!property) throw new CrossTenantViolationError("Property does not belong to your organization.");
-      }
-
-      const payment = await prisma.payment.create({
-        data: {
+  refunds: {
+    async findMany(ctx: TenantContext, filters?: { paymentId?: string }) {
+      return prisma.refund.findMany({
+        where: {
           organizationId: ctx.organizationId,
-          propertyId: data.propertyId,
-          invoiceId: data.invoiceId,
-          reservationId: data.reservationId,
-          amount: data.amount,
-          currency: data.currency ?? "USD",
-          status: data.status ?? "captured",
-          method: data.method ?? "card",
-          provider: data.provider,
-          providerRef: data.providerRef,
-          capturedAt: data.status === "captured" ? new Date() : undefined,
+          ...(filters?.paymentId ? { paymentId: filters.paymentId } : {}),
+        },
+        include: {
+          payment: {
+            include: { invoice: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const refund = await prisma.refund.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+        include: {
+          payment: {
+            include: { invoice: true },
+          },
         },
       });
+      if (!refund) throw new NotFoundError("Refund not found.");
+      return refund;
+    },
 
-      if (data.status === "captured" && data.invoiceId) {
-        await prisma.invoice.update({
-          where: { id: data.invoiceId },
-          data: { status: "paid" },
-        });
-      }
+    async request(
+      ctx: TenantContext,
+      data: { paymentId: string; amount: number | Prisma.Decimal | string; reason?: string },
+      userId?: string,
+    ) {
+      return requestRefund(ctx, { ...data, userId });
+    },
 
-      return payment;
+    async approve(
+      ctx: TenantContext,
+      data: { refundId: string; gatewayRef?: string },
+      approvedByUserId: string,
+    ) {
+      return approveRefund(ctx, {
+        refundId: data.refundId,
+        approvedByUserId,
+        gatewayRef: data.gatewayRef,
+      });
     },
   },
 
