@@ -19,6 +19,7 @@ const PROTECTED_PREFIXES = [
   "/integrations",
   "/support",
   "/notifications",
+  "/activity-logs",
 ];
 
 export function middleware(request: NextRequest) {

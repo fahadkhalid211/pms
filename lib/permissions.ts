@@ -42,6 +42,7 @@ export const ALL_PERMISSIONS = [
   "support.manage",
   // AI
   "ai.operate",
+  "ai.approve",
   "ai.configure",
   "ai.chatbot.manage",
   // Integrations & staff
@@ -95,6 +96,7 @@ export const ROLE_DEFINITIONS = [
       "support.view",
       "support.manage",
       "ai.operate",
+      "ai.approve",
       "staff.manage",
       "audit.view",
       "settings.manage",

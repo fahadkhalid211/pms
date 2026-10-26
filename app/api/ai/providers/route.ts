@@ -1,46 +1,49 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
 import { encryptSecret } from "@/lib/ai/encryption";
-import { auditLog } from "@/lib/audit";
+import { assertSafeBaseUrl } from "@/lib/ai/providers";
+import { logActivity } from "@/lib/audit";
 
 const PROVIDER_MODELS: Record<string, string[]> = {
   openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini"],
   gemini: ["gemini-2.0-flash", "gemini-1.5-pro"],
   groq: ["llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
   anthropic: ["claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"],
+  mock: ["mock-operations-v1", "mock-fast-v1"],
 };
 
-async function safeConfig(config: any) {
-  const credential = await prisma.aiProviderCredential.findFirst({ where: { providerConfigId: config.id }, select: { encryptedKey: true } });
-  return {
-    id: config.id,
-    organizationId: config.organizationId,
-    name: config.name,
-    provider: config.provider,
-    model: config.model,
-    baseUrl: config.baseUrl,
-    isEnabled: config.isEnabled,
-    isDefault: config.isDefault,
-    fallbackProvider: config.fallbackProvider,
-    fallbackModel: config.fallbackModel,
-    temperature: config.temperature,
-    maxTokens: config.maxTokens,
-    timeoutMs: config.timeoutMs,
-    hasApiKey: Boolean(credential),
-    createdAt: config.createdAt,
-    updatedAt: config.updatedAt,
-  };
-}
+const createProviderSchema = z.object({
+  name: z.string().min(1).optional(),
+  provider: z.enum(["openai", "gemini", "groq", "anthropic", "mock"]),
+  model: z.string().min(1),
+  apiKey: z.string().optional().nullable(),
+  baseUrl: z.string().optional().nullable(),
+  isEnabled: z.boolean().default(true),
+  isDefault: z.boolean().default(false),
+  fallbackProvider: z.string().optional().nullable(),
+  fallbackModel: z.string().optional().nullable(),
+  temperature: z.number().min(0).max(2).default(0.2),
+  maxTokens: z.number().int().positive().default(1024),
+  timeoutMs: z.number().int().positive().default(30000),
+  capabilities: z.record(z.unknown()).optional(),
+});
 
 export async function GET() {
   try {
     const user = await requirePermission("ai.configure");
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return NextResponse.json({ success: false, error: { message: "Organization context required." } }, { status: 400 });
+    }
+
     const configs = await prisma.aiProviderConfig.findMany({
-      where: { organizationId: user.organizationId ?? "" },
+      where: { organizationId },
       orderBy: { updatedAt: "desc" },
       include: { credentials: { select: { id: true, keyHint: true, updatedAt: true } } },
     });
+
     const safe = configs.map((c) => ({
       id: c.id,
       organizationId: c.organizationId,
@@ -55,67 +58,123 @@ export async function GET() {
       temperature: c.temperature,
       maxTokens: c.maxTokens,
       timeoutMs: c.timeoutMs,
+      hasApiKey: c.credentials.length > 0,
+      keyHint: c.credentials[0]?.keyHint ?? null,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
     }));
+
     return NextResponse.json({ success: true, data: safe });
-  } catch (error: any) {
-    if (error?.status === 403) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
-    if (error?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to load AI providers" } }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { status?: number; message?: string };
+    if (err?.status === 403) return NextResponse.json({ success: false, error: { message: err.message ?? "Forbidden" } }, { status: 403 });
+    if (err?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
+    return NextResponse.json({ success: false, error: { message: err?.message ?? "Failed to load AI providers" } }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const user = await requirePermission("ai.configure");
-    const body = await request.json();
-    const provider = body.provider as "openai" | "gemini" | "groq" | "anthropic";
-    const apiKey = body.apiKey;
-    if (!apiKey) {
-      return NextResponse.json({ success: false, error: { message: "API key is required." } }, { status: 400 });
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return NextResponse.json({ success: false, error: { message: "Organization context required." } }, { status: 400 });
     }
+
+    const body = await request.json();
+    const parsed = createProviderSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: { message: parsed.error.issues[0]?.message ?? "Invalid configuration." } },
+        { status: 400 },
+      );
+    }
+
+    const data = parsed.data;
+
+    if (data.provider !== "mock" && !data.apiKey) {
+      return NextResponse.json({ success: false, error: { message: "API key is required for real providers." } }, { status: 400 });
+    }
+
+    // SSRF validation
+    if (data.baseUrl) {
+      try {
+        assertSafeBaseUrl(data.baseUrl);
+      } catch (err: any) {
+        return NextResponse.json({ success: false, error: { message: err.message } }, { status: 400 });
+      }
+    }
+
+    // If marked default, unset other defaults
+    if (data.isDefault) {
+      await prisma.aiProviderConfig.updateMany({
+        where: { organizationId, isDefault: true },
+        data: { isDefault: false },
+      });
+    }
+
     const config = await prisma.aiProviderConfig.create({
       data: {
-        organizationId: user.organizationId ?? "",
-        name: body.name ?? `${provider} ${body.model ?? "default"}`,
-        provider,
-        model: body.model ?? PROVIDER_MODELS[provider]?.[0] ?? "default",
-        baseUrl: body.baseUrl,
-        isEnabled: body.isEnabled ?? true,
-        isDefault: body.isDefault ?? false,
-        fallbackProvider: body.fallbackProvider,
-        fallbackModel: body.fallbackModel,
-        temperature: body.temperature ?? 0.2,
-        maxTokens: body.maxTokens ?? 1024,
-        timeoutMs: body.timeoutMs ?? 30000,
+        organizationId,
+        name: data.name ?? `${data.provider.toUpperCase()} (${data.model})`,
+        provider: data.provider,
+        model: data.model || PROVIDER_MODELS[data.provider]?.[0] || "default",
+        baseUrl: data.baseUrl ?? null,
+        isEnabled: data.isEnabled,
+        isDefault: data.isDefault,
+        fallbackProvider: data.fallbackProvider ?? null,
+        fallbackModel: data.fallbackModel ?? null,
+        temperature: data.temperature,
+        maxTokens: data.maxTokens,
+        timeoutMs: data.timeoutMs,
       },
     });
-    const encryptedKey = encryptSecret(apiKey);
-    await prisma.aiProviderCredential.create({
-      data: {
-        organizationId: user.organizationId!,
-        providerConfigId: config.id,
-        encryptedKey,
-        keyHint: apiKey.slice(-4),
-      },
-    });
-    await auditLog({
+
+    if (data.apiKey) {
+      const encryptedKey = encryptSecret(data.apiKey);
+      await prisma.aiProviderCredential.create({
+        data: {
+          organizationId,
+          providerConfigId: config.id,
+          encryptedKey,
+          keyHint: data.apiKey.slice(-4),
+        },
+      });
+    }
+
+    await logActivity({
+      organizationId,
       userId: user.id,
-      organizationId: user.organizationId ?? undefined,
+      userName: user.name,
+      userEmail: user.email,
+      userRole: user.roleKey,
+      source: "backend",
+      category: "ai",
       action: "ai.provider_created",
+      summary: `Created AI provider '${config.name}' (${config.provider}/${config.model}).`,
       entityType: "AiProviderConfig",
       entityId: config.id,
-      metadata: { provider, model: config.model },
     });
-    const credential = await prisma.aiProviderCredential.findFirst({ where: { providerConfigId: config.id }, select: { encryptedKey: true } });
+
     return NextResponse.json({
       success: true,
-      data: { ...config, hasApiKey: Boolean(credential) },
+      data: {
+        id: config.id,
+        organizationId: config.organizationId,
+        name: config.name,
+        provider: config.provider,
+        model: config.model,
+        baseUrl: config.baseUrl,
+        isEnabled: config.isEnabled,
+        isDefault: config.isDefault,
+        hasApiKey: Boolean(data.apiKey),
+        keyHint: data.apiKey ? data.apiKey.slice(-4) : null,
+      },
     });
-  } catch (error: any) {
-    if (error?.status === 403) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
-    if (error?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
-    return NextResponse.json({ success: false, error: { message: error?.message ?? "Failed to create AI provider" } }, { status: 400 });
+  } catch (error: unknown) {
+    const err = error as { status?: number; message?: string };
+    if (err?.status === 403) return NextResponse.json({ success: false, error: { message: err.message ?? "Forbidden" } }, { status: 403 });
+    if (err?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
+    return NextResponse.json({ success: false, error: { message: err?.message ?? "Failed to create AI provider" } }, { status: 500 });
   }
 }

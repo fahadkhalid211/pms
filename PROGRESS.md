@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP7 – Notifications, branded templates, delivery logs, preferences & reminders (Completed and Verified).
-- **Overall completion:** ~85%
+- **Phase:** WP8 – AI Operations Hub, Provider Adapters, Tool Dispatch, Human-in-the-Loop Approvals & Universal Activity Logging (Completed and Verified).
+- **Overall completion:** ~92%
 
 ## Completed
 
@@ -47,7 +47,7 @@
 - [x] Cryptographic password reset lifecycle (`lib/auth/passwords.ts`, `/api/auth/forgot-password`, `/api/auth/reset-password`) using SHA-256 token hashing at rest, 1-hour expiration, and simulated notification dispatch.
 - [x] Sliding-window rate limiting on auth endpoints (`lib/rate-limit.ts`).
 - [x] Remediated all audit IDORs: `/api/properties/[id]`, `/api/rooms`, `/api/housekeeping`, `/api/maintenance`, `/api/maintenance/[id]`, `/api/invoices`, `/api/invoices/[id]`, `/api/payments`, `/app/(app)/reports` (eliminated `organizations[0]` leakage), AI tools in `lib/ai/tools.ts`, and SSRF safe URL guard in `lib/ai/providers.ts`.
-- [x] High-converting, comprehensive landing page at `app/page.tsx` with Hero, operations suite, AI Hub showcase, double-booking shield architecture, multi-tenancy & security deep-dive, transparent pricing tiers, and interactive FAQ.
+- [x] High-converting, comprehensive landing page at `app/page.tsx` with Hospitable.com branding (Hospitable Grape `#6D28D9` / `#7C3AED` on obsidian `#090D16`), zero emojis, thin-line Lucide icons, unified command center simulator, partner ecosystem badges, 5-tab feature showcase, interactive ROI calculator, verified host reviews, transparent pricing matrix, and FAQ accordion.
 - [x] Automated WP2 gate test suite (`tests/auth-rbac-tenancy.test.ts`) validating Registration & Login bootstrap, RBAC matrix, Cross-tenant DAL isolation, Property-scope boundaries, Rate limiting, and Crypto-hashed password reset lifecycles.
 
 ### WP3 – Properties, rooms, room types, rates
@@ -110,25 +110,33 @@
 - [x] Dynamic route retry endpoint (`/api/notifications/[id]/retry`) for re-queuing failed delivery attempts.
 - [x] Automated WP7 gate test suite (`tests/notifications.test.ts`): 6 comprehensive unit and integration tests verifying queue lifecycle, exponential backoff retries, branded template interpolation across all 5 templates, recipient preferences & opt-out suppression, automated reminders with deduplication, and strict multi-tenant isolation.
 
+### WP8 – AI operations hub, provider adapters, tool dispatch & human-in-the-loop approvals
+- [x] Provider-Agnostic Adapter Engine (`lib/ai/providers.ts`): normalized interface supporting OpenAI, Google Gemini, Groq, Anthropic Claude, and Mock adapters with tool-call formatting, system prompts, AbortSignal timeouts, and token limits.
+- [x] Resilient Provider Error Taxonomy (`lib/ai/providers.ts`): structured hierarchy with `AiProviderError`, `AiRateLimitError`, `AiTimeoutError`, `AiAuthenticationError`, and `AiDisabledError`.
+- [x] Automatic Fallback Chain: primary provider rate limit, timeout, or 5xx automatically triggers fallback provider with audit event recording.
+- [x] Token Estimation & Usage Tracking: computes prompt/completion token usage, execution latency in milliseconds, and estimated cost in USD based on standard provider pricing rates.
+- [x] Comprehensive SSRF Protection (`assertSafeBaseUrl`): validates HTTPS, strictly blocks cloud metadata endpoints (`169.254.169.254`, `metadata.google.internal`, `metadata.azure.com`), and restricts private/loopback IP ranges in production.
+- [x] Provider-Neutral Tool Registry with Zod Schemas (`lib/ai/tools.ts`): 16 operational tools with strict Zod validation and risk classifications:
+  - `read`: `search_reservations`, `check_availability`, `get_guest_summary`, `get_invoices`, `generate_report`, `get_policies`.
+  - `reversible`: `update_room_status`, `create_housekeeping_task`, `create_maintenance_ticket`, `check_in_reservation`, `check_out_reservation`, `draft_message`.
+  - `sensitive` (**Mandatory Approval**): `create_reservation`, `cancel_reservation`, `refund_payment`, `bulk_send_messages`.
+- [x] Autonomous Agent Loop (`lib/ai/agent.ts`): multi-turn agent coordinator (up to 5 turns), enforcing tenant scoping, user RBAC permissions, and property restrictions.
+- [x] Human-in-the-Loop Supervisory Approval Workflow: sensitive tools automatically pause execution, persist `ApprovalRequest` and `AiToolExecution` records with status `pending`, set `AiAgentExecution` to `awaiting_approval`, and return clean approval pending outcome without running the tool prematurely.
+- [x] Dedicated Approval Resolution Paths: `approveAiExecution` re-validates approver's `ai.approve` permission, executes the underlying tool with supervisor authority, marks `ApprovalRequest` as `executed`, and updates agent execution to `completed`. `rejectAiExecution` marks request `rejected`, marks tool execution `rejected`, terminates agent execution with `failed`, and preserves existing reservation/payment state untouched.
+- [x] Prompt Injection Defense: malicious user prompts attempting to override policies or bypass approvals are safely handled; tool dispatch and RBAC checks are strictly governed by TypeScript code.
+- [x] Independent Disable Switches: toggling `isEnabled: false` halts the AI agent gracefully with `AiDisabledError` while core PMS functions continue to operate completely unaffected.
+- [x] Universal Dual-Source Activity Logging Engine (`lib/audit.ts`, `app/api/activity-logs`, `components/activity-tracker.tsx`, `lib/client-logger.ts`): logs frontend user actions (navigation, button clicks, errors) and backend events (auth, reservations, frontdesk, billing, housekeeping, maintenance, notifications, AI) with precise ISO timestamp, user details (`userId`, `userName`, `userEmail`, `userRole`), IP address, user agent, PII redaction, and human-readable summary.
+- [x] Activity Logs Operational Viewer (`app/(app)/activity-logs/page.tsx`): live stream viewer with Frontend vs Backend source badges, KPI summary counters, category filters, text search, and JSON metadata inspector modal.
+- [x] AI Operations Hub Workspace (`app/(app)/ai/page.tsx`): interactive conversational operations console, quick action prompt chips, pending supervisor approvals review card with 1-click Approve and Confirm Reject buttons, and live execution audit stream.
+- [x] AI Provider Hub Workspace (`app/(app)/ai/providers/page.tsx`): encrypted provider configuration, AES-256-GCM key storage, masked key hints (`•••• 4821`), default toggles, connection testing, and deletion.
+- [x] Automated WP8 gate test suite (`tests/ai-hub-and-agent.test.ts`): 9 comprehensive unit and integration tests verifying tool permission denial, cross-tenant isolation, sensitive tool approval gating, approval resolution path, rejection resolution path, prompt injection defense, AI disabled switch resilience, universal activity logging integration, and SSRF base URL protection.
+
 ## In progress
 
-- WP8 – AI hub, provider adapters, approval workflows.
+- WP9 – Customer portal & chatbot.
 
 ## Pending
 
-- WP8: AI hub, provider adapters, approval workflows.
 - WP9: Customer portal & chatbot.
-- WP10: Reports, analytics, integrations, hardening.
-- WP11: UI polish, Playwright journeys, production Dockerfile.
-
-## Known limitations
-
-- Docker engine is not installed on this host environment; local development PostgreSQL 18.4 runs via embedded binaries on port 5432 (`localhost:5432`).
-
-## Verified test results
-
-- `npm run typecheck`: Passed (0 errors).
-- `npm run lint`: Passed (0 errors).
-- `npm test`: 10 passed test files, 59 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`, `tests/billing-and-payments.test.ts`, `tests/notifications.test.ts`).
-- `npm run build`: Passed (compiled 64 dynamic/static routes successfully).
-- WP7 Gate: 6/6 tests passed in `tests/notifications.test.ts`.
+- WP10: Reports, dashboard, integrations, hardening.
+- WP11: UX polish, Playwright journeys, production build & delivery.
