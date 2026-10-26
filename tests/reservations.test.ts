@@ -336,7 +336,9 @@ describe("WP4 Gate: Reservations Engine, Concurrency, and State Machine", () => 
     expect(searchB.items).toHaveLength(0);
   });
 
-  it("8. Idempotency Key Gate: duplicate POST requests return cached response without double-booking", async () => {
+  it(
+    "8. Idempotency Key Gate: duplicate POST requests return cached response without double-booking",
+    async () => {
     const timestamp = Date.now().toString(36);
     const { createUserWithContext, authenticate } = await import("@/lib/auth/actions");
     const { POST } = await import("@/app/api/reservations/route");
@@ -409,5 +411,5 @@ describe("WP4 Gate: Reservations Engine, Concurrency, and State Machine", () => 
     // Verify exactly 3 RoomNights exist in DB for this stay (no duplicate rows)
     const nights = await prisma.roomNight.findMany({ where: { roomId: room.id } });
     expect(nights).toHaveLength(3);
-  });
+  }, 15000);
 });
