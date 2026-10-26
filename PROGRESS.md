@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Phase:** WP6 – Billing, server-side invoice calculations, payments, refunds & gateway integration (Completed and Verified).
-- **Overall completion:** ~75%
+- **Phase:** WP7 – Notifications, branded templates, delivery logs, preferences & reminders (Completed and Verified).
+- **Overall completion:** ~85%
 
 ## Completed
 
@@ -99,13 +99,23 @@
 - [x] Enhanced Billing Workspace (`app/(app)/billing/page.tsx`): live revenue KPIs (Open Balance, Collected Revenue, Total Invoiced, Overdue Count), status filters, search, "Generate from Reservation" modal, and reconciled payment modal.
 - [x] Automated WP6 gate test suite (`tests/billing-and-payments.test.ts`): 6 comprehensive unit and integration tests verifying server-side line item math, deposit balance tracking, reconciled payment completion, refunds lifecycle, webhook signature verification, and multi-tenant isolation.
 
+### WP7 – Notifications, branded templates, delivery logs, preferences & reminders
+- [x] Transactional Notification Queue Engine (`lib/notifications/queue.ts`, `lib/dal.ts`): ACID-backed PostgreSQL queue, idempotency, claiming, worker processor (`dal.notifications.processQueue`), and exponential backoff retry counter (`2^attempts * 1000ms`).
+- [x] Property-Branded HTML Email Templates (`lib/notifications/templates.ts`, `/api/notifications/preview`): 5 hospitality templates (`pre_arrival`, `check_in_welcome`, `check_out_thanks`, `payment_receipt`, `payment_reminder`) with dynamic property branding (name, address, phone, email, brand colors, styled action buttons).
+- [x] Configurable Provider Adapters (`lib/notifications/providers.ts`): pluggable `EmailProviderAdapter` interface with `MockEmailAdapter` (simulated failures, sent history inspection), `ResendEmailAdapter` (production HTTP API), and `SmtpEmailAdapter`.
+- [x] Recipient Privacy & Preferences Gate (`lib/notifications/preferences.ts`, `/api/notifications/preferences`): guest profile preferences (`emailEnabled`, `smsEnabled`, `preArrivalReminders`, `checkInReminders`, `checkOutReminders`, `paymentReminders`, `marketingEmails`), enforcing opt-out suppression at enqueue time without persisting unwanted jobs.
+- [x] Automated Guest Reminders Engine (`lib/notifications/reminders.ts`, `/api/notifications/reminders`): time-window scanning (pre-arrival 24h-72h, check-in welcome, post-checkout thanks, overdue payment reminders) with strict deduplication preventing duplicate communications.
+- [x] Delivery Audit Logs (`lib/notifications/queue.ts`, `/api/notifications/logs`): detailed provider delivery attempt records (provider, providerRef, status, latency ms, timestamp, error).
+- [x] Notifications Operational Workspace (`app/(app)/notifications/page.tsx`): live KPI stats (in queue, delivered, failed, suppressed), tabbed view (dispatch queue vs delivery audit logs), manual queue trigger, reminders runner, manual notification enqueue modal, and interactive live template preview modal with property branding.
+- [x] Dynamic route retry endpoint (`/api/notifications/[id]/retry`) for re-queuing failed delivery attempts.
+- [x] Automated WP7 gate test suite (`tests/notifications.test.ts`): 6 comprehensive unit and integration tests verifying queue lifecycle, exponential backoff retries, branded template interpolation across all 5 templates, recipient preferences & opt-out suppression, automated reminders with deduplication, and strict multi-tenant isolation.
+
 ## In progress
 
-- WP7 – Notifications service & email delivery queue.
+- WP8 – AI hub, provider adapters, approval workflows.
 
 ## Pending
 
-- WP7: Notifications service & email delivery queue.
 - WP8: AI hub, provider adapters, approval workflows.
 - WP9: Customer portal & chatbot.
 - WP10: Reports, analytics, integrations, hardening.
@@ -119,6 +129,6 @@
 
 - `npm run typecheck`: Passed (0 errors).
 - `npm run lint`: Passed (0 errors).
-- `npm test`: 9 passed test files, 53 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`, `tests/billing-and-payments.test.ts`).
-- `npm run build`: Passed (compiled 62 dynamic/static routes successfully).
-- WP6 Gate: 6/6 tests passed in `tests/billing-and-payments.test.ts`.
+- `npm test`: 10 passed test files, 59 passed tests (`tests/permissions.test.ts`, `tests/reservations.test.ts`, `tests/utils.test.ts`, `tests/schema-v2.test.ts`, `tests/auth-login.test.ts`, `tests/auth-rbac-tenancy.test.ts`, `tests/pricing-and-properties.test.ts`, `tests/frontdesk-housekeeping-maintenance.test.ts`, `tests/billing-and-payments.test.ts`, `tests/notifications.test.ts`).
+- `npm run build`: Passed (compiled 64 dynamic/static routes successfully).
+- WP7 Gate: 6/6 tests passed in `tests/notifications.test.ts`.

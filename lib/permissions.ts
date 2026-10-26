@@ -30,6 +30,9 @@ export const ALL_PERMISSIONS = [
   // Billing
   "billing.view",
   "billing.manage",
+  // Notifications
+  "notifications.view",
+  "notifications.manage",
   // Guests & Portal
   "guests.view",
   "guests.create",
@@ -85,6 +88,8 @@ export const ROLE_DEFINITIONS = [
       "maintenance.manage",
       "billing.view",
       "billing.manage",
+      "notifications.view",
+      "notifications.manage",
       "guests.view",
       "guests.create",
       "support.view",

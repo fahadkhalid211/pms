@@ -18,6 +18,7 @@ const PROTECTED_PREFIXES = [
   "/guests",
   "/integrations",
   "/support",
+  "/notifications",
 ];
 
 export function middleware(request: NextRequest) {

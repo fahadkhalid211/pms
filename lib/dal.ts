@@ -21,6 +21,21 @@ import {
   getInvoiceFolio,
 } from "@/lib/billing";
 
+import {
+  enqueueNotification,
+  processNotificationQueue,
+  retryNotification,
+  getDeliveryLogs,
+  getRecipientPreferences,
+  updateGuestPreferences,
+  runPreArrivalReminders,
+  runCheckInReminders,
+  runCheckOutReminders,
+  runPaymentReminders,
+  type EnqueueNotificationInput,
+  type RecipientPreferences,
+} from "@/lib/notifications";
+
 export interface TenantContext {
   organizationId: string;
   propertyId?: string | null;
@@ -1355,6 +1370,76 @@ export const dal = {
           ratePlans: createdRatePlans,
         };
       });
+    },
+  },
+
+  notifications: {
+    async findMany(ctx: TenantContext, filters?: { propertyId?: string; status?: string; channel?: any; type?: string }) {
+      return prisma.notification.findMany({
+        where: {
+          organizationId: ctx.organizationId,
+          ...(filters?.propertyId ? { propertyId: filters.propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
+          ...(filters?.status ? { status: filters.status as any } : {}),
+          ...(filters?.channel ? { channel: filters.channel } : {}),
+          ...(filters?.type ? { type: filters.type } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    },
+
+    async findUnique(ctx: TenantContext, id: string) {
+      const n = await prisma.notification.findFirst({
+        where: { id, organizationId: ctx.organizationId },
+      });
+      if (!n) throw new NotFoundError("Notification not found.");
+      return n;
+    },
+
+    async enqueue(ctx: TenantContext, input: Omit<EnqueueNotificationInput, "organizationId"> & { organizationId?: string }) {
+      if (input.organizationId && input.organizationId !== ctx.organizationId) {
+        throw new CrossTenantViolationError("Cannot enqueue notification for another organization.");
+      }
+      return enqueueNotification(ctx, { ...input, organizationId: ctx.organizationId });
+    },
+
+    async processQueue(ctx?: TenantContext, limit = 10) {
+      return processNotificationQueue(ctx, limit);
+    },
+
+    async retry(ctx: TenantContext, id: string) {
+      return retryNotification(ctx, id);
+    },
+
+    async getDeliveryLogs(ctx: TenantContext, filters?: { notificationId?: string; status?: "sent" | "failed" }) {
+      return getDeliveryLogs(ctx, filters);
+    },
+
+    async getPreferences(ctx: TenantContext, guestId?: string, userId?: string) {
+      return getRecipientPreferences({ guestId, userId, organizationId: ctx.organizationId });
+    },
+
+    async updatePreferences(ctx: TenantContext, guestId: string, updates: Partial<RecipientPreferences>) {
+      return updateGuestPreferences(ctx.organizationId, guestId, updates);
+    },
+
+    async runReminders(ctx: TenantContext, type?: "pre_arrival" | "check_in" | "check_out" | "payment" | "all") {
+      const t = type ?? "all";
+      const results: Record<string, any> = {};
+
+      if (t === "all" || t === "pre_arrival") {
+        results.preArrival = await runPreArrivalReminders(ctx);
+      }
+      if (t === "all" || t === "check_in") {
+        results.checkIn = await runCheckInReminders(ctx);
+      }
+      if (t === "all" || t === "check_out") {
+        results.checkOut = await runCheckOutReminders(ctx);
+      }
+      if (t === "all" || t === "payment") {
+        results.payment = await runPaymentReminders(ctx);
+      }
+
+      return results;
     },
   },
 };
