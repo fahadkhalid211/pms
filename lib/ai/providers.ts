@@ -571,7 +571,44 @@ async function callMockProvider(
         reason: "Requested refund via operations agent",
       },
     });
-  } else if (lastUserMessage.includes("check_availability") || lastUserMessage.includes("availability")) {
+  } else if (
+    lastUserMessage.includes("lookup_verified_booking") ||
+    lastUserMessage.includes("lookup booking") ||
+    lastUserMessage.includes("check booking") ||
+    lastUserMessage.includes("check reservation") ||
+    lastUserMessage.includes("booking reference")
+  ) {
+    const codeMatch =
+      lastUserMessage.match(/\b(BK-[A-Z0-9-]+)\b/i) ||
+      lastUserMessage.match(/(?:booking|reservation)(?:\s+(?:code|ref|reference|#))?\s+([A-Z0-9-]+)/i);
+    const emailMatch = lastUserMessage.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    toolCalls.push({
+      id: `call_${Math.random().toString(36).slice(2, 9)}`,
+      name: "lookup_verified_booking",
+      arguments: {
+        bookingCode: codeMatch ? codeMatch[1] : "BK-UNKNOWN",
+        email: emailMatch ? emailMatch[0] : undefined,
+      },
+    });
+  } else if (
+    lastUserMessage.includes("request_human_handoff") ||
+    lastUserMessage.includes("human handoff") ||
+    lastUserMessage.includes("human manager") ||
+    lastUserMessage.includes("speak to a manager") ||
+    lastUserMessage.includes("speak with a human")
+  ) {
+    toolCalls.push({
+      id: `call_${Math.random().toString(36).slice(2, 9)}`,
+      name: "request_human_handoff",
+      arguments: {
+        reason: "Urgent issue or human representative requested by guest.",
+        guestName: "Guest",
+      },
+    });
+  } else if (
+    lastUserMessage.includes("check_availability") ||
+    /(?:check availability|room availability|rooms available|available rooms)/i.test(lastUserMessage)
+  ) {
     toolCalls.push({
       id: `call_${Math.random().toString(36).slice(2, 9)}`,
       name: "check_availability",
@@ -606,6 +643,24 @@ async function callMockProvider(
         propertyId: "prop-123",
         message: "Severe weather alert: check-in kiosk is moved to lobby B.",
         target: "all_active",
+      },
+    });
+  } else if (lastUserMessage.includes("get_rates") || lastUserMessage.includes("room rates") || lastUserMessage.includes("pricing")) {
+    toolCalls.push({
+      id: `call_${Math.random().toString(36).slice(2, 9)}`,
+      name: "get_rates",
+      arguments: {
+        propertyId: "prop-123",
+      },
+    });
+  } else if (lastUserMessage.includes("create_support_ticket") || lastUserMessage.includes("support ticket")) {
+    toolCalls.push({
+      id: `call_${Math.random().toString(36).slice(2, 9)}`,
+      name: "create_support_ticket",
+      arguments: {
+        subject: "Guest Website Chat Assistance",
+        description: "Inquiry forwarded from chatbot session.",
+        priority: "normal",
       },
     });
   }

@@ -26,8 +26,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
-  // 1. CSRF Origin Verification for state-modifying requests (webhooks authenticate via HMAC signatures)
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !pathname.startsWith("/api/webhooks")) {
+  // 1. CSRF Origin Verification for state-modifying requests (webhooks, public chatbot, and portal endpoints are exempt)
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !pathname.startsWith("/api/webhooks") && !pathname.startsWith("/api/chatbot") && !pathname.startsWith("/api/portal")) {
     const origin = request.headers.get("origin");
     const referer = request.headers.get("referer");
     const host = request.headers.get("host");

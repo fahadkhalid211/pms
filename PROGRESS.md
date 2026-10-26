@@ -131,12 +131,25 @@
 - [x] AI Provider Hub Workspace (`app/(app)/ai/providers/page.tsx`): encrypted provider configuration, AES-256-GCM key storage, masked key hints (`•••• 4821`), default toggles, connection testing, and deletion.
 - [x] Automated WP8 gate test suite (`tests/ai-hub-and-agent.test.ts`): 9 comprehensive unit and integration tests verifying tool permission denial, cross-tenant isolation, sensitive tool approval gating, approval resolution path, rejection resolution path, prompt injection defense, AI disabled switch resilience, universal activity logging integration, and SSRF base URL protection.
 
+### Work Package 9 – Customer Portal & Chatbot (Completed — tag: `wp9-done`)
+- [x] Knowledge Base RAG Engine (`lib/kb.ts`): Document creation, automatic text chunking (`chunkText`), and PostgreSQL Full-Text Search (`searchKnowledgeBase`) using native `to_tsvector` + `plainto_tsquery` + `ts_rank` with multi-tenant scoping and ILIKE fallback.
+- [x] Autonomous Guest Concierge Engine (`lib/chatbot.ts`): Grounding prompt, multi-turn conversation memory, hotel operating hours injection, and real-time tool execution (`check_availability`, `get_rates`, `lookup_verified_booking`, `create_support_ticket`, `request_human_handoff`).
+- [x] Strict Anti-IDOR Identity Verification Gate: Ref alone is strictly DENIED; requires both booking confirmation code AND matching guest email address. Cross-customer data leakage is completely blocked.
+- [x] Public Guest Booking & Operations Engine (`lib/portal.ts`): Public room search with live financial quotes (Decimal 12,2), atomic public booking creation with `RoomNight` records, `verifyAndGetBooking`, `submitOnlineCheckIn`, `submitCancellationRequest`, `sendGuestPortalMessage`, and `getCustomerBookings`.
+- [x] Public & Admin API Routes:
+  - `app/api/kb/route.ts` & `app/api/kb/[id]/route.ts` & `app/api/kb/search/route.ts`: Knowledge base CRUD and FTS search.
+  - `app/api/chatbot/message/route.ts` & `app/api/chatbot/respond/route.ts`: Public and admin chatbot messaging.
+  - `app/api/chatbot/widget.js/route.ts`: Lightweight standalone embeddable widget loader script.
+  - `app/api/portal/search/route.ts`, `app/api/portal/book/route.ts`, `app/api/portal/verify/route.ts`, `app/api/portal/check-in/route.ts`, `app/api/portal/cancel/route.ts`, `app/api/portal/messages/route.ts`, `app/api/portal/bookings/route.ts`: Complete guest portal endpoints.
+- [x] Guest Portal UI (`app/portal/page.tsx`): Hospitable-branded guest portal with 5 interactive tabs (Book a Stay, Find My Booking, Online Check-in, Front Desk Messages, Cancellation Request), zero emojis, HD thin-line Lucide icons.
+- [x] Chatbot & Knowledge Base Admin Console (`app/(app)/ai/chatbot/page.tsx`): Comprehensive management console with KB document manager, chunk inspector, live FTS rank tester, widget embed code snippet generator, and interactive test console with diagnostics.
+- [x] Automated WP9 gate test suite (`tests/customer-portal-and-chatbot.test.ts`): 13 comprehensive tests passing 100% covering FTS retrieval, multi-tenant KB isolation, anti-IDOR verification gate, cross-customer isolation, public quotes, atomic room nights, online check-in, cancellation fees, chatbot grounding, chatbot identity verification, and human handoff escalation.
+
 ## In progress
 
-- WP9 – Customer portal & chatbot.
+- WP10 – Reports, dashboard, integrations, hardening.
 
 ## Pending
 
-- WP9: Customer portal & chatbot.
 - WP10: Reports, dashboard, integrations, hardening.
 - WP11: UX polish, Playwright journeys, production build & delivery.
