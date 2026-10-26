@@ -145,11 +145,57 @@
 - [x] Chatbot & Knowledge Base Admin Console (`app/(app)/ai/chatbot/page.tsx`): Comprehensive management console with KB document manager, chunk inspector, live FTS rank tester, widget embed code snippet generator, and interactive test console with diagnostics.
 - [x] Automated WP9 gate test suite (`tests/customer-portal-and-chatbot.test.ts`): 13 comprehensive tests passing 100% covering FTS retrieval, multi-tenant KB isolation, anti-IDOR verification gate, cross-customer isolation, public quotes, atomic room nights, online check-in, cancellation fees, chatbot grounding, chatbot identity verification, and human handoff escalation.
 
+### Work Package 10 – Reports, Dashboard, Integrations Framework, iCal & Hardening (Completed — tag: `wp10-done`)
+- [x] Executive Analytics & KPI Engine (`lib/reports.ts`): real queries scoped strictly to `organizationId` and optional `propertyId`:
+  - Occupancy Rate: `(roomsSold / roomsAvailable) * 100` with 2 decimal precision.
+  - Average Daily Rate (ADR): `roomRevenue / roomsSold` with zero division guards and `Decimal(12, 2)` arithmetic.
+  - Revenue Per Available Room (RevPAR): `roomRevenue / roomsAvailable`.
+  - Room revenue, total invoiced revenue, paid revenue, and outstanding balance due.
+  - Real-time operational movements: today's arrivals, departures, stayovers, cancellations, and no-shows.
+  - Live room inventory status breakdown (`available`, `occupied`, `dirty`, `maintenance`).
+  - Day-by-day trend time-series analysis for occupancy, ADR, RevPAR, and revenue.
+- [x] RFC 4180 High-Fidelity CSV Export Engine (`lib/reports.ts`, `app/api/reports/export/route.ts`):
+  - Strict compliance with RFC 4180 (header row, CRLF delimiters, escaped quotes and delimiters).
+  - Multi-dataset reporting: Financial Transactions (`financial`), Occupancy Trends (`occupancy`), and Reservation Manifest (`reservations`).
+  - Direct HTTP streaming download with `Content-Disposition: attachment; filename=...`.
+- [x] Executive Dashboard Workspace (`app/(app)/dashboard/page.tsx`):
+  - 4 primary KPI cards with period-over-period trend badges (Occupancy %, ADR, RevPAR, Outstanding Balance).
+  - Secondary operational metric cards (Arrivals, Departures, Cancellations, No-shows).
+  - Today's Arrivals & Departures operational queue with guest details, room numbers, check-in/out badges, and quick links.
+  - Live Room Inventory breakdown card with visual progress bars.
+  - Live activity audit feed showing recent cross-departmental operations.
+- [x] Dedicated Reports & Financial Analytics Workspace (`app/(app)/reports/page.tsx`):
+  - Property selector and dynamic date range presets (Last 7 Days, Last 30 Days, Last 90 Days, This Month, Year to Date).
+  - Summary KPI cards with formatted currency and percentages.
+  - One-click CSV export bar for Financial, Occupancy, and Reservation reports.
+  - Detailed daily performance breakdown table.
+- [x] Integrations & Channel Manager Framework (`lib/integrations/index.ts`, `app/api/integrations/route.ts`):
+  - Multi-tenant integration registry with connection state tracking (`connected`, `error`, `disconnected`, `pending`).
+  - AES-256-GCM symmetric credential encryption (`encryptSecret`, `decryptSecret`, `maskSecret`) with authenticated tag verification; raw secrets never stored or exposed in plaintext.
+  - Supported channels catalog (Stripe, Airbnb, Booking.com, Vrbo, Expedia, Google Vacation Rentals) with clear "not connected" stub badges.
+  - Sync execution logging (`createSyncLog`) tracking sync direction, entity counts, status, and duration.
+- [x] RFC 5545 iCalendar Subscription Engine (`lib/integrations/index.ts`, `app/api/integrations/ical/[propertyId]/route.ts`):
+  - Generates valid `text/calendar` iCal feeds (`BEGIN:VCALENDAR`, `VERSION:2.0`, `PRODID:-//Lumina PMS//EN`).
+  - Emits `VEVENT` blocks for confirmed and checked-in reservations with UID, DTSTAMP, DTSTART, DTEND, SUMMARY, and STATUS.
+  - Robust RFC 5545 iCal parser (`parseIcalFeed`) extracting external calendar events.
+  - CSRF origin bypass whitelisted in `middleware.ts` for external calendar subscribers.
+- [x] Webhook Ingestion & Deduplication Gate (`lib/integrations/index.ts`, `app/api/integrations/webhooks/[provider]/route.ts`):
+  - HMAC SHA256 cryptographic signature verification (`verifyWebhookSignature`).
+  - Idempotent deduplication by `externalId` backed by database unique constraint `@@unique([organizationId, externalId])`. Duplicate events are recorded as `ignored` with diagnostic errors and zero side-effects.
+- [x] Enterprise Data Retention & GDPR Privacy Hardening:
+  - Automated retention purge job (`lib/retention.ts`, `app/api/retention/cleanup/route.ts`) purging expired audit logs, webhook events, and notifications past retention thresholds.
+  - GDPR Article 15 Data Portability export (`app/api/guests/[id]/export/route.ts`) returning structured JSON archive of all guest profile, reservation, invoice, payment, and message records.
+  - GDPR Article 17 Right to Erasure / Anonymization (`app/api/guests/[id]/anonymize/route.ts`) safely pseudonymizing PII while preserving financial audit compliance.
+- [x] Security Headers & Infrastructure Hardening (`next.config.mjs`):
+  - Enforced `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`.
+- [x] Enterprise Disaster Recovery Runbook (`docs/BACKUP_AND_RECOVERY.md`):
+  - Complete documentation covering RTO (under 30 min) / RPO (under 5 min), automated daily `pg_dump` with AES-256 encryption, continuous WAL archiving for Point-In-Time Recovery (PITR), step-by-step restoration drill runbooks, and retention tiers.
+- [x] Automated WP10 gate test suite (`tests/reports-integrations-hardening.test.ts`): 9 comprehensive unit and integration tests passing 100% verifying executive KPIs (ADR, RevPAR, Occupancy), multi-tenant report isolation, RFC 4180 CSV export formatting, AES-256-GCM credential encryption, webhook deduplication by externalId, RFC 5545 iCal generation and parsing, HMAC webhook signature verification, data retention cleanup, and GDPR data export & anonymization.
+
 ## In progress
 
-- WP10 – Reports, dashboard, integrations, hardening.
+- WP11 – UX polish, Playwright journeys, production build & delivery.
 
 ## Pending
 
-- WP10: Reports, dashboard, integrations, hardening.
 - WP11: UX polish, Playwright journeys, production build & delivery.
