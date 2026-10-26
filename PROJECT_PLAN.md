@@ -1,115 +1,74 @@
-# Lumina PMS — Project Plan
+# Lumina PMS — Production Project Plan & Architectural Specification
 
-**Version:** 1.0 (MVP planning baseline)
-**Status:** Planning / in progress
+**Version:** 2.0 (Production Verified Baseline)  
+**Status:** All 11 Work Packages Completed & Production Verified (`wp11-done`)
+
+---
 
 ## 1. Executive Summary
 
-Lumina PMS is an original, AI-powered hospitality property management platform for hotels, guesthouses, resorts, serviced apartments, vacation rentals, and property management companies. The product unifies property management, reservations, room availability, guest management, staff operations, billing, customer communication, analytics, an autonomous operations AI agent, and a customer-facing AI chatbot.
+Lumina PMS is an original, production-grade, AI-powered hospitality property management system designed for independent boutique hotels, resorts, guesthouses, serviced apartments, and vacation rental management companies.
 
-Unlike coarse enterprise PMS suites, Lumina is designed around a small, learnable operational core: a front desk that fits on one screen, reservations that cannot double-book, invoices that reconcile to the penny, and an AI layer that acts through authorized, auditable tools rather than talking to the database directly.
+Lumina combines an operational core — multi-tenancy, property hierarchies, atomic room night inventory with strict double-booking prevention, rate plans with seasonal modifiers, decimal financial arithmetic, front desk workspaces, housekeeping turnover, and maintenance work orders — with an autonomous AI operations agent, human-in-the-loop supervisor approvals, anti-IDOR customer portal, PostgreSQL full-text search knowledge base, and an integrations framework with RFC 5545 iCalendar synchronization and idempotent webhook processing.
 
-## 2. Architecture Overview
+---
+
+## 2. Verified Architectural Overview
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│                        Browser (Responsive)                 │
-│  Admin / Staff / Customer portals + Public booking + Chat   │
-└───────────────────────────┬────────────────────────────────┘
-                            │ HTTPS / JSON
-┌───────────────────────────▼────────────────────────────────┐
-│              Next.js 15 (App Router) API layer              │
-│   Route Handlers · Server Actions · Zod validation          │
-│   Server-side RBAC enforcement · Tenant scoping            │
-└───────┬──────────────────┬────────────────────┬───────────┘
-        │                  │                    │
-        ▼                  ▼                    ▼
-┌───────────────┐  ┌──────────────┐  ┌────────────────────┐
-│  PostgreSQL   │  │   Redis/     │  │  AI Provider       │
-│  (Prisma)     │  │   SQS-like   │  │  Adapters:         │
-│  + FTS/RAG    │  │   queue*     │  │  OpenAI/Gemini/    │
-│               │  │              │  │  Groq/Anthropic   │
-└───────────────┘  └──────┬───────┘  └──────────┬─────────┘
-                          │                     │
-                          ▼                     ▼
-                   Background job runner   AI tool executor
-                   (notifications,        (permission-checked,
-                    emails, reports)       approval-aware)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                 Browser Layer (Next.js 15 App Router)                   │
+│   Operations Hub · Front Desk · Tape Chart · Guest Portal · AI Console │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │ HTTPS / JSON / Cookies
+┌────────────────────────────────────▼────────────────────────────────────┐
+│                    Next.js 15 Authorized Service Layer                  │
+│    Route Handlers · Server Actions · Zod Validation · Rate Limiter      │
+│    Tenant Isolation (`organizationId`) · Strict RBAC Permission Matrix │
+└───────┬────────────────────┬───────────────────┬────────────────────────┘
+        │                    │                   │
+        ▼                    ▼                   ▼
+┌───────────────┐   ┌─────────────────┐   ┌───────────────────────────────┐
+│  PostgreSQL   │   │  ACID Delivery  │   │  Provider-Agnostic AI Hub     │
+│  (Prisma ORM) │   │  Queue Engine   │   │  (OpenAI, Gemini, Anthropic,  │
+│  + Native FTS │   │  (Transactional │   │   Groq & Mock Adapters)       │
+│  + RoomNights │   │   Outbox)       │   │  + Human Supervisory Gate     │
+└───────────────┘   └────────┬────────┘   └──────────────┬────────────────┘
+                             │                           │
+                             ▼                           ▼
+                      Worker Runner              Tool Registry
+                   (Branded Templates,         (16 Operations Tools,
+                    Automated Reminders,        Risk Classifications,
+                    Retention Purges)           Supervisor Approvals)
 ```
 
-\* The MVP uses an in-process background job runner (durable outbox table + worker); swap to a managed queue without schema changes.
+---
 
-### Key architectural decisions
+## 3. Work Package Implementation Matrix
 
-1. **Monolith-first**: Next.js App Router route handlers + server actions colocate API and UI. Extract services when load grows.
-2. **Database**: PostgreSQL via Prisma ORM. Money stored as `Decimal` (Prisma `Decimal`), never `Float`. Reservation totals computed in DB transactions.
-3. **Auth**: Auth.js-style credentials/JWT strategy implemented with `jose` + `bcryptjs`; httpOnly, secure session cookies; DB-backed session records where revocation is required.
-4. **Validation**: `zod` schemas at every boundary; server is authoritative, client mirrors for ergonomics.
-5. **AI**: Provider-agnostic adapter interface with per-provider request adapters; encrypted credential storage (AES-256-GCM); tool registry with permission checks; approval workflow for sensitive actions.
-6. **RAG**: PostgreSQL full-text search (pgvector-ready schema) over knowledge base documents with ingestion status tracking.
-7. **Background**: notification/email dispatch via background worker with retries and dead-letter handling.
+| Work Package | Focus Area | Verification Gate | Status |
+| --- | --- | --- | --- |
+| **WP0** | Foundations, Environment & Docker Setup | `tests/auth-login.test.ts` (2 tests) | Completed (`wp0-done`) |
+| **WP1** | Schema v2, RoomNight Uniqueness & Constraints | `tests/schema-v2.test.ts` (4 tests) | Completed (`wp1-done`) |
+| **WP2** | Auth, Session Resolution, RBAC & Multi-Tenancy | `tests/auth-rbac-tenancy.test.ts` (6 tests) | Completed (`wp2-done`) |
+| **WP3** | Properties, Rooms, Rate Plans & Decimal Pricing | `tests/pricing-and-properties.test.ts` (12 tests) | Completed (`wp3-done`) |
+| **WP4** | Reservations Engine, Concurrency & State Machine | `tests/reservations.test.ts` (9 tests) | Completed (`wp4-done`) |
+| **WP5** | Front Desk, Housekeeping & Maintenance Workspaces | `tests/frontdesk-housekeeping-maintenance.test.ts` (7 tests) | Completed (`wp5-done`) |
+| **WP6** | Server-Side Billing, Invoices & Reconciled Payments | `tests/billing-and-payments.test.ts` (6 tests) | Completed (`wp6-done`) |
+| **WP7** | Transactional Notifications Queue & Branded Email | `tests/notifications.test.ts` (6 tests) | Completed (`wp7-done`) |
+| **WP8** | AI Operations Hub, Tool Dispatch & Approvals | `tests/ai-hub-and-agent.test.ts` (9 tests) | Completed (`wp8-done`) |
+| **WP9** | Customer Portal, Anti-IDOR Verification & Chatbot | `tests/customer-portal-and-chatbot.test.ts` (13 tests) | Completed (`wp9-done`) |
+| **WP10** | Reports, ADR/RevPAR Analytics, iCal & Hardening | `tests/reports-integrations-hardening.test.ts` (9 tests) | Completed (`wp10-done`) |
+| **WP11** | UX Polish, Omnisearch, Playwright Journeys & Docker | `e2e/journeys.spec.ts` (3 E2E journeys) | Completed (`wp11-done`) |
 
-## 3. Feature Map
+---
 
-### Implemented scope (MVP)
+## 4. Key Architectural Guarantees
 
-| Area | Status |
-| --- | --- |
-| Landing, auth (register/login/recover), org setup | In progress |
-| RBAC: admin / staff / customer, permissions | In progress |
-| Multi-property, room types, rooms, statuses | Planned |
-| Availability + double-booking protection | Planned |
-| Reservations CRUD, statuses, rates, invoices | Planned |
-| Front desk, housekeeping, maintenance | Planned |
-| Payments, refunds, invoicing | Planned |
-| Dashboard analytics (ADR/RevPAR/occupancy) | Planned |
-| AI provider hub + agent + approvals | Planned |
-| Chatbot + knowledge base + RAG | Planned |
-| Integrations framework | Planned |
-| Reporting, audit logs, exports | Planned |
-| Tests (Vitest + Playwright) | Planned |
-
-### Planned (post-MVP) scope
-
-- OTA channel integrations (Booking.com/Expedia/Airbnb) via approved APIs.
-- Calendar sync (Google/Outlook), WhatsApp Business, accounting software.
-- Vector search (pgvector), advanced RAG.
-- Mobile app shell (responsive PWA).
-
-## 4. Database Design (core entities)
-
-- `User`, `Organization`, `OrganizationMembership`, `Role`, `Permission`, `UserPermissionOverride`
-- `Property`, `PropertyMembership`, `RoomType`, `Room`, `Amenity`, `RoomAmenity`
-- `RatePlan`, `SeasonalRate`, `AvailabilityOverride` (or derived from reservations)
-- `Guest`, `GuestProfile`, `GuestRequest`
-- `Reservation`, `ReservationRoom`, `ReservationGuest`
-- `Invoice`, `InvoiceLineItem`, `Payment`, `Refund`, `Transaction`
-- `HousekeepingTask`, `MaintenanceTicket`, `TaskComment`
-- `Notification`, `SupportConversation`, `SupportMessage`, `ChatMessage`
-- `KnowledgeBaseDocument`, `KnowledgeBaseChunk`, `AiProviderConfig`, `AiProviderCredential`
-- `AiAgentExecution`, `AiToolExecution`, `ApprovalRequest`, `AgentAction`
-- `Integration`, `IntegrationConnection`, `WebhookEvent`
-- `AuditLog`, `SecurityEvent`
-
-All queries carry `organizationId` scoping; cross-tenant access is prevented at the service layer.
-
-## 5. Milestones
-
-- **M1 — Foundations:** scaffold, DB schema, auth, org/tenant scoping, RBAC, audit.
-- **M2 — Property graph:** properties, room types, rooms, rates, availability, reservations, guests.
-- **M3 — Operations:** front desk, housekeeping, maintenance, invoices/payments.
-- **M4 — Intelligence:** AI provider hub, agent tools, approvals, activity log.
-- **M5 — Conversational AI:** chatbot widget, KB/RAG, handoff, live tools.
-- **M6 — Insight & integration:** reports, integrations framework, hardening, tests.
-
-## 6. Security & Compliance Notes
-
-- Passwords hashed with bcrypt (cost ≥ 12); JWT sessions with rotation.
-- Rate limiting on auth and AI endpoints; CSRF where cookies are used for auth.
-- AES-256-GCM encrypted AI provider credentials; keys never logged or returned.
-- Least-privilege permission checks in server services; AI tools re-check permissions.
-- Audit logging on privileged mutations; data export/delete workflows.
-
-## 7. Definition of Done (operational MVP)
-
-See top-level `README.md` — functional checklist including end-to-end reservation flow, check-in/out, invoicing, AI agent with approvals, chatbot, tests.
+1. **Zero Double-Bookings:** Physical inventory is locked by atomic `RoomNight` records bound by database unique constraint `@@unique([roomId, date])`.
+2. **Strict Financial Precision:** All currency amounts (rates, taxes, discounts, totals, balances) utilize `Decimal(12, 2)` arithmetic; zero floating-point math for money.
+3. **Multi-Tenant Isolation:** Every data entity and query enforces explicit `organizationId` scoping, verified via automated cross-tenant security tests.
+4. **Anti-IDOR Public Customer Portal:** Guest bookings cannot be accessed with confirmation references alone; requires verified email matching.
+5. **AI Human-in-the-Loop Governance:** High-risk actions (`cancel_reservation`, `refund_payment`, `create_reservation`, `bulk_send_messages`) pause execution for supervisor approval.
+6. **Universal Activity Logging:** Captures both frontend UI events and backend operations with user context, timestamps, PII redaction, and human-readable summaries.
+7. **Production Standalone Packaging:** Next.js `output: "standalone"` multi-stage Docker container with non-root security execution.

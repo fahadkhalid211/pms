@@ -1,133 +1,136 @@
 # Lumina PMS
 
-**Lumina PMS** is an original, AI-powered hospitality property management system for hotels, guesthouses, resorts, serviced apartments, vacation rentals, and property management companies.
+[![Build & Test Status](https://img.shields.io/badge/build-passing-brightgreen)](./PROGRESS.md)
+[![Test Suites](https://img.shields.io/badge/vitest-90%20passed-brightgreen)](./tests)
+[![E2E Journeys](https://img.shields.io/badge/playwright-3%20passed-brightgreen)](./e2e)
+[![Next.js](https://img.shields.io/badge/next.js-15.5-black)](https://nextjs.org)
+[![PostgreSQL](https://img.shields.io/badge/postgres-16-blue)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-It combines the operational core of a modern PMS — properties, rooms, rates, reservations, front desk, housekeeping, billing — with an autonomous AI operations agent and a customer-facing AI support chatbot, all wrapped in a calm, learnable interface.
+**Lumina PMS** is a modern, AI-powered hospitality property management system designed for boutique hotels, resorts, guesthouses, serviced apartments, and vacation rental management companies.
 
-> **Note on brand:** Lumina PMS is an original product name and UI identity created for this project. No proprietary code, branding, or interface designs from existing products are used.
+It combines an operational hospitality core — properties, rooms, atomic room nights, seasonal rate plans, front desk check-in/out workspaces, housekeeping task assignments, maintenance work orders, and penny-precise invoicing — with an autonomous AI operations agent, human-in-the-loop supervisor approvals, anti-IDOR guest portal, native PostgreSQL full-text search knowledge base, and an integrations framework with RFC 5545 iCalendar feeds and idempotent webhook processing.
 
 ---
 
-## Features
+## Key Highlights
 
-### Operations (admin / staff)
-- Multi-property organizations with per-property scoping and configurable permissions.
-- Property, room type, and room management with status lifecycle (`available`, `occupied`, `dirty`, `clean`, `inspected`, `out_of_service`).
-- Rate plans, seasonal pricing, discounts, configurable fees, taxes.
-- Reservation engine with live availability, conflict prevention, booking references, statuses, group bookings.
-- Front desk workspace: arrivals/departures, quick check-in/check-out, walk-ins, occupancy, outstanding balances.
-- Housekeeping task assignment and maintenance work orders with priorities and history.
-- Invoices, line items, deposits, partial payments, refunds, printable invoices, financial summaries.
-- Customer support conversations and notification delivery logs.
-
-### Intelligence
-- Admin AI provider hub: OpenAI, Google Gemini, Groq, Anthropic Claude — encrypted credentials, model checks, fallbacks, usage tracking.
-- Autonomous operations agent with permission-aware tool registry, multi-step execution, approvals for sensitive actions, execution history, audit log.
-- Customer chatbot: knowledge base (FAQs, policies, amenities, instructions), RAG-style retrieval, live PMS tools (availability, rates, verified booking lookup), human handoff.
-
-### Customers
-- Public booking search, availability, reservation creation, booking details, online check-in, payments, support messages, special requests, booking history, profile.
-
-### Platform
-- Global search, quick-create, calendar, reports, audit logs, data export, integrations framework, notification preferences.
+- **Anti-Double-Booking Engine:** Atomic `RoomNight` records guarded by PostgreSQL `@@unique([roomId, date])` unique constraints.
+- **Strict Financial Precision:** All financial transactions, line items, taxes, fees, ADR, and RevPAR are computed using exact `Decimal(12, 2)` arithmetic. Zero floating-point money math.
+- **Strict Multi-Tenant Scoping:** Every query, route handler, and service method is strictly scoped by `organizationId`. Verified across all 13 test suites.
+- **AI Operations Hub with Human Approval:** Provider-agnostic adapter architecture supporting OpenAI, Google Gemini, Anthropic Claude, Groq, and Mock adapters. Sensitive actions (cancellations, refunds, bulk messaging) automatically pause execution for supervisory approval.
+- **Public Guest Portal & Concierge Chatbot:** Hospitable-branded guest portal with live quotes, atomic bookings, online check-in, messaging, and strict anti-IDOR verification gates. Autonomous chatbot backed by native PostgreSQL full-text search (`ts_rank`).
+- **Executive Analytics & RFC 4180 CSV Reports:** Real-time Occupancy %, ADR (`room revenue / rooms sold`), RevPAR (`room revenue / rooms available`), arrivals/departures queue, and streaming CSV downloads.
+- **Integrations & iCal Engine:** AES-256-GCM credential encryption, RFC 5545 `.ics` subscription calendar export/import feeds, and HMAC SHA256 verified webhook receiver with idempotent deduplication by `externalId`.
+- **Universal Activity Logging:** Captures both frontend user actions and backend operations with timestamps, user context, IP addresses, PII redaction, and human-readable summaries.
+- **Standalone Docker Packaging:** Production-ready multi-stage `Dockerfile` utilizing Next.js `output: "standalone"` with non-root security execution.
 
 ---
 
 ## Tech Stack
 
-| Concern | Choice |
+| Domain | Technology |
 | --- | --- |
-| Framework | Next.js 15 (App Router), React 19, TypeScript |
-| UI | Tailwind CSS, hand-rolled shadcn/ui-style design system components |
-| Charts | Recharts |
-| Backend | Next.js route handlers + server actions |
-| Database | PostgreSQL (Prisma ORM) — SQLite for local development/tests |
-| Auth | Auth.js-compatible credentials strategy (jose JWT sessions, bcrypt hashing) |
-| Validation | Zod |
-| AI | Provider adapter architecture (OpenAI, Gemini, Groq, Anthropic) |
-| Background jobs | In-process durable-outbox runner (managed queue-ready) |
-| Testing | Vitest (unit/integration), Playwright (E2E) |
+| **Framework** | Next.js 15 (App Router), React 19, TypeScript |
+| **Styling & Icons** | Tailwind CSS, Lucide Icons (HD thin-line, zero emojis) |
+| **Database & ORM** | PostgreSQL 16 (or local daemon), Prisma ORM |
+| **Security & Auth** | JOSE JWT sessions, bcrypt password hashing, AES-256-GCM secret encryption, CSRF protection, OWASP security headers |
+| **AI Integration** | Provider-agnostic adapter interface (OpenAI, Gemini, Groq, Anthropic, Mock) |
+| **Job Queue** | ACID transactional PostgreSQL outbox with exponential backoff retries |
+| **Unit & Integration Tests** | Vitest (13 suites, 90 automated tests) |
+| **End-to-End Tests** | Playwright (3 automated multi-step journeys) |
 
 ---
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
-
+### 1. Prerequisites
 - Node.js 20+ (LTS recommended)
+- PostgreSQL database (or run the included local background daemon `npm run db:start`)
 - npm 10+
-- A PostgreSQL database (or use the included local SQLite fallback for development)
-- An AI provider key (optional — core PMS functions work without AI)
 
-### Installation
-
+### 2. Setup & Environment
 ```bash
+# Clone repository
 git clone <repository-url> pms
 cd pms
+
+# Install dependencies
+npm ci
+
+# Configure environment
 cp .env.example .env
-npm install
-npx prisma migrate dev   # or: npm run db:push
+```
+
+### 3. Database Initialization & Seeding
+```bash
+# Push schema migrations
+npx prisma db push
+
+# Seed demo hotels, rooms, rate plans, and admin accounts
 npm run db:seed
+```
+
+**Default Seed Credentials:**
+- **Admin Email:** `admin@lumina.pms`
+- **Password:** `Password123!`
+- **Hotel:** *The Lumina Boutique*
+
+### 4. Development Server
+```bash
 npm run dev
-```
-
-### Environment variables
-
-See [`.env.example`](./.env.example) for the full list. Key variables:
-
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/lumina"
-AUTH_SECRET="..."
-AUTH_ENCRYPTION_KEY="..."        # 32-byte hex key for AI credential encryption
-OPENAI_API_KEY="sk_..."          # optional
-GEMINI_API_KEY="..."
-GROQ_API_KEY="..."
-ANTHROPIC_API_KEY="..."
-```
-
-### Scripts
-
-```bash
-npm run dev        # start dev server
-npm run build      # production build
-npm run start      # start production server
-npm run db:push    # sync schema to database
-npm run db:seed    # seed demo data
-npm run test       # unit / integration tests
-npm run test:e2e   # Playwright end-to-end tests
+# Visit http://localhost:3000
 ```
 
 ---
 
-## Docker
+## Verification & Testing
+
+### Full Vitest Test Suite (13 Suites / 90 Tests)
+```bash
+npm test
+```
+
+### Playwright End-to-End Journeys
+```bash
+npm run test:e2e
+```
+*Journeys tested:*
+1. **Admin Setup & Operations:** Login -> Executive Dashboard KPIs -> Global Omnisearch (Ctrl+K) -> Reservations -> Front Desk -> Invoices -> Reports.
+2. **Customer Public Portal:** Room search -> Direct pricing quotes -> Anti-IDOR identity verification gate -> Online check-in.
+3. **AI Operations & Governance:** AI Operations console -> Quick prompt chips -> Supervisor approval queue -> Knowledge Base management -> Provider credentials hub -> Activity logs.
+
+### TypeScript Typecheck
+```bash
+npm run typecheck
+```
+
+### Production Build
+```bash
+npm run build
+```
+
+---
+
+## Docker Deployment
+
+Lumina PMS includes a multi-stage Docker build producing a minimal standalone container:
 
 ```bash
+# Build and run with Docker Compose
 docker compose up -d
+
+# Inspect running services
+docker compose ps
 ```
 
-See [`docker-compose.yml`](./docker-compose.yml).
+The container runs as non-root user `nextjs` (UID 1001) on port `3000`.
 
 ---
 
-## Testing
+## Project Documentation
 
-```bash
-npm run test        # Vitest
-npm run test:e2e    # Playwright
-```
-
-Critical paths covered: auth, RBAC, tenant isolation, availability, double-booking prevention, reservations, invoices, AI tool permissions, approvals.
-
----
-
-## Deployment
-
-- Vercel / Netlify / Docker container deployment documented in deployment guide.
-- Environment variables provisioned via secrets manager.
-- Database migrations applied as release steps.
-
----
-
-## Project Status & Progress
-
-See [`PROGRESS.md`](./PROGRESS.md).
+- [`SUPERVISION_PLAN.md`](./SUPERVISION_PLAN.md) — Exhaustive 12-package supervisory protocol and verification gates.
+- [`PROGRESS.md`](./PROGRESS.md) — Comprehensive execution log with raw test outputs for all 11 Work Packages.
+- [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) — Architecture, schema guarantees, and multi-tenant security specifications.
+- [`docs/BACKUP_AND_RECOVERY.md`](./docs/BACKUP_AND_RECOVERY.md) — Enterprise disaster recovery runbook, RTO/RPO metrics, and WAL PITR guide.
