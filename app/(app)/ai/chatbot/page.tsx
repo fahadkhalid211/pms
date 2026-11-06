@@ -317,7 +317,7 @@ export default function AiChatbotAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalChunks}</div>
-            <p className="text-xs text-muted-foreground">Postgres FTS vectors</p>
+            <p className="text-xs text-muted-foreground">MySQL FULLTEXT index</p>
           </CardContent>
         </Card>
         <Card className="border border-border/80">
@@ -350,7 +350,7 @@ export default function AiChatbotAdminPage() {
               <div>
                 <CardTitle className="text-lg">Hotel Knowledge Base</CardTitle>
                 <CardDescription>
-                  Grounded articles indexed with PostgreSQL full-text search (`tsvector` & `ts_rank`).
+                  Grounded articles indexed with MySQL FULLTEXT search (`MATCH ... AGAINST`).
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -432,7 +432,7 @@ export default function AiChatbotAdminPage() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Search className="h-4 w-4 text-primary" />
-                Test Postgres Full-Text Search Retrieval
+                Test Full-Text Search Retrieval
               </CardTitle>
               <CardDescription>
                 Simulate how the chatbot retrieves chunks using `ts_rank` against natural language queries.

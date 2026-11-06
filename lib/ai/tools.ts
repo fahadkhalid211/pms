@@ -160,9 +160,9 @@ export const toolsRegistry: AiTool<any>[] = [
       }
       if (args.query) {
         where.OR = [
-          { code: { contains: args.query, mode: "insensitive" } },
-          { guest: { firstName: { contains: args.query, mode: "insensitive" } } },
-          { guest: { lastName: { contains: args.query, mode: "insensitive" } } },
+          { code: { contains: args.query } },
+          { guest: { firstName: { contains: args.query } } },
+          { guest: { lastName: { contains: args.query } } },
         ];
       }
       const reservations = await prisma.reservation.findMany({
@@ -304,9 +304,9 @@ export const toolsRegistry: AiTool<any>[] = [
       if (args.guestId) where.id = args.guestId;
       if (args.query) {
         where.OR = [
-          { firstName: { contains: args.query, mode: "insensitive" } },
-          { lastName: { contains: args.query, mode: "insensitive" } },
-          { email: { contains: args.query, mode: "insensitive" } },
+          { firstName: { contains: args.query } },
+          { lastName: { contains: args.query } },
+          { email: { contains: args.query } },
         ];
       }
 

@@ -1,15 +1,24 @@
 services:
   db:
-    image: postgres:16
+    image: mysql:8.4
     restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: lumina_pms
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-lumina_root_dev}
+      MYSQL_DATABASE: lumina_pms
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
+
+  migrate:
+    build:
+      context: .
+      target: migrator
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-lumina_root_dev}@db:3306/lumina_pms
+    depends_on:
+      - db
 
   app:
     build: .
@@ -17,11 +26,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/lumina_pms?schema=public
-      AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production}
-      AUTH_ENCRYPTION_KEY: ${AUTH_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-lumina_root_dev}@db:3306/lumina_pms
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET (openssl rand -base64 48)}
+      AUTH_ENCRYPTION_KEY: ${AUTH_ENCRYPTION_KEY:?set AUTH_ENCRYPTION_KEY (openssl rand -hex 32)}
+      INTEGRATION_ENCRYPTION_KEY: ${INTEGRATION_ENCRYPTION_KEY:?set INTEGRATION_ENCRYPTION_KEY (openssl rand -hex 32)}
     depends_on:
-      - db
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
-  pgdata:
+  mysqldata:

@@ -141,15 +141,15 @@ describe("WP1 Gate: Schema v2, Relations, and Constraints", () => {
     await prisma.idempotencyKey.delete({ where: { id: idemp.id } });
   });
 
-  it("verifies PostgreSQL Full-Text Search tsvector indexes on KnowledgeBaseDocument", async () => {
-    // Search using PostgreSQL FTS syntax
-    const results = await prisma.$queryRaw<Array<{ id: string; title: string }>>`
-      SELECT id, title
-      FROM "KnowledgeBaseDocument"
-      WHERE to_tsvector('english', coalesce("title", '') || ' ' || coalesce("content", '')) @@ to_tsquery('english', 'check-in')
+  it("verifies MySQL FULLTEXT indexes exist on knowledge base tables", async () => {
+    const rows = await prisma.$queryRaw<Array<{ TABLE_NAME: string; INDEX_TYPE: string }>>`
+      SELECT DISTINCT TABLE_NAME, INDEX_TYPE
+      FROM information_schema.STATISTICS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND INDEX_TYPE = 'FULLTEXT'
+        AND TABLE_NAME IN ('KnowledgeBaseDocument', 'KnowledgeBaseChunk')
     `;
-    expect(Array.isArray(results)).toBe(true);
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0].title).toContain("Check-in");
+    const tables = rows.map((r) => r.TABLE_NAME.toLowerCase()).sort();
+    expect(tables).toEqual(["knowledgebasechunk", "knowledgebasedocument"]);
   });
 });

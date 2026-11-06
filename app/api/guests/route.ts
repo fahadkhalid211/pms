@@ -10,9 +10,9 @@ export async function GET(request: Request) {
     const where: any = { organizationId: user.organizationId ?? "" };
     if (query) {
       where.OR = [
-        { firstName: { contains: query, mode: "insensitive" } },
-        { lastName: { contains: query, mode: "insensitive" } },
-        { email: { contains: query, mode: "insensitive" } },
+        { firstName: { contains: query } },
+        { lastName: { contains: query } },
+        { email: { contains: query } },
       ];
     }
     const guests = await prisma.guest.findMany({

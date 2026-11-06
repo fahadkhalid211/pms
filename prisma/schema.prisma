@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -236,7 +236,7 @@ model User {
   roleKey              String?
   organizationId       String?
   status               UserStatus    @default(active)
-  propertyIds          Json          @default("[]")
+  propertyIds          Json?
   passwordResetToken   String?
   passwordResetExpires DateTime?
   createdAt            DateTime      @default(now())
@@ -312,7 +312,7 @@ model OrganizationMembership {
   roleId         String?
   roleKey        String?
   status         MembershipStatus @default(active)
-  propertyIds    Json             @default("[]")
+  propertyIds    Json?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
@@ -330,8 +330,8 @@ model Role {
   organizationId String?
   key            String
   name           String
-  description    String?
-  permissions    Json                     @default("[]")
+  description    String? @db.Text
+  permissions    Json?
   isSystem       Boolean                  @default(false)
   createdAt      DateTime                 @default(now())
   updatedAt      DateTime                 @updatedAt
@@ -349,7 +349,7 @@ model Permission {
   id          String           @id @default(cuid())
   key         String           @unique
   name        String
-  description String?
+  description String? @db.Text
   module      String
   createdAt   DateTime         @default(now())
 
@@ -396,7 +396,7 @@ model Property {
   checkOutTime         Int                  @default(11)
   taxRate              Decimal              @default(0) @db.Decimal(12, 2)
   cleaningFee          Decimal              @default(0) @db.Decimal(12, 2)
-  description          String?
+  description          String? @db.Text
   status               PropertyStatus       @default(active)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
@@ -624,7 +624,7 @@ model Guest {
   lastName         String
   email            String?
   phone            String?
-  notes            String?
+  notes            String? @db.Text
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -646,7 +646,7 @@ model GuestProfile {
   loyaltyTier       String?      @default("standard")
   totalStays        Int          @default(0)
   totalSpent        Decimal      @default(0) @db.Decimal(12, 2)
-  preferences       Json?        @default("{}")
+  preferences       Json?        
   idDocumentType    String?
   idDocumentNumber  String?
   idVerified        Boolean      @default(false)
@@ -668,7 +668,7 @@ model GuestRequest {
   propertyId     String?
   reservationId  String?
   type           String       @default("special_request")
-  content        String
+  content        String @db.Text
   status         String       @default("pending")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -699,13 +699,13 @@ model Reservation {
   children        Int               @default(0)
   guestId         String?
   source          ReservationSource @default(direct)
-  notes           String?
+  notes           String? @db.Text
   totalAmount     Decimal           @default(0) @db.Decimal(12, 2)
   currency        String            @default("USD")
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   cancelledAt     DateTime?
-  cancelledReason String?
+  cancelledReason String? @db.Text
 
   organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
@@ -760,7 +760,7 @@ model Invoice {
   tax            Decimal           @default(0) @db.Decimal(12, 2)
   total          Decimal           @default(0) @db.Decimal(12, 2)
   currency       String            @default("USD")
-  notes          String?
+  notes          String? @db.Text
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -780,7 +780,7 @@ model InvoiceLineItem {
   id             String       @id @default(cuid())
   organizationId String
   invoiceId      String
-  description    String
+  description    String @db.Text
   quantity       Int          @default(1)
   unitAmount     Decimal      @default(0) @db.Decimal(12, 2)
   total          Decimal      @default(0) @db.Decimal(12, 2)
@@ -806,7 +806,7 @@ model Payment {
   method         String?
   provider       String?
   providerRef    String?
-  failureReason  String?
+  failureReason  String? @db.Text
   capturedAt     DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -829,7 +829,7 @@ model Refund {
   amount         Decimal      @default(0) @db.Decimal(12, 2)
   currency       String       @default("USD")
   status         RefundStatus @default(pending)
-  reason         String?
+  reason         String? @db.Text
   providerRef    String?
   approvedBy     String?
   createdAt      DateTime     @default(now())
@@ -855,7 +855,7 @@ model HousekeepingTask {
   status         HousekeepingStatus @default(pending)
   priority       TaskPriority       @default(normal)
   title          String?
-  notes          String?
+  notes          String? @db.Text
   assigneeId     String?
   dueAt          DateTime?
   completedAt    DateTime?
@@ -878,7 +878,7 @@ model TaskComment {
   organizationId String
   taskId         String
   authorId       String?
-  body           String
+  body           String @db.Text
   createdAt      DateTime         @default(now())
 
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -895,7 +895,7 @@ model MaintenanceTicket {
   roomId         String?
   status         MaintenanceStatus   @default(open)
   priority       MaintenancePriority @default(normal)
-  description    String
+  description    String @db.Text
   createdBy      String?
   assigneeId     String?
   resolvedAt     DateTime?
@@ -930,7 +930,7 @@ model Notification {
   relatedType    String?
   relatedId      String?
   sentAt         DateTime?
-  error          String?
+  error          String? @db.Text
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
@@ -970,7 +970,7 @@ model SupportMessage {
   conversationId String
   senderType     SenderType          @default(customer)
   senderId       String?
-  body           String
+  body           String @db.Text
   createdAt      DateTime            @default(now())
 
   organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -1002,7 +1002,7 @@ model ChatbotMessage {
   organizationId String
   conversationId String
   role           String              @default("user")
-  content        String?
+  content        String? @db.Text
   toolCalls      Json?
   toolResults    Json?
   createdAt      DateTime            @default(now())
@@ -1024,7 +1024,7 @@ model KnowledgeBaseDocument {
   propertyId     String?
   type           DocumentType         @default(faq)
   title          String
-  content        String
+  content        String @db.Text
   source         String?
   status         DocumentStatus       @default(active)
   createdAt      DateTime             @default(now())
@@ -1037,6 +1037,7 @@ model KnowledgeBaseDocument {
   @@index([organizationId])
   @@index([propertyId])
   @@index([status])
+  @@fulltext([title, content])
 }
 
 model KnowledgeBaseChunk {
@@ -1044,7 +1045,7 @@ model KnowledgeBaseChunk {
   organizationId String
   documentId     String
   chunkIndex     Int
-  content        String
+  content        String @db.Text
   tokenCount     Int                   @default(0)
   createdAt      DateTime              @default(now())
 
@@ -1054,6 +1055,7 @@ model KnowledgeBaseChunk {
   @@unique([documentId, chunkIndex])
   @@index([organizationId])
   @@index([documentId])
+  @@fulltext([content])
 }
 
 // ---------------------------------------------------------------------------
@@ -1066,7 +1068,7 @@ model AiProviderConfig {
   name             String
   provider         String                 @default("openai")
   model            String
-  baseUrl          String?
+  baseUrl          String? @db.Text
   isEnabled        Boolean                @default(true)
   isDefault        Boolean                @default(false)
   fallbackProvider String?
@@ -1088,7 +1090,7 @@ model AiProviderCredential {
   id               String           @id @default(cuid())
   organizationId   String
   providerConfigId String
-  encryptedKey     String
+  encryptedKey     String @db.Text
   keyHint          String?
   keyVersion       Int              @default(1)
   createdAt        DateTime         @default(now())
@@ -1106,7 +1108,7 @@ model EncryptedCredential {
   organizationId String
   targetType     CredentialTargetType
   targetId       String
-  encryptedData  String
+  encryptedData  String @db.Text
   keyHint        String?
   keyVersion     Int                  @default(1)
   createdAt      DateTime             @default(now())
@@ -1128,9 +1130,9 @@ model AiAgentExecution {
   propertyId     String?
   userId         String?
   status         AiExecutionStatus  @default(queued)
-  requestSummary String
-  finalSummary   String?
-  error          String?
+  requestSummary String @db.Text
+  finalSummary   String? @db.Text
+  error          String? @db.Text
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   startedAt      DateTime?
@@ -1175,7 +1177,7 @@ model ApprovalRequest {
   executionId    String?
   toolName       String
   action         String
-  summary        String
+  summary        String @db.Text
   details        Json?
   status         ApprovalStatus    @default(pending)
   decidedBy      String?
@@ -1207,7 +1209,7 @@ model Integration {
   config         Json?
   credentials    Json?
   lastSyncAt     DateTime?
-  lastError      String?
+  lastError      String? @db.Text
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -1227,7 +1229,7 @@ model WebhookEvent {
   status         WebhookEventStatus @default(received)
   externalId     String?
   processedAt    DateTime?
-  error          String?
+  error          String? @db.Text
   createdAt      DateTime           @default(now())
 
   organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -1252,7 +1254,7 @@ model AuditLog {
   entityId       String?
   metadata       Json?
   ipAddress      String?
-  userAgent      String?
+  userAgent      String? @db.Text
   createdAt      DateTime      @default(now())
 
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)

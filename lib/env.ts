@@ -11,7 +11,7 @@ const ZERO_KEY = "00000000000000000000000000000000000000000000000000000000000000
 const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    DATABASE_URL: z.string().min(1).default("file:./dev.db"),
+    DATABASE_URL: z.string().min(1).default("mysql://root@127.0.0.1:3306/lumina_pms"),
     AUTH_SECRET: z.string().min(32, "AUTH_SECRET must be at least 32 characters").default("lumina-dev-only-insecure-secret-change-me-32b"),
     AUTH_ENCRYPTION_KEY: z.string().default(ZERO_KEY),
     AUTH_URL: z.string().default("http://localhost:3000"),
@@ -38,6 +38,13 @@ const envSchema = z
       process.env.NEXT_PHASE !== "phase-production-build";
 
     if (isProductionRuntime) {
+      if (!data.DATABASE_URL.toLowerCase().startsWith("mysql://")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["DATABASE_URL"],
+          message: "In production, DATABASE_URL must be a MySQL/MariaDB URL (mysql://USER:PASSWORD@HOST:3306/DBNAME).",
+        });
+      }
       if (INSECURE_AUTH_SECRETS.includes(data.AUTH_SECRET)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

@@ -102,7 +102,7 @@ export default function LandingPage() {
     },
     {
       q: "How does Hospitable prevent double-bookings across Airbnb, Vrbo, and Booking.com?",
-      a: "Hospitable uses sub-second, direct-API synchronization combined with hardware-grade PostgreSQL database constraints. The instant a reservation or hold is placed on any channel, those dates are atomically blocked across all other connected calendars in milliseconds.",
+      a: "Hospitable uses sub-second, direct-API synchronization combined with hardware-grade database constraints. The instant a reservation or hold is placed on any channel, those dates are atomically blocked across all other connected calendars in milliseconds.",
     },
     {
       q: "Do my cleaners or maintenance staff need to download an app or pay for an account?",
@@ -723,7 +723,7 @@ export default function LandingPage() {
                       </li>
                       <li className="flex items-start gap-2.5">
                         <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
-                        <span><strong>Database-level concurrency:</strong> PostgreSQL unique constraints physically prevent two guests from reserving the same night.</span>
+                        <span><strong>Database-level concurrency:</strong> Database unique constraints physically prevent two guests from reserving the same night.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
                         <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />

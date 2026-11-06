@@ -196,7 +196,7 @@ describe("WP9 Gate: Customer Portal, Anti-IDOR Identity Verification, FTS KB & C
   });
 
   // =========================================================================
-  // TEST 1: Knowledge Base Document Creation, Chunking & Postgres FTS
+  // TEST 1: Knowledge Base Document Creation, Chunking & FULLTEXT search
   // =========================================================================
   it("indexes knowledge base documents and performs FTS rank retrieval", async () => {
     const doc = await createKnowledgeBaseDocument({

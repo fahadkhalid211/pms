@@ -116,7 +116,7 @@ export interface CreateReservationInput {
 
 /**
  * Transactionally creates a reservation, allocates individual RoomNight rows
- * enforced by PostgreSQL unique constraints (roomId, date), preventing double-bookings.
+ * enforced by database unique constraints (roomId, date), preventing double-bookings.
  */
 export async function createReservation(input: CreateReservationInput) {
   const checkInUtc = toUtcMidnight(input.checkIn);
@@ -188,7 +188,7 @@ export async function createReservation(input: CreateReservationInput) {
     discount = await prisma.discount.findFirst({
       where: {
         organizationId: input.organizationId,
-        code: { equals: input.discountCode.trim(), mode: "insensitive" },
+        code: { equals: input.discountCode.trim() },
       },
     });
   }
@@ -311,7 +311,7 @@ export async function createReservation(input: CreateReservationInput) {
       reservation: fullReservation,
     };
   } catch (error: any) {
-    if (error?.code === "P2002") {
+    if (error?.code === "P2002" || error?.code === "P2034") {
       throw new DoubleBookingConflictError("One or more selected rooms are already reserved for the requested dates.");
     }
     throw error;
@@ -464,7 +464,7 @@ export async function updateReservation(
 
     return updated;
   } catch (error: any) {
-    if (error?.code === "P2002") {
+    if (error?.code === "P2002" || error?.code === "P2034") {
       throw new DoubleBookingConflictError("Cannot extend or modify reservation: room is already reserved for the new dates.");
     }
     throw error;
@@ -542,10 +542,10 @@ export async function listReservations(params: {
   if (params.query) {
     const q = params.query.trim();
     where.OR = [
-      { code: { contains: q, mode: "insensitive" } },
-      { guest: { firstName: { contains: q, mode: "insensitive" } } },
-      { guest: { lastName: { contains: q, mode: "insensitive" } } },
-      { guest: { email: { contains: q, mode: "insensitive" } } },
+      { code: { contains: q } },
+      { guest: { firstName: { contains: q } } },
+      { guest: { lastName: { contains: q } } },
+      { guest: { email: { contains: q } } },
     ];
   }
 

@@ -275,10 +275,10 @@ export const dal = {
       if (filters?.search) {
         const q = filters.search.trim();
         where.OR = [
-          { code: { contains: q, mode: "insensitive" } },
-          { guest: { firstName: { contains: q, mode: "insensitive" } } },
-          { guest: { lastName: { contains: q, mode: "insensitive" } } },
-          { guest: { email: { contains: q, mode: "insensitive" } } },
+          { code: { contains: q } },
+          { guest: { firstName: { contains: q } } },
+          { guest: { lastName: { contains: q } } },
+          { guest: { email: { contains: q } } },
         ];
       }
 
@@ -1125,7 +1125,7 @@ export const dal = {
       return prisma.discount.findFirst({
         where: {
           organizationId: ctx.organizationId,
-          code: { equals: code.trim(), mode: "insensitive" },
+          code: { equals: code.trim() },
           ...(propertyId ? { OR: [{ propertyId }, { propertyId: null }] } : {}),
           AND: [
             { OR: [{ validFrom: null }, { validFrom: { lte: now } }] },

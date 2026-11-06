@@ -71,3 +71,38 @@ Clean clone → `docker compose up -d db && npm ci && npx prisma migrate deploy 
 - Switch DB to **PostgreSQL** per spec (SQLite cannot give money precision or overlap guarantees).
 - Keep custom jose/bcrypt auth (fixed) rather than adopting Auth.js, to avoid churn; reconsider only if OAuth/SSO is needed.
 - Preserve existing page shells and component names where sound; replace hand-rolled `components/ui` with real shadcn/Radix incrementally.
+
+---
+
+## WP12 – Port to MySQL/MariaDB (Hostinger managed database)
+
+**Why:** Hostinger web apps provide MySQL/MariaDB only. The app currently targets PostgreSQL. Decision (user): **replace Postgres with MySQL**; do not maintain both. All work below was derived from an audit of the current code.
+
+**Step 0 – Preconditions (report before coding).** Ask the user for / record: server flavour and version (`SELECT VERSION()`: MySQL 8.x vs MariaDB 10.x), whether the DB allows remote connections or only `localhost`, charset/collation (require `utf8mb4`). If MariaDB, confirm `JSON` columns and `FULLTEXT` on InnoDB work (run a throwaway test table). Report findings; stop if FULLTEXT on InnoDB is unavailable.
+
+**Step 1 – Schema (`prisma/schema.prisma`).**
+- `provider = "mysql"`. Keep the 29 enums (MySQL supports them). Keep `Decimal(12,2)` and `@db.Date`.
+- Remove `@default` from the 4 `Json` fields (`propertyIds` ×2, `permissions`, `preferences`, lines ~239/315/334/649) — MySQL/MariaDB cannot default JSON/TEXT. Set the defaults in application code at every create site and add a test that a created User/Membership/Role/Guest has `[]`/`{}` rather than null.
+- Add `@db.Text`/`@db.LongText` to long string columns (KB `content`, notes, descriptions, message bodies, audit details, AI prompts/outputs); default `String` is `VARCHAR(191)` and will silently fail/truncate on long content. List every column changed in the report.
+- Add `@@fulltext([title, content])` on KnowledgeBaseDocument and `@@fulltext([content])` on KnowledgeBaseChunk (on MySQL this needs `previewFeatures = ["fullTextIndex"]` in the generator block; if the installed Prisma version rejects it, create the FULLTEXT indexes with raw SQL in the migration instead).
+- Check every index/unique key fits InnoDB limits (utf8mb4 index prefix, total key size). `RoomNight` unique `(roomId, date)` MUST remain — it is the double-booking guard.
+
+**Step 2 – Migrations.** Delete `prisma/migrations/20261025162411_init` (Postgres SQL, contains `tsvector`/GIN) and regenerate a fresh `init` migration for MySQL on an empty database. Update `migration_lock.toml`. `prisma migrate deploy` must succeed on a clean Hostinger-like DB. (Existing Postgres data, if any, is out of scope; the project is pre-launch.)
+
+**Step 3 – Application code.**
+- Remove every `mode: "insensitive"` (≈ `lib/dal.ts`, `lib/reservations.ts`, `lib/portal.ts`, `lib/chatbot.ts`, `lib/ai/tools.ts`, `app/api/guests/route.ts`, `app/api/search/route.ts`). MySQL collation is case-insensitive; add a test proving a search for `"smith"` finds `"Smith"`.
+- Rewrite `lib/kb.ts` search (raw `plainto_tsquery`/`ts_rank`/`ILIKE`, lines ~115–190) to `MATCH(...) AGAINST (? IN NATURAL LANGUAGE MODE)` via `$queryRaw` with parameter binding (no string interpolation), keep the existing LIKE fallback, keep org scoping in the WHERE clause. Score column replaces `ts_rank`.
+- Re-audit every `$queryRaw`/`$executeRaw` and `ON CONFLICT`-style assumptions; confirm P2002 handling in `lib/reservations.ts` (~314, ~467) and `lib/integrations/index.ts` (~228) still triggers for MySQL duplicate-key errors.
+- `lib/env.ts`: `DATABASE_URL` default must no longer be SQLite; in production require it to start with `mysql://`. Update `.env.example`, `docker-compose.yml` (mysql:8 or mariadb:10.11 service), `README.md`, `PROGRESS.md`, Dockerfile (no change expected beyond `prisma generate`).
+- `prisma/seed.ts`: verify it runs on MySQL (cuid ids, Json fields).
+
+**Step 4 – Tests/gates (all must pass against a real MySQL/MariaDB, not mocks).**
+1. `docker compose up -d db` (MySQL/MariaDB) → `npx prisma migrate deploy` → `npm run db:seed` succeed from empty.
+2. `npm run typecheck`, `lint`, `npm test`, `npm run build` green.
+3. **Concurrency test unchanged and passing:** N parallel creations for the same room/night → exactly 1 succeeds, rest rejected cleanly (no 500s).
+4. KB retrieval test passes with FULLTEXT; cross-org KB isolation test still passes.
+5. Case-insensitive search test; long-text round-trip test (≥ 5,000 chars into KB content and a guest note); Json default test.
+6. Playwright journeys still pass.
+7. `grep -rn "postgres\|tsvector\|plainto_tsquery\|mode: \"insensitive\"\|ILIKE" lib app prisma` returns nothing (docs excluded).
+
+**Deployment note (Hostinger).** `DATABASE_URL="mysql://DB_USER:DB_PASSWORD@DB_HOST:3306/DB_NAME"` (URL-encode special characters in the password). Run `npx prisma migrate deploy` once against that database before first start. Do NOT mark WP12 done until the app has been verified against a MySQL/MariaDB of the same flavour as Hostinger's.

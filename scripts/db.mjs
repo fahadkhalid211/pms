@@ -1,37 +1,25 @@
-import EmbeddedPostgres from "embedded-postgres";
-import fs from "node:fs";
-import path from "node:path";
+// Local development/test database: an embedded MySQL server (no Docker required).
+// Production uses Hostinger's managed MySQL/MariaDB via DATABASE_URL instead.
+import { createDB } from "mysql-memory-server";
 
-const dbDir = path.resolve("./.pgdata");
-const isFirstRun = !fs.existsSync(dbDir);
+const PORT = Number(process.env.MYSQL_PORT || 3306);
+const DB_NAME = process.env.MYSQL_DB || "lumina_pms";
 
-const pg = new EmbeddedPostgres({
-  databaseDir: dbDir,
-  port: 5432,
-  user: "postgres",
-  password: "postgres",
-  persistent: true,
+console.log(`Starting embedded MySQL on port ${PORT} (first run downloads the server binary)...`);
+
+const db = await createDB({
+  dbName: DB_NAME,
+  username: "root",
+  port: PORT,
+  logLevel: "ERROR",
+  ignoreUnsupportedSystemVersion: true,
 });
 
-if (isFirstRun) {
-  console.log("Initialising PostgreSQL cluster...");
-  await pg.initialise();
-}
-
-console.log("Starting PostgreSQL server on port 5432...");
-await pg.start();
-console.log("PostgreSQL is running on port 5432 and ready for connections!");
-
-try {
-  await pg.createDatabase("lumina_pms");
-  console.log("Database 'lumina_pms' ready.");
-} catch {
-  // Database may already exist
-}
+console.log(`MySQL is ready. DATABASE_URL=mysql://root@127.0.0.1:${db.port}/${db.dbName}`);
 
 const shutdown = async () => {
-  console.log("Stopping PostgreSQL...");
-  await pg.stop();
+  console.log("Stopping MySQL...");
+  await db.stop();
   process.exit(0);
 };
 

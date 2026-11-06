@@ -192,7 +192,7 @@ export async function createPublicBooking(input: PublicBookingInput) {
   let guest = await prisma.guest.findFirst({
     where: {
       organizationId: input.organizationId,
-      email: { equals: input.guest.email.trim(), mode: "insensitive" },
+      email: { equals: input.guest.email.trim() },
     },
   });
 
@@ -280,7 +280,6 @@ export async function verifyAndGetBooking(input: {
       guest: {
         email: {
           equals: input.email.trim(),
-          mode: "insensitive",
         },
       },
     },
@@ -486,7 +485,6 @@ export async function getCustomerBookings(organizationId: string, email: string)
       guest: {
         email: {
           equals: email.trim(),
-          mode: "insensitive",
         },
       },
     },

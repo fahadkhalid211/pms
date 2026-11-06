@@ -271,7 +271,7 @@ export default function AiProvidersPage() {
                     required={provider !== "mock"}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    Stored securely in Postgres with AES-256-GCM envelope encryption.
+                    Stored securely in the database with AES-256-GCM envelope encryption.
                   </p>
                 </div>
               )}

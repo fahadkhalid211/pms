@@ -78,10 +78,10 @@ export async function GET(req: NextRequest) {
         where: {
           organizationId: user.organizationId,
           OR: [
-            { code: { contains: q, mode: "insensitive" } },
-            { guest: { firstName: { contains: q, mode: "insensitive" } } },
-            { guest: { lastName: { contains: q, mode: "insensitive" } } },
-            { guest: { email: { contains: q, mode: "insensitive" } } },
+            { code: { contains: q } },
+            { guest: { firstName: { contains: q } } },
+            { guest: { lastName: { contains: q } } },
+            { guest: { email: { contains: q } } },
           ],
         },
         select: {
@@ -101,10 +101,10 @@ export async function GET(req: NextRequest) {
         where: {
           organizationId: user.organizationId,
           OR: [
-            { firstName: { contains: q, mode: "insensitive" } },
-            { lastName: { contains: q, mode: "insensitive" } },
-            { email: { contains: q, mode: "insensitive" } },
-            { phone: { contains: q, mode: "insensitive" } },
+            { firstName: { contains: q } },
+            { lastName: { contains: q } },
+            { email: { contains: q } },
+            { phone: { contains: q } },
           ],
         },
         select: {
@@ -122,8 +122,8 @@ export async function GET(req: NextRequest) {
         where: {
           organizationId: user.organizationId,
           OR: [
-            { number: { contains: q, mode: "insensitive" } },
-            { property: { name: { contains: q, mode: "insensitive" } } },
+            { number: { contains: q } },
+            { property: { name: { contains: q } } },
           ],
         },
         select: {
@@ -141,8 +141,8 @@ export async function GET(req: NextRequest) {
         where: {
           organizationId: user.organizationId,
           OR: [
-            { number: { contains: q, mode: "insensitive" } },
-            { reservation: { code: { contains: q, mode: "insensitive" } } },
+            { number: { contains: q } },
+            { reservation: { code: { contains: q } } },
           ],
         },
         select: {

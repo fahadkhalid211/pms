@@ -243,3 +243,15 @@ All 12 Work Packages (WP0 through WP11) are **100% Complete, Tested, and Verifie
 - [x] WP9: Customer Portal, Anti-IDOR Verification & Guest Chatbot (`wp9-done`)
 - [x] WP10: Reports, Dashboard, Integrations Framework & Hardening (`wp10-done`)
 - [x] WP11: UX Polish, Omnisearch, Playwright Journeys & Delivery (`wp11-done`)
+
+
+## WP12: MySQL / MariaDB port (Hostinger-ready)
+- [x] Prisma provider switched to `mysql`; 45 tables regenerated as a single clean `init` migration (utf8mb4, InnoDB). Old PostgreSQL migration removed.
+- [x] Long text columns (notes, descriptions, message bodies, KB content, error text, credentials) use `@db.Text`; 3 JSON array columns lost their DB defaults (MySQL cannot default JSON) and are nullable - all readers already treat null as empty.
+- [x] Knowledge-base search rewritten from PostgreSQL `tsvector` to MySQL `FULLTEXT` (`MATCH ... AGAINST`, bound parameters, org-scoped) with a LIKE fallback.
+- [x] Removed every `mode: "insensitive"` (MySQL collation is case-insensitive).
+- [x] Double-booking guard (`RoomNight` unique `(roomId, date)`) unchanged; concurrency test passes on MySQL. MySQL deadlock errors (P2034) are mapped to the same conflict error.
+- [x] `lib/env.ts` rejects non-`mysql://` DATABASE_URL in production. New scripts: `db:deploy`, `start:prod` (migrate then start), `postinstall`/`build` run `prisma generate`.
+- [x] docker-compose now MySQL 8.4 with a one-off migrate service; local dev/test DB is an embedded MySQL (`npm run db:start`).
+- Verified (embedded MySQL 9.7.4 on Windows): typecheck clean, 13 suites / 90 tests passing, `next build` OK, production standalone server booted against a freshly migrated DB and served registration (HTTP 201).
+- Playwright: 3 journeys pass on MySQL. Not verified: Hostinger actual MySQL/MariaDB version (MariaDB untested), Docker build (Docker not installed on the dev machine).

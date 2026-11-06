@@ -4,22 +4,22 @@
 [![Test Suites](https://img.shields.io/badge/vitest-90%20passed-brightgreen)](./tests)
 [![E2E Journeys](https://img.shields.io/badge/playwright-3%20passed-brightgreen)](./e2e)
 [![Next.js](https://img.shields.io/badge/next.js-15.5-black)](https://nextjs.org)
-[![PostgreSQL](https://img.shields.io/badge/postgres-16-blue)](https://www.postgresql.org)
+[![MySQL](https://img.shields.io/badge/mysql-8%20%2F%20mariadb-blue)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 **Lumina PMS** is a modern, AI-powered hospitality property management system designed for boutique hotels, resorts, guesthouses, serviced apartments, and vacation rental management companies.
 
-It combines an operational hospitality core — properties, rooms, atomic room nights, seasonal rate plans, front desk check-in/out workspaces, housekeeping task assignments, maintenance work orders, and penny-precise invoicing — with an autonomous AI operations agent, human-in-the-loop supervisor approvals, anti-IDOR guest portal, native PostgreSQL full-text search knowledge base, and an integrations framework with RFC 5545 iCalendar feeds and idempotent webhook processing.
+It combines an operational hospitality core — properties, rooms, atomic room nights, seasonal rate plans, front desk check-in/out workspaces, housekeeping task assignments, maintenance work orders, and penny-precise invoicing — with an autonomous AI operations agent, human-in-the-loop supervisor approvals, anti-IDOR guest portal, MySQL FULLTEXT search knowledge base, and an integrations framework with RFC 5545 iCalendar feeds and idempotent webhook processing.
 
 ---
 
 ## Key Highlights
 
-- **Anti-Double-Booking Engine:** Atomic `RoomNight` records guarded by PostgreSQL `@@unique([roomId, date])` unique constraints.
+- **Anti-Double-Booking Engine:** Atomic `RoomNight` records guarded by database `@@unique([roomId, date])` unique constraints.
 - **Strict Financial Precision:** All financial transactions, line items, taxes, fees, ADR, and RevPAR are computed using exact `Decimal(12, 2)` arithmetic. Zero floating-point money math.
 - **Strict Multi-Tenant Scoping:** Every query, route handler, and service method is strictly scoped by `organizationId`. Verified across all 13 test suites.
 - **AI Operations Hub with Human Approval:** Provider-agnostic adapter architecture supporting OpenAI, Google Gemini, Anthropic Claude, Groq, and Mock adapters. Sensitive actions (cancellations, refunds, bulk messaging) automatically pause execution for supervisory approval.
-- **Public Guest Portal & Concierge Chatbot:** Hospitable-branded guest portal with live quotes, atomic bookings, online check-in, messaging, and strict anti-IDOR verification gates. Autonomous chatbot backed by native PostgreSQL full-text search (`ts_rank`).
+- **Public Guest Portal & Concierge Chatbot:** Hospitable-branded guest portal with live quotes, atomic bookings, online check-in, messaging, and strict anti-IDOR verification gates. Autonomous chatbot backed by MySQL FULLTEXT search (`MATCH ... AGAINST`).
 - **Executive Analytics & RFC 4180 CSV Reports:** Real-time Occupancy %, ADR (`room revenue / rooms sold`), RevPAR (`room revenue / rooms available`), arrivals/departures queue, and streaming CSV downloads.
 - **Integrations & iCal Engine:** AES-256-GCM credential encryption, RFC 5545 `.ics` subscription calendar export/import feeds, and HMAC SHA256 verified webhook receiver with idempotent deduplication by `externalId`.
 - **Universal Activity Logging:** Captures both frontend user actions and backend operations with timestamps, user context, IP addresses, PII redaction, and human-readable summaries.
@@ -33,10 +33,10 @@ It combines an operational hospitality core — properties, rooms, atomic room n
 | --- | --- |
 | **Framework** | Next.js 15 (App Router), React 19, TypeScript |
 | **Styling & Icons** | Tailwind CSS, Lucide Icons (HD thin-line, zero emojis) |
-| **Database & ORM** | PostgreSQL 16 (or local daemon), Prisma ORM |
+| **Database & ORM** | MySQL 8 or MariaDB 10.x, Prisma ORM |
 | **Security & Auth** | JOSE JWT sessions, bcrypt password hashing, AES-256-GCM secret encryption, CSRF protection, OWASP security headers |
 | **AI Integration** | Provider-agnostic adapter interface (OpenAI, Gemini, Groq, Anthropic, Mock) |
-| **Job Queue** | ACID transactional PostgreSQL outbox with exponential backoff retries |
+| **Job Queue** | ACID transactional database outbox with exponential backoff retries |
 | **Unit & Integration Tests** | Vitest (13 suites, 90 automated tests) |
 | **End-to-End Tests** | Playwright (3 automated multi-step journeys) |
 
@@ -46,7 +46,7 @@ It combines an operational hospitality core — properties, rooms, atomic room n
 
 ### 1. Prerequisites
 - Node.js 20+ (LTS recommended)
-- PostgreSQL database (or run the included local background daemon `npm run db:start`)
+- MySQL 8 or MariaDB 10.x database (or run the embedded local server with `npm run db:start`)
 - npm 10+
 
 ### 2. Setup & Environment
@@ -64,8 +64,11 @@ cp .env.example .env
 
 ### 3. Database Initialization & Seeding
 ```bash
-# Push schema migrations
-npx prisma db push
+# Start the embedded local MySQL (separate terminal; first run downloads the server)
+npm run db:start
+
+# Apply schema migrations
+npm run db:deploy
 
 # Seed demo hotels, rooms, rate plans, and admin accounts
 npm run db:seed
@@ -109,6 +112,12 @@ npm run typecheck
 ```bash
 npm run build
 ```
+
+---
+
+## Hostinger Deployment
+
+See [docs/DEPLOY_HOSTINGER.md](docs/DEPLOY_HOSTINGER.md) for the step-by-step guide (Node.js web app + Hostinger MySQL).
 
 ---
 

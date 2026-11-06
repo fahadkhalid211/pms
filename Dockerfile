@@ -19,6 +19,11 @@ ENV NODE_ENV=production
 RUN npx prisma generate
 RUN npm run build
 
+# 2b. One-off migration runner (applies prisma migrations, then exits)
+FROM builder AS migrator
+ENV NODE_ENV=production
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 # 3. Production Runner Stage
 FROM node:20-alpine AS runner
 WORKDIR /app

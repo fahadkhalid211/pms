@@ -242,7 +242,6 @@ export async function respondToGuest(input: {
             guest: {
               email: {
                 equals: args.email.trim(),
-                mode: "insensitive",
               },
             },
           },
@@ -318,7 +317,7 @@ export async function respondToGuest(input: {
 async function getOrCreateGuestId(organizationId: string, email?: string, name?: string): Promise<string> {
   if (email) {
     const existing = await prisma.guest.findFirst({
-      where: { organizationId, email: { equals: email, mode: "insensitive" } },
+      where: { organizationId, email: { equals: email } },
     });
     if (existing) return existing.id;
   }

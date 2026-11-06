@@ -1,105 +1,20 @@
-# Lumina PMS — Enterprise Backup & Disaster Recovery Architecture
+# Backup and Recovery (MySQL / MariaDB)
 
-This runbook defines the disaster recovery (DR), automated backup lifecycle, and cryptographic data protection policies for Lumina Property Management System.
-
----
-
-## 1. Recovery Time & Point Objectives (RTO / RPO)
-
-- **Recovery Point Objective (RPO):** < 5 minutes (via continuous Write-Ahead Logging / WAL archiving).
-- **Recovery Time Objective (RTO):** < 30 minutes (full automated database restoration to standby target).
-
----
-
-## 2. Backup Strategy & Scheduling
-
-### A. Nightly Logical Snapshots (`pg_dump`)
-Automated nightly logical backups capture the entire relational schema, table data, and multi-tenant indexes.
+## Hostinger managed database
+- hPanel > Websites > Backups: enable automatic backups for your plan and note the retention window.
+- Before every deploy that adds a migration, export the database from hPanel > Databases > phpMyAdmin > Export (Quick, SQL), or run:
 
 ```bash
-# Automated nightly export command
-pg_dump \
-  --format=custom \
-  --compress=9 \
-  --no-owner \
-  --no-privileges \
-  --dbname="${DATABASE_URL}" \
-  --file="/backups/lumina_pms_$(date +%Y%m%d_%H%M%S).dump"
+mysqldump --single-transaction --routines --default-character-set=utf8mb4 -h DB_HOST -u DB_USER -p DB_NAME > lumina-$(date +%F).sql
 ```
 
-### B. Point-In-Time Recovery (PITR) & WAL Archiving
-PostgreSQL WAL (Write-Ahead Log) segments are continuously archived to secure object storage (e.g. AWS S3 / Google Cloud Storage with versioning and immutable object locking).
+Store dumps off the server and encrypt them (they contain guest data).
 
-`postgresql.conf` configuration:
-```ini
-wal_level = replica
-archive_mode = on
-archive_command = 'gzip < %p | aws s3 cp - s3://lumina-pms-wal-archive/%f.gz'
-archive_timeout = 300
-```
-
----
-
-## 3. Encryption at Rest & Key Management
-
-1. **Database Storage Encryption:**
-   - Underlying EBS / persistent volumes must be encrypted with AWS KMS / GCP Cloud KMS customer-managed keys (CMK) using AES-256-XTS.
-2. **Application-Level Envelope Encryption:**
-   - Sensitive third-party credentials (Stripe keys, OTA credentials, AI provider keys) are encrypted at the application layer using hardware-accelerated **AES-256-GCM** before database insertion (`lib/ai/encryption.ts`).
-3. **Backup File Encryption:**
-   - Dump files are encrypted using GPG / OpenSSL prior to network transmission:
-   ```bash
-   openssl enc -aes-256-cbc -salt -in backup.dump -out backup.dump.enc -pass file:/etc/lumina/backup.key
-   ```
-
----
-
-## 4. Disaster Recovery & Restoration Runbook
-
-### Step 1: Provision Clean PostgreSQL Target
+## Restore drill
 ```bash
-# Initialize clean cluster with same PostgreSQL version (v15+)
-pg_createcluster 15 main
-systemctl start postgresql@15-main
+mysql --default-character-set=utf8mb4 -h DB_HOST -u DB_USER -p DB_NAME < lumina-YYYY-MM-DD.sql
 ```
+Restore into an empty database, point a staging copy of the app at it, log in, and confirm reservations and invoices load. Run this drill at least quarterly.
 
-### Step 2: Restore Logical Dump
-```bash
-# Decrypt dump
-openssl enc -d -aes-256-cbc -in backup.dump.enc -out backup.dump -pass file:/etc/lumina/backup.key
-
-# Create database and restore
-createdb lumina_pms
-pg_restore \
-  --dbname=lumina_pms \
-  --clean \
-  --if-exists \
-  --no-owner \
-  --single-transaction \
-  backup.dump
-```
-
-### Step 3: Run Database Migrations Check
-```bash
-# Verify schema matches application expectations
-npx prisma migrate status
-```
-
-### Step 4: Verification Smoke Test
-```bash
-# Verify data integrity and multi-tenancy constraints
-npm test
-```
-
----
-
-## 5. Automated Backup Retention & Purge Policy
-
-| Tier | Retention Period | Storage Class |
-| :--- | :--- | :--- |
-| Hourly WAL Segments | 7 days | Standard S3 / Hot Storage |
-| Daily Logical Dumps | 30 days | S3 Infrequent Access (IA) |
-| Weekly Snapshots | 90 days | S3 Glacier Flexible Retrieval |
-| Monthly Historical Dumps | 7 years | S3 Glacier Deep Archive (Compliance) |
-
-Automated application log purging is governed by the Data Retention Service (`lib/retention.ts`), which purges operational activity logs and webhook delivery events older than 90 days.
+## Secrets
+Back up `AUTH_ENCRYPTION_KEY` and `INTEGRATION_ENCRYPTION_KEY` separately from database dumps. Without them, stored AI provider keys and integration credentials cannot be decrypted after a restore.

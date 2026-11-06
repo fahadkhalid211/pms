@@ -112,8 +112,10 @@ export async function createKnowledgeBaseDocument(input: CreateDocumentInput) {
 }
 
 /**
- * Searches the Knowledge Base using PostgreSQL Full-Text Search (tsvector + plainto_tsquery)
- * with relevance ranking and strict multi-tenant isolation.
+ * Searches the Knowledge Base using MySQL/MariaDB FULLTEXT (MATCH ... AGAINST in
+ * natural-language mode) with relevance ranking and strict multi-tenant isolation.
+ * The query is always passed as a bound parameter; natural-language mode ignores
+ * boolean operators, so user input cannot alter the search expression.
  */
 export async function searchKnowledgeBase(
   organizationId: string,
@@ -124,50 +126,39 @@ export async function searchKnowledgeBase(
     throw new Error("organizationId is required for knowledge base search.");
   }
 
-  const limit = options.limit ?? 5;
+  const limit = Math.max(1, Math.min(Math.floor(options.limit ?? 5), 50));
   const cleanQuery = query.trim();
   if (!cleanQuery) return [];
 
-  // 1. Attempt PostgreSQL Full-Text Search
+  type RawMatch = {
+    id: string;
+    documentId: string;
+    content: string;
+    title: string;
+    type: string;
+    score: number | string;
+  };
+
+  // 1. FULLTEXT relevance search
   try {
-    const rawMatches = options.propertyId
-      ? await prisma.$queryRaw<Array<{
-          id: string;
-          documentId: string;
-          content: string;
-          title: string;
-          type: string;
-          rank: number;
-        }>>`
-          SELECT c.id, c."documentId", c.content, d.title, d.type,
-                 ts_rank(to_tsvector('english', c.content || ' ' || d.title), plainto_tsquery('english', ${cleanQuery})) as rank
-          FROM "KnowledgeBaseChunk" c
-          JOIN "KnowledgeBaseDocument" d ON c."documentId" = d.id
-          WHERE c."organizationId" = ${organizationId}
-            AND d.status = 'active'
-            AND (d."propertyId" = ${options.propertyId} OR d."propertyId" IS NULL)
-            AND to_tsvector('english', c.content || ' ' || d.title) @@ plainto_tsquery('english', ${cleanQuery})
-          ORDER BY rank DESC
-          LIMIT ${limit};
-        `
-      : await prisma.$queryRaw<Array<{
-          id: string;
-          documentId: string;
-          content: string;
-          title: string;
-          type: string;
-          rank: number;
-        }>>`
-          SELECT c.id, c."documentId", c.content, d.title, d.type,
-                 ts_rank(to_tsvector('english', c.content || ' ' || d.title), plainto_tsquery('english', ${cleanQuery})) as rank
-          FROM "KnowledgeBaseChunk" c
-          JOIN "KnowledgeBaseDocument" d ON c."documentId" = d.id
-          WHERE c."organizationId" = ${organizationId}
-            AND d.status = 'active'
-            AND to_tsvector('english', c.content || ' ' || d.title) @@ plainto_tsquery('english', ${cleanQuery})
-          ORDER BY rank DESC
-          LIMIT ${limit};
-        `;
+    const propertyFilter = options.propertyId
+      ? Prisma.sql`AND (d.propertyId = ${options.propertyId} OR d.propertyId IS NULL)`
+      : Prisma.empty;
+
+    const rawMatches = await prisma.$queryRaw<RawMatch[]>(Prisma.sql`
+      SELECT c.id AS id, c.documentId AS documentId, c.content AS content,
+             d.title AS title, d.type AS type,
+             MATCH(c.content) AGAINST (${cleanQuery} IN NATURAL LANGUAGE MODE) AS score
+      FROM KnowledgeBaseChunk c
+      JOIN KnowledgeBaseDocument d ON c.documentId = d.id
+      WHERE c.organizationId = ${organizationId}
+        AND d.organizationId = ${organizationId}
+        AND d.status = 'active'
+        ${propertyFilter}
+        AND MATCH(c.content) AGAINST (${cleanQuery} IN NATURAL LANGUAGE MODE)
+      ORDER BY score DESC
+      LIMIT ${limit}
+    `);
 
     if (rawMatches.length > 0) {
       return rawMatches.map((m) => ({
@@ -176,17 +167,17 @@ export async function searchKnowledgeBase(
         title: m.title,
         type: m.type,
         content: m.content,
-        score: Number(m.rank.toFixed(4)),
+        score: Number(Number(m.score).toFixed(4)),
       }));
     }
   } catch {
-    // If tsquery fails (e.g. stop words or syntax), fallback to ILIKE
+    // FULLTEXT can reject very short or stop-word-only queries; fall back to LIKE matching.
   }
 
-  // 2. Fallback keyword matching (ILIKE)
-  const keywords = cleanQuery.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  // 2. Fallback keyword matching (LIKE; MySQL collation is case-insensitive)
+  const keywords = cleanQuery.toLowerCase().split(/s+/).filter((w) => w.length > 2);
   const whereOr = keywords.map((k) => ({
-    content: { contains: k, mode: Prisma.QueryMode.insensitive },
+    content: { contains: k },
   }));
 
   const fallbackChunks = await prisma.knowledgeBaseChunk.findMany({
