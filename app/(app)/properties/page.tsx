@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { Building2, ChevronRight, BedDouble, Calendar } from "lucide-react";
 
 interface Property {
   id: string;
@@ -15,6 +17,10 @@ interface Property {
   country: string | null;
   status: string;
   currency: string;
+  _count?: {
+    rooms: number;
+    reservations: number;
+  };
 }
 
 export default function PropertiesPage() {
@@ -67,21 +73,60 @@ export default function PropertiesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Properties</h1>
-        <p className="text-muted-foreground">Manage the properties within your organization.</p>
+        <p className="text-muted-foreground">Manage properties and click any listing to open its details, rooms, bookings, and team.</p>
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader><CardTitle>Existing properties</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Existing properties ({properties.length})</CardTitle>
+            <CardDescription className="text-xs">Select a property to inspect bookings, rooms, rate plans, and sync feeds.</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-2">
-            {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : properties.length === 0 ? <p className="text-sm text-muted-foreground">No properties yet. Create your first property.</p> : properties.map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-sm text-muted-foreground">{p.code} · {p.city ?? "—"}, {p.country ?? "—"}</div>
-                </div>
-                <Badge variant={p.status === "active" ? "default" : "muted"}>{p.status}</Badge>
-              </div>
-            ))}
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            ) : properties.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No properties yet. Create your first property or import from Hospitable.</p>
+            ) : (
+              properties.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/properties/${p.id}`}
+                  className="group flex items-center justify-between rounded-lg border p-3.5 transition-colors hover:border-primary/40 hover:bg-muted/30"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Building2 className="h-4 w-4" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {p.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {p.code} · {p.city ?? "—"}, {p.country ?? "—"} · {p.currency}
+                      </div>
+                      {p._count && (
+                        <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <BedDouble className="h-3 w-3" strokeWidth={1.5} />
+                            {p._count.rooms} room{p._count.rooms === 1 ? "" : "s"}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="h-3 w-3" strokeWidth={1.5} />
+                            {p._count.reservations} booking{p._count.reservations === 1 ? "" : "s"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Badge variant={p.status === "active" ? "default" : "muted"} className="capitalize">
+                      {p.status}
+                    </Badge>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
+                  </div>
+                </Link>
+              ))
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -99,10 +144,10 @@ export default function PropertiesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2"><Label htmlFor="pctz">Timezone</Label><Input id="pctz" value={timezone} onChange={(e) => setTimezone(e.target.value)} /></div>
-                <div className="space-y-2"><Label htmlFor="pctin">Check-in (min)</Label><Input id="pctin" type="number" value={checkInTime} onChange={(e) => setCheckInTime(Number(e.target.value))} /></div>
+                <div className="space-y-2"><Label htmlFor="pctin">Check-in (hr)</Label><Input id="pctin" type="number" min={0} max={23} value={checkInTime} onChange={(e) => setCheckInTime(Number(e.target.value))} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2"><Label htmlFor="pctout">Check-out (min)</Label><Input id="pctout" type="number" value={checkOutTime} onChange={(e) => setCheckOutTime(Number(e.target.value))} /></div>
+                <div className="space-y-2"><Label htmlFor="pctout">Check-out (hr)</Label><Input id="pctout" type="number" min={0} max={23} value={checkOutTime} onChange={(e) => setCheckOutTime(Number(e.target.value))} /></div>
                 <div className="space-y-2"><Label htmlFor="ptax">Tax %</Label><Input id="ptax" type="number" step="0.01" value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} /></div>
               </div>
               {error ? <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div> : null}

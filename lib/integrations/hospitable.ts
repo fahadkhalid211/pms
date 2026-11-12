@@ -214,16 +214,6 @@ function mapHospitableSource(raw: HospitableReservationPayload): { source: Reser
   return { source: "ota", channelLabel: channel || "ota" };
 }
 
-function splitFullName(name: string): { firstName: string; lastName: string } {
-  const cleaned = name.trim();
-  if (!cleaned) return { firstName: "Hospitable", lastName: "Guest" };
-  const parts = cleaned.split(/\s+/);
-  return {
-    firstName: parts[0] || "Hospitable",
-    lastName: parts.slice(1).join(" ") || "Guest",
-  };
-}
-
 function readDecryptedObject(credentials: unknown): Record<string, string> {
   if (!credentials || typeof credentials !== "object") return {};
   const result: Record<string, string> = {};

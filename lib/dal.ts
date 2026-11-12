@@ -74,6 +74,11 @@ export const dal = {
           organizationId: ctx.organizationId,
           ...(ctx.propertyId ? { id: ctx.propertyId } : {}),
         },
+        include: {
+          _count: {
+            select: { rooms: true, reservations: true },
+          },
+        },
         orderBy: { name: "asc" },
       });
     },
