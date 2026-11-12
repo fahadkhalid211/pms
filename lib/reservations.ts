@@ -305,6 +305,8 @@ export async function createReservation(input: CreateReservationInput) {
       },
     });
 
+    await syncHospitableOutboundSafe(input.organizationId, input.propertyId, stayDates);
+
     const fullReservation = await getReservation(result.id, input.organizationId);
     return {
       ...fullReservation,
@@ -462,12 +464,33 @@ export async function updateReservation(
       },
     });
 
+    if (datesChanged || newStatus === "cancelled" || newStatus === "no_show") {
+      const affectedDates = [
+        ...getStayDatesArray(existing.checkIn, existing.checkOut),
+        ...getStayDatesArray(updated.checkIn, updated.checkOut),
+      ];
+      await syncHospitableOutboundSafe(organizationId, existing.propertyId, affectedDates);
+    }
+
     return updated;
   } catch (error: any) {
     if (error?.code === "P2002" || error?.code === "P2034") {
       throw new DoubleBookingConflictError("Cannot extend or modify reservation: room is already reserved for the new dates.");
     }
     throw error;
+  }
+}
+
+async function syncHospitableOutboundSafe(
+  organizationId: string,
+  propertyId: string,
+  dates: Date[],
+): Promise<void> {
+  try {
+    const { pushPropertyDatesToHospitable } = await import("@/lib/integrations/hospitable");
+    await pushPropertyDatesToHospitable({ organizationId, propertyId, dates });
+  } catch {
+    // Non-fatal: outbound failures are recorded on Integration.lastError and should not roll back local bookings
   }
 }
 

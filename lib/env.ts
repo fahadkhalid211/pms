@@ -30,6 +30,11 @@ const envSchema = z
     INTEGRATION_WEBHOOK_SECRET: z.string().default("dev-only-webhook-secret-0123456789abcdef"),
     ALLOW_PRODUCTION_SEED: z.string().optional(),
     SEED_ADMIN_PASSWORD: z.string().optional(),
+    HOSPITABLE_CLIENT_ID: z.string().optional(),
+    HOSPITABLE_CLIENT_SECRET: z.string().optional(),
+    HOSPITABLE_CONNECT_TOKEN: z.string().optional(),
+    AIRBNB_CLIENT_ID: z.string().optional(),
+    AIRBNB_CLIENT_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     // When running in production (outside Next.js build phase), refuse insecure defaults and zero keys

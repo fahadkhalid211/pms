@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { Prisma, IntegrationStatus, WebhookEventStatus } from "@prisma/client";
 import { encryptSecret, decryptSecret } from "@/lib/ai/encryption";
 import { logActivity } from "@/lib/audit";
+import { processHospitableWebhook } from "@/lib/integrations/hospitable";
 
 export interface IntegrationDefinition {
   provider: string;
@@ -16,6 +17,15 @@ export interface IntegrationDefinition {
 
 export const SUPPORTED_INTEGRATIONS: IntegrationDefinition[] = [
   {
+    provider: "hospitable",
+    name: "Hospitable Two-Way Sync",
+    category: "ota",
+    description: "Import properties, owner/user details, guests & bookings from Hospitable and push local calendar availability back in real time.",
+    supportsWebhooks: true,
+    supportsIcal: false,
+    isStubbed: false,
+  },
+  {
     provider: "stripe",
     name: "Stripe Payments & Terminal",
     category: "payments",
@@ -26,9 +36,9 @@ export const SUPPORTED_INTEGRATIONS: IntegrationDefinition[] = [
   },
   {
     provider: "airbnb_ical",
-    name: "Airbnb Calendar Sync (iCal)",
+    name: "Airbnb Host Account & Calendar Sync",
     category: "ota",
-    description: "Two-way calendar sync to prevent double-bookings on Airbnb listings.",
+    description: "Sign in to Airbnb to sync reservations & availability or link via Hospitable.",
     supportsWebhooks: true,
     supportsIcal: true,
     isStubbed: false,
@@ -46,10 +56,10 @@ export const SUPPORTED_INTEGRATIONS: IntegrationDefinition[] = [
     provider: "booking_com",
     name: "Booking.com Channel Connector",
     category: "ota",
-    description: "Direct XML channel manager connection for Booking.com inventory and rates.",
+    description: "Sign in to Booking.com Extranet to connect channel manager sync or import/export availability.",
     supportsWebhooks: true,
-    supportsIcal: false,
-    isStubbed: true,
+    supportsIcal: true,
+    isStubbed: false,
   },
   {
     provider: "whatsapp",
@@ -162,8 +172,9 @@ export async function getDecryptedCredentials(organizationId: string, integratio
 export function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
   if (!signature || !secret) return false;
   try {
+    const cleanSig = signature.replace(/^sha256=/i, "").trim();
     const expected = crypto.createHmac("sha256", secret).update(payload, "utf8").digest("hex");
-    return crypto.timingSafeEqual(Buffer.from(signature, "hex"), Buffer.from(expected, "hex"));
+    return crypto.timingSafeEqual(Buffer.from(cleanSig, "hex"), Buffer.from(expected, "hex"));
   } catch {
     return false;
   }
@@ -245,7 +256,14 @@ export async function handleWebhookEvent(input: {
 
   try {
     // Dispatch provider processing
-    if (input.provider === "stripe") {
+    if (input.provider === "hospitable") {
+      await processHospitableWebhook({
+        organizationId: input.organizationId,
+        integrationId: input.integrationId,
+        eventType: input.eventType,
+        payload: (input.payload || {}) as Record<string, unknown>,
+      });
+    } else if (input.provider === "stripe") {
       // Stub: handle stripe event
       if (input.eventType === "payment_intent.succeeded" && input.payload?.paymentId) {
         await prisma.payment.updateMany({

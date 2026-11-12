@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { handleWebhookEvent } from "@/lib/integrations";
+import { getDecryptedCredentials, handleWebhookEvent, verifyWebhookSignature } from "@/lib/integrations";
 
 export async function POST(
   request: Request,
@@ -12,23 +12,24 @@ export async function POST(
     const orgId = searchParams.get("orgId") || searchParams.get("organizationId");
 
     const rawBody = await request.text();
-    let payload: any = {};
+    let payload: Record<string, unknown> = {};
     try {
       payload = JSON.parse(rawBody);
     } catch {
       payload = { raw: rawBody };
     }
 
-    // Determine organizationId
-    let resolvedOrgId = orgId;
-    if (!resolvedOrgId) {
-      // Try to find active integration matching provider
-      const integration = await prisma.integration.findFirst({
-        where: { provider },
-        select: { organizationId: true, id: true },
-      });
-      resolvedOrgId = integration?.organizationId ?? null;
-    }
+    const integration = orgId
+      ? await prisma.integration.findFirst({
+          where: { organizationId: orgId, provider },
+          select: { id: true, organizationId: true },
+        })
+      : await prisma.integration.findFirst({
+          where: { provider },
+          select: { id: true, organizationId: true },
+        });
+
+    const resolvedOrgId = orgId || integration?.organizationId || null;
 
     if (!resolvedOrgId) {
       return NextResponse.json(
@@ -37,23 +38,47 @@ export async function POST(
       );
     }
 
-    // Extract external event ID for deduplication
+    let signatureVerified = false;
+    if (integration) {
+      const creds = await getDecryptedCredentials(resolvedOrgId, integration.id);
+      const signingSecret = creds.webhookSecret || creds.apiSecret;
+      if (signingSecret) {
+        const incomingSig =
+          request.headers.get("x-hospitable-signature") ||
+          request.headers.get("x-webhook-signature") ||
+          request.headers.get("signature") ||
+          "";
+        if (!verifyWebhookSignature(rawBody, incomingSig, signingSecret)) {
+          return NextResponse.json(
+            { success: false, error: { message: "Invalid webhook signature." } },
+            { status: 401 },
+          );
+        }
+        signatureVerified = true;
+      }
+    }
+
+    const dataObj = (payload.data && typeof payload.data === "object" ? payload.data : null) as Record<string, unknown> | null;
     const externalId =
       request.headers.get("x-webhook-id") ||
       request.headers.get("x-event-id") ||
-      payload.id ||
-      payload.externalId ||
-      payload.eventId ||
-      null;
+      (typeof payload.id === "string" ? payload.id : null) ||
+      (typeof payload.externalId === "string" ? payload.externalId : null) ||
+      (typeof payload.eventId === "string" ? payload.eventId : null) ||
+      (typeof dataObj?.id === "string" ? `${String(payload.action || payload.event || "ev")}:${dataObj.id}` : null);
 
-    const eventType = payload.type || payload.event || payload.eventType || "generic.event";
+    const eventType = String(
+      payload.action || payload.type || payload.event || payload.eventType || "generic.event",
+    );
 
     const result = await handleWebhookEvent({
       organizationId: resolvedOrgId,
       provider,
+      integrationId: integration?.id ?? null,
       eventType,
       externalId,
       payload,
+      signatureVerified,
     });
 
     return NextResponse.json({
