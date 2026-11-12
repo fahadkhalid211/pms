@@ -933,11 +933,33 @@ export async function syncHospitableTwoWay(input: {
       summary.usersImported += result.usersAdded;
     }
 
-    // 2. Pull Reservations & Guest Details
-    const reservations = await fetchAllHospitablePages<HospitableReservationPayload>(
-      token,
-      "/reservations?include=guest,financials,properties,listings&per_page=50",
-    );
+    // 2. Pull Reservations & Guest Details (Hospitable v2 requires properties[] query param)
+    const propertyUuids = properties.map((p) => p.id).filter(Boolean);
+    const reservations: HospitableReservationPayload[] = [];
+
+    for (let i = 0; i < propertyUuids.length; i += 20) {
+      const batch = propertyUuids.slice(i, i + 20);
+      const propQuery = batch.map((id) => `properties[]=${encodeURIComponent(id)}`).join("&");
+      let batchReservations: HospitableReservationPayload[] = [];
+      try {
+        batchReservations = await fetchAllHospitablePages<HospitableReservationPayload>(
+          token,
+          `/reservations?${propQuery}&include=guest,financials,properties,listings&per_page=50`,
+        );
+      } catch (resErr: unknown) {
+        const msg = (resErr as Error).message || "";
+        // Fallback if token lacks financials/listings scope
+        if (msg.includes("(403)") || msg.includes("scope")) {
+          batchReservations = await fetchAllHospitablePages<HospitableReservationPayload>(
+            token,
+            `/reservations?${propQuery}&include=guest,properties&per_page=50`,
+          );
+        } else {
+          throw resErr;
+        }
+      }
+      reservations.push(...batchReservations);
+    }
 
     for (const hr of reservations) {
       const resResult = await upsertHospitableReservation({
@@ -952,7 +974,7 @@ export async function syncHospitableTwoWay(input: {
       if (resResult.conflict) summary.conflicts.push(resResult.conflict);
     }
 
-    // 3. Push Local PMS Reservations/Blocks Outbound to Hospitable (Two-Way)
+    // 3. Push Local PMS-Originated Bookings/Blocks Outbound to Hospitable (Two-Way)
     const today = toUtcMidnight(new Date());
     const horizon = new Date(today.getTime() + 180 * 86400000);
 
@@ -963,6 +985,10 @@ export async function syncHospitableTwoWay(input: {
           propertyId: mapping.propertyId,
           date: { gte: today, lte: horizon },
           status: { in: ["reserved", "blocked", "maintenance"] },
+          OR: [
+            { reservationId: null },
+            { reservation: { NOT: { code: { startsWith: "HSP-" } } } },
+          ],
         },
         select: { date: true },
       });
@@ -972,11 +998,17 @@ export async function syncHospitableTwoWay(input: {
           date: d,
           available: false,
         }));
-        await hospitableRequest(token, `/properties/${hospitableUuid}/calendar`, {
-          method: "PUT",
-          body: JSON.stringify({ dates: uniqueDates }),
-        });
-        summary.datesPushed += uniqueDates.length;
+        try {
+          await hospitableRequest(token, `/properties/${hospitableUuid}/calendar`, {
+            method: "PUT",
+            body: JSON.stringify({ dates: uniqueDates }),
+          });
+          summary.datesPushed += uniqueDates.length;
+        } catch (pushErr: unknown) {
+          summary.conflicts.push(
+            `Outbound calendar push skipped for ${hospitableUuid}: ${(pushErr as Error).message}`,
+          );
+        }
       }
     }
 

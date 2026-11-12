@@ -140,6 +140,16 @@ describe("Staff Accounts, Hospitable Two-Way Sync & OTA Sign-In", () => {
       }
 
       if (url.includes("/v2/reservations?") && method === "GET") {
+        if (!url.includes(`properties[]=${encodeURIComponent(`hsp-prop-${ts}`)}`)) {
+          return new Response(
+            JSON.stringify({
+              status_code: 400,
+              reason_phrase: "The properties field is required.",
+              errors: { properties: ["The properties field is required."] },
+            }),
+            { status: 400, headers: { "Content-Type": "application/json" } },
+          );
+        }
         return new Response(
           JSON.stringify({
             data: [
