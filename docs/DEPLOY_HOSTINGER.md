@@ -18,7 +18,7 @@ hPanel > Websites > Add website > Node.js Apps. Import the Git repository (or up
 | Build command | `npm run build` |
 | Start command | `npm run start:prod` |
 
-`start:prod` applies pending database migrations (`prisma migrate deploy`) and then starts the app, so the tables are created on first start.
+`start` and `start:prod` both apply pending database migrations (`prisma migrate deploy`) and then start the app, so the tables are created on first start.
 
 ## 3. Environment variables
 Set these in the app's Environment Variables panel **before building** (`NEXT_PUBLIC_*` values are baked in at build time). Generate your own secrets; never reuse examples.
