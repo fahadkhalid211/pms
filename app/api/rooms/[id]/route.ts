@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
 import { dal, NotFoundError, CrossTenantViolationError } from "@/lib/dal";
 import { InvalidOperationError } from "@/lib/operations";
@@ -19,13 +20,47 @@ export async function GET(
   try {
     const { id } = await params;
     const user = await requirePermission("rooms.view");
+    const organizationId = user.organizationId!;
 
     const room = await dal.rooms.findUnique(
-      { organizationId: user.organizationId! },
+      { organizationId },
       id,
     );
 
-    return NextResponse.json({ success: true, data: room });
+    const [reservationRooms, housekeepingTasks, maintenanceTickets] = await Promise.all([
+      prisma.reservationRoom.findMany({
+        where: { organizationId, roomId: id },
+        include: {
+          reservation: {
+            include: {
+              guest: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
+            },
+          },
+        },
+        orderBy: { reservation: { checkIn: "desc" } },
+        take: 50,
+      }),
+      prisma.housekeepingTask.findMany({
+        where: { organizationId, roomId: id },
+        orderBy: { createdAt: "desc" },
+        take: 25,
+      }),
+      prisma.maintenanceTicket.findMany({
+        where: { organizationId, roomId: id },
+        orderBy: { createdAt: "desc" },
+        take: 25,
+      }),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...room,
+        reservations: reservationRooms.map((rr) => rr.reservation),
+        housekeepingTasks,
+        maintenanceTickets,
+      },
+    });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ success: false, error: { message: error.message } }, { status: 404 });

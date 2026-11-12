@@ -19,8 +19,8 @@ interface ReservationRow {
   adults: number;
   children: number;
   source: string;
-  property: { name: string } | null;
-  guest: { firstName: string; lastName: string; email: string } | null;
+  property: { id?: string; name: string } | null;
+  guest: { id?: string; firstName: string; lastName: string; email: string } | null;
 }
 
 const STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "muted"> = {
@@ -142,15 +142,30 @@ export default function ReservationsPage() {
                 ) : (
                   items.map((r) => (
                     <tr key={r.id} className="border-b last:border-0 hover:bg-muted/40">
-                      <td className="p-3 font-medium">{r.code}</td>
-                      <td className="p-3">{r.guest ? `${r.guest.firstName} ${r.guest.lastName}` : "—"}</td>
-                      <td className="p-3">{new Date(r.checkIn).toDateString()}</td>
-                      <td className="p-3">{new Date(r.checkOut).toDateString()}</td>
+                      <td className="p-3 font-medium">
+                        <Link href={`/reservations/${r.id}`} className="font-mono text-primary hover:underline">
+                          {r.code}
+                        </Link>
+                      </td>
+                      <td className="p-3">
+                        {r.guest?.id ? (
+                          <Link href={`/guests/${r.guest.id}`} className="hover:text-primary hover:underline">
+                            {r.guest.firstName} {r.guest.lastName}
+                          </Link>
+                        ) : r.guest ? (
+                          `${r.guest.firstName} ${r.guest.lastName}`
+                        ) : "—"}
+                      </td>
+                      <td className="p-3">{new Date(r.checkIn).toISOString().slice(0, 10)}</td>
+                      <td className="p-3">{new Date(r.checkOut).toISOString().slice(0, 10)}</td>
                       <td className="p-3">{r.adults + r.children}</td>
                       <td className="p-3 capitalize">{r.source}</td>
                       <td className="p-3"><Badge variant={STATUS_BADGE_VARIANTS[r.status] ?? "muted"}>{r.status.replace(/_/g, " ")}</Badge></td>
-                      <td className="p-3 text-right">
-                        <Button variant="ghost" size="sm" onClick={() => setSelected(r)}>Manage</Button>
+                      <td className="p-3 text-right space-x-1 whitespace-nowrap">
+                        <Link href={`/reservations/${r.id}`}>
+                          <Button variant="outline" size="sm">Open</Button>
+                        </Link>
+                        <Button variant="ghost" size="sm" onClick={() => setSelected(r)}>Quick Edit</Button>
                       </td>
                     </tr>
                   ))

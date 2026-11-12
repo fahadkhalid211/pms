@@ -510,13 +510,22 @@ export default function PropertyDetailPage() {
                   </thead>
                   <tbody className="divide-y">
                     {filteredBookings.map((r) => {
-                      const roomLabels = r.rooms?.map((rr) => rr.room?.number || rr.room?.name).filter(Boolean).join(", ") || "—";
                       const guestName = r.guest ? `${r.guest.firstName} ${r.guest.lastName}` : "Walk-in / Unassigned";
                       return (
                         <tr key={r.id} className="hover:bg-muted/20">
-                          <td className="p-3 font-mono font-semibold text-foreground">{r.code}</td>
+                          <td className="p-3 font-mono font-semibold text-foreground">
+                            <Link href={`/reservations/${r.id}`} className="text-primary hover:underline">
+                              {r.code}
+                            </Link>
+                          </td>
                           <td className="p-3">
-                            <div className="font-medium text-foreground">{guestName}</div>
+                            {r.guest ? (
+                              <Link href={`/guests/${r.guest.id}`} className="font-medium text-foreground hover:text-primary hover:underline">
+                                {guestName}
+                              </Link>
+                            ) : (
+                              <div className="font-medium text-foreground">{guestName}</div>
+                            )}
                             <div className="text-[11px] text-muted-foreground">
                               {r.guest?.email || r.guest?.phone || `${r.adults} adults`}
                             </div>
@@ -527,7 +536,19 @@ export default function PropertyDetailPage() {
                               {r.adults} adult{r.adults === 1 ? "" : "s"}{r.children > 0 ? `, ${r.children} children` : ""}
                             </div>
                           </td>
-                          <td className="p-3 font-medium">{roomLabels}</td>
+                          <td className="p-3 font-medium">
+                            {r.rooms && r.rooms.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {r.rooms.map((rr, idx) =>
+                                  rr.room ? (
+                                    <Link key={rr.room.id || idx} href={`/rooms/${rr.room.id}`} className="text-primary hover:underline">
+                                      {rr.room.number || rr.room.name}
+                                    </Link>
+                                  ) : null,
+                                )}
+                              </div>
+                            ) : "—"}
+                          </td>
                           <td className="p-3">
                             <Badge variant="outline" className="text-[10px] uppercase">{r.source}</Badge>
                             {r.notes && <div className="text-[11px] text-muted-foreground truncate max-w-[180px]" title={r.notes}>{r.notes}</div>}
@@ -679,9 +700,13 @@ export default function PropertyDetailPage() {
                 <p className="text-muted-foreground">No rooms configured yet.</p>
               ) : (
                 property.rooms.map((room) => (
-                  <div key={room.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <Link
+                    key={room.id}
+                    href={`/rooms/${room.id}`}
+                    className="flex items-center justify-between rounded-lg border p-3 hover:border-primary/40 hover:bg-muted/20 transition-colors"
+                  >
                     <div>
-                      <div className="font-semibold">
+                      <div className="font-semibold text-foreground hover:text-primary">
                         {room.number} {room.name ? `· ${room.name}` : ""}
                       </div>
                       <div className="text-muted-foreground">
@@ -689,7 +714,7 @@ export default function PropertyDetailPage() {
                       </div>
                     </div>
                     <Badge variant="outline" className="capitalize text-[10px]">{room.status.replace(/_/g, " ")}</Badge>
-                  </div>
+                  </Link>
                 ))
               )}
             </CardContent>

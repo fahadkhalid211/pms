@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
         id: `guest_${g.id}`,
         title: fullName,
         subtitle: [g.email, g.phone].filter(Boolean).join(" • ") || "No contact info",
-        url: `/guests?id=${g.id}`,
+        url: `/guests/${g.id}`,
         category: "guest",
       });
     }
@@ -190,7 +190,7 @@ export async function GET(req: NextRequest) {
         id: `room_${rm.id}`,
         title: `Room ${rm.number} — ${rm.property?.name ?? ""}`,
         subtitle: `${rm.roomType?.name ?? "Standard"} • Status: ${rm.status}`,
-        url: `/rooms?id=${rm.id}`,
+        url: `/rooms/${rm.id}`,
         category: "room",
         badge: rm.status,
       });

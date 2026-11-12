@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
@@ -217,6 +218,7 @@ export default function RoomsPage() {
                   <thead>
                     <tr className="border-b bg-muted/40">
                       <th className="p-3 text-left">Room Number</th>
+                      <th className="p-3 text-left">Property</th>
                       <th className="p-3 text-left">Room Type</th>
                       <th className="p-3 text-left">Base Rate</th>
                       <th className="p-3 text-left">Status</th>
@@ -225,14 +227,25 @@ export default function RoomsPage() {
                   <tbody>
                     {rooms.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="p-6 text-center text-muted-foreground">
+                        <td colSpan={5} className="p-6 text-center text-muted-foreground">
                           No rooms yet. Add your first room above or use the Setup Wizard.
                         </td>
                       </tr>
                     ) : (
                       rooms.map((r) => (
-                        <tr key={r.id} className="border-b last:border-0 hover:bg-muted/10">
-                          <td className="p-3 font-semibold">Room {r.number}</td>
+                        <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
+                          <td className="p-3 font-semibold">
+                            <Link href={`/rooms/${r.id}`} className="text-primary hover:underline">
+                              Room {r.number}
+                            </Link>
+                          </td>
+                          <td className="p-3">
+                            {r.property ? (
+                              <Link href={`/properties/${r.property.id}`} className="hover:text-primary hover:underline">
+                                {r.property.name}
+                              </Link>
+                            ) : "—"}
+                          </td>
                           <td className="p-3">{r.roomType?.name ?? "—"}</td>
                           <td className="p-3">
                             {r.roomType?.baseRate ? `$${Number(r.roomType.baseRate).toFixed(2)} / night` : "—"}

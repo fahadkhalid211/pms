@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input, Label, Select } from "@/components/ui/input";
+import { Input, Label } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { ChevronRight } from "lucide-react";
 
 interface Guest {
   id: string;
@@ -69,12 +71,17 @@ export default function GuestsPage() {
           </CardContent>
           <CardContent className="space-y-2">
             {guests.length === 0 ? <p className="text-sm text-muted-foreground">No guests found.</p> : guests.map((g) => (
-              <div key={g.id} className="flex items-center justify-between rounded-lg border p-3">
+              <Link
+                key={g.id}
+                href={`/guests/${g.id}`}
+                className="group flex items-center justify-between rounded-lg border p-3 transition-colors hover:border-primary/40 hover:bg-muted/30"
+              >
                 <div>
-                  <div className="font-medium">{g.firstName} {g.lastName}</div>
-                  <div className="text-sm text-muted-foreground">{g.email ?? "—"} · {g._count?.reservations ?? 0} reservations</div>
+                  <div className="font-medium group-hover:text-primary transition-colors">{g.firstName} {g.lastName}</div>
+                  <div className="text-sm text-muted-foreground">{g.email ?? "—"} · {g.phone ?? "No phone"} · {g._count?.reservations ?? 0} reservations</div>
                 </div>
-              </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
+              </Link>
             ))}
           </CardContent>
         </Card>

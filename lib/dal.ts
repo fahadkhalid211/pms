@@ -262,7 +262,7 @@ export const dal = {
   reservations: {
     async findMany(ctx: TenantContext, filters?: { propertyId?: string; status?: string; search?: string; from?: string; to?: string; page?: number; pageSize?: number }) {
       const page = Math.max(1, filters?.page ?? 1);
-      const pageSize = Math.min(100, Math.max(1, filters?.pageSize ?? 20));
+      const pageSize = Math.min(250, Math.max(1, filters?.pageSize ?? 20));
       const propId = filters?.propertyId ?? ctx.propertyId ?? undefined;
 
       const where: Prisma.ReservationWhereInput = {
