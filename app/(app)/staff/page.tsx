@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { parseCsvRecords } from "@/lib/csv";
 import {
   UserPlus,
   Users,
@@ -16,6 +17,8 @@ import {
   PauseCircle,
   PlayCircle,
   RefreshCw,
+  Upload,
+  FileSpreadsheet,
 } from "lucide-react";
 
 interface StaffMember {
@@ -77,6 +80,82 @@ export default function StaffPage() {
   const [selectedPropertyIds, setSelectedPropertyIds] = React.useState<string[]>([]);
   const [submitting, setSubmitting] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+
+  // Bulk Import Users State
+  const [bulkOpen, setBulkOpen] = React.useState(false);
+  const [bulkText, setBulkText] = React.useState("");
+  const [bulkBusy, setBulkBusy] = React.useState(false);
+
+  const SAMPLE_USERS_CSV = `name,email,role,password,property_codes
+Elena Rostova,elena@yourhotel.com,manager,StrongPass123!,
+Carlos Mendez,carlos@yourhotel.com,front_desk,FrontDesk123!,
+Maria Sanchez,maria@yourhotel.com,housekeeping,,`;
+
+  const parsedBulkUsers = React.useMemo(() => {
+    const trimmed = bulkText.trim();
+    if (!trimmed) return [];
+    const validRoles = new Set(["admin", "manager", "front_desk", "housekeeping"]);
+    if (trimmed.startsWith("[")) {
+      try {
+        const arr = JSON.parse(trimmed);
+        return Array.isArray(arr) ? arr.filter((u) => u && u.email && u.name) : [];
+      } catch {
+        return [];
+      }
+    }
+    return parseCsvRecords(trimmed)
+      .filter((r) => (r.email || "").trim() && (r.name || r.full_name || "").trim())
+      .map((r) => {
+        const rawRole = (r.role || r.role_key || "front_desk").toLowerCase().trim();
+        const rawCodes = (r.property_codes || r.properties || "").trim();
+        return {
+          name: (r.name || r.full_name).trim(),
+          email: r.email.trim(),
+          roleKey: validRoles.has(rawRole) ? rawRole : "front_desk",
+          password: (r.password || "").trim(),
+          propertyCodes: rawCodes ? rawCodes.split(/[;|]/).map((s) => s.trim()).filter(Boolean) : [],
+        };
+      });
+  }, [bulkText]);
+
+  function handleBulkFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") setBulkText(reader.result);
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleBulkImportSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (parsedBulkUsers.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const res = await fetch("/api/staff/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ users: parsedBulkUsers }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        toast({ title: "Bulk user import failed", description: json.error?.message, variant: "destructive" });
+        return;
+      }
+      toast({
+        title: "Bulk users imported",
+        description: `Imported ${json.data.imported} user(s)${json.data.skippedCount ? ` (${json.data.skippedCount} skipped)` : ""}.`,
+      });
+      setBulkOpen(false);
+      setBulkText("");
+      void loadStaff();
+    } catch {
+      toast({ title: "Network error", description: "Failed to import users.", variant: "destructive" });
+    } finally {
+      setBulkBusy(false);
+    }
+  }
 
   const loadStaff = React.useCallback(async () => {
     setLoading(true);
@@ -201,10 +280,14 @@ export default function StaffPage() {
             Add staff accounts, assign operational roles, and scope property access across your team.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => void loadStaff()} disabled={loading} className="gap-1.5">
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} strokeWidth={1.5} />
             Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)} className="gap-1.5">
+            <Upload className="h-4 w-4" strokeWidth={1.5} />
+            Bulk Import Users
           </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1.5">
             <UserPlus className="h-4 w-4" strokeWidth={1.5} />
@@ -434,6 +517,72 @@ export default function StaffPage() {
             </Button>
             <Button type="submit" size="sm" disabled={submitting}>
               {submitting ? "Creating..." : "Create Staff Account"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+
+      {/* Bulk Import Users Modal */}
+      <Dialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        title="Bulk Import Staff Accounts"
+        description="Upload a CSV file or paste CSV / JSON rows. Users without a password are created as invited."
+      >
+        <form onSubmit={handleBulkImportSubmit} className="space-y-4 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="inline-flex items-center gap-1.5 cursor-pointer rounded-md border px-2.5 py-1.5 font-medium hover:bg-muted/40">
+              <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
+              <span>Upload CSV File</span>
+              <input type="file" accept=".csv,.txt,.json" className="hidden" onChange={handleBulkFileUpload} />
+            </label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setBulkText(SAMPLE_USERS_CSV)}
+            >
+              Load Sample CSV
+            </Button>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="bulk-users-text">CSV (headers: name,email,role,password,property_codes) or JSON</Label>
+            <textarea
+              id="bulk-users-text"
+              rows={6}
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={SAMPLE_USERS_CSV}
+              className="w-full rounded-md border border-input bg-background p-2.5 font-mono text-[11px]"
+            />
+          </div>
+
+          {parsedBulkUsers.length > 0 && (
+            <div className="rounded-md border max-h-36 overflow-y-auto">
+              <div className="bg-muted/40 px-2.5 py-1.5 font-semibold border-b">
+                Preview: {parsedBulkUsers.length} user(s) ready to import
+              </div>
+              <div className="divide-y">
+                {parsedBulkUsers.slice(0, 10).map((u, idx) => (
+                  <div key={idx} className="px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="font-medium">{u.name} ({u.email})</span>
+                    <span className="text-muted-foreground capitalize">
+                      {u.roleKey.replace("_", " ")} · {u.password ? "Active" : "Invited"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setBulkOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" disabled={bulkBusy || parsedBulkUsers.length === 0}>
+              {bulkBusy ? "Importing..." : `Import ${parsedBulkUsers.length || ""} Users`}
             </Button>
           </div>
         </form>
