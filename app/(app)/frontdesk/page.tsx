@@ -20,6 +20,7 @@ import {
   Search,
   Calendar,
   Building2,
+  BedDouble,
 } from "lucide-react";
 
 interface ReservationRoom {
@@ -735,16 +736,21 @@ export default function FrontDeskPage() {
 
       {/* Room Status Rack */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Room Status & Inventory Rack ({filteredRooms.length})</CardTitle>
-              <CardDescription>Real-time room occupancy, cleaning state, and maintenance status. Click any room to open details.</CardDescription>
+              <CardTitle className="text-base flex items-center gap-2">
+                <BedDouble className="h-4 w-4 text-primary" />
+                Room Status &amp; Inventory Rack ({filteredRooms.length})
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Real-time room occupancy, cleaning state, and maintenance status. Click any room to open details.
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {filteredRooms.map((room) => {
               const statusColor =
                 room.status === "occupied"
@@ -758,10 +764,14 @@ export default function FrontDeskPage() {
                   : "border-border";
 
               return (
-                <div key={room.id} className={`flex flex-col justify-between rounded-lg border-2 p-3 ${statusColor}`}>
+                <div key={room.id} className={`flex flex-col justify-between rounded-lg border p-2.5 ${statusColor}`}>
                   <div>
-                    <div className="flex items-center justify-between">
-                      <Link href={`/rooms/${room.id}`} className="text-lg font-bold hover:text-primary hover:underline">
+                    <div className="flex items-start justify-between gap-1.5">
+                      <Link
+                        href={`/rooms/${room.id}`}
+                        className="text-xs font-semibold leading-snug hover:text-primary hover:underline line-clamp-2"
+                        title={formatRoomDisplayName(room)}
+                      >
                         {formatRoomDisplayName(room)}
                       </Link>
                       <Badge
@@ -772,21 +782,26 @@ export default function FrontDeskPage() {
                             ? "secondary"
                             : "destructive"
                         }
+                        className="text-[10px] capitalize shrink-0 px-1.5 py-0.5"
                       >
                         {room.status}
                       </Badge>
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {room.roomType?.name ?? "Standard"} {room.floor ? `· Floor ${room.floor}` : ""}
+                    <div className="mt-1 text-[11px] text-muted-foreground flex flex-wrap items-center gap-1">
+                      {room.property?.name && (
+                        <span className="truncate max-w-[120px]">{room.property.name} &bull;</span>
+                      )}
+                      <span>{room.roomType?.name ?? "Standard"}</span>
+                      {room.floor && <span>&bull; Floor {room.floor}</span>}
                     </div>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-1 border-t pt-2">
+                  <div className="mt-2.5 flex flex-wrap gap-1 border-t pt-2">
                     {room.status === "dirty" && (
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs"
+                        className="h-6 px-2 text-[11px]"
                         onClick={() => void handleQuickStatusChange(room.id, "clean")}
                       >
                         <Sparkles className="mr-1 h-3 w-3" /> Clean
@@ -796,7 +811,7 @@ export default function FrontDeskPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs"
+                        className="h-6 px-2 text-[11px]"
                         onClick={() => void handleQuickStatusChange(room.id, "inspected")}
                       >
                         Inspect
@@ -806,7 +821,7 @@ export default function FrontDeskPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs text-rose-600"
+                        className="h-6 px-2 text-[11px] text-rose-600"
                         onClick={() => void handleQuickStatusChange(room.id, "out_of_service")}
                       >
                         Out of order
@@ -816,7 +831,7 @@ export default function FrontDeskPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs text-emerald-600"
+                        className="h-6 px-2 text-[11px] text-emerald-600"
                         onClick={() => void handleQuickStatusChange(room.id, "clean")}
                       >
                         Restore
