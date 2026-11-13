@@ -6,6 +6,7 @@ import { requirePermission } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/passwords";
 import { syncSystemRolesAndPermissions } from "@/lib/permissions";
 import { logActivity } from "@/lib/audit";
+import { parseCsvRecords, parseXlsxRecords } from "@/lib/csv";
 
 const STAFF_ROLE_KEYS = ["admin", "manager", "front_desk", "housekeeping"] as const;
 
@@ -30,8 +31,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: { message: "Organization required" } }, { status: 400 });
     }
 
-    const body = await request.json();
-    const parsed = bulkUsersPayloadSchema.safeParse(body);
+    let usersInput: unknown[] = [];
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const file = formData.get("file");
+      if (!(file instanceof File)) {
+        return NextResponse.json({ success: false, error: { message: "No spreadsheet file (.xlsx/.csv) uploaded." } }, { status: 400 });
+      }
+      const buffer = await file.arrayBuffer();
+      const isXlsx = /\.(xlsx|xls)$/i.test(file.name);
+      const records = isXlsx ? parseXlsxRecords(buffer) : parseCsvRecords(new TextDecoder().decode(buffer));
+      usersInput = records.map((r) => {
+        const rawRole = (r.role || r.role_key || "front_desk").toLowerCase().trim();
+        const rawCodes = (r.property_codes || r.properties || "").trim();
+        return {
+          name: (r.name || r.full_name || "").trim(),
+          email: (r.email || "").trim(),
+          roleKey: rawRole,
+          password: (r.password || "").trim() || undefined,
+          propertyCodes: rawCodes ? rawCodes.split(/[;|]/).map((s) => s.trim()).filter(Boolean) : [],
+        };
+      });
+    } else {
+      const body = await request.json();
+      usersInput = body.users;
+    }
+
+    const parsed = bulkUsersPayloadSchema.safeParse({ users: usersInput });
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: { message: parsed.error.issues[0]?.message ?? "Invalid bulk users payload" } },

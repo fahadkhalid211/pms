@@ -4,6 +4,7 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/auth/session";
 import { logActivity } from "@/lib/audit";
+import { parseCsvRecords, parseXlsxRecords } from "@/lib/csv";
 
 const bulkPropertyItemSchema = z.object({
   name: z.string().trim().min(1, "Property name is required"),
@@ -47,8 +48,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: { message: "No organization context found." } }, { status: 400 });
     }
 
-    const body = await request.json();
-    const parsed = bulkPropertiesPayloadSchema.safeParse(body);
+    let propertiesInput: unknown[] = [];
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const file = formData.get("file");
+      if (!(file instanceof File)) {
+        return NextResponse.json({ success: false, error: { message: "No spreadsheet file (.xlsx/.csv) uploaded." } }, { status: 400 });
+      }
+      const buffer = await file.arrayBuffer();
+      const isXlsx = /\.(xlsx|xls)$/i.test(file.name);
+      const records = isXlsx ? parseXlsxRecords(buffer) : parseCsvRecords(new TextDecoder().decode(buffer));
+      propertiesInput = records.map((r) => ({
+        name: (r.name || r.property_name || "").trim(),
+        code: (r.code || "").trim() || undefined,
+        addressLine1: (r.address_line1 || r.address || "").trim() || undefined,
+        city: (r.city || "").trim() || undefined,
+        state: (r.state || "").trim() || undefined,
+        postalCode: (r.postal_code || r.zip || "").trim() || undefined,
+        country: (r.country || "").trim() || undefined,
+        phone: (r.phone || "").trim() || undefined,
+        email: (r.email || "").trim() || undefined,
+        timezone: (r.timezone || "UTC").trim(),
+        currency: (r.currency || "USD").trim().toUpperCase(),
+        checkInTime: r.check_in_time ? Number(r.check_in_time) : undefined,
+        checkOutTime: r.check_out_time ? Number(r.check_out_time) : undefined,
+        taxRate: r.tax_rate ? Number(r.tax_rate) : undefined,
+        cleaningFee: r.cleaning_fee ? Number(r.cleaning_fee) : undefined,
+        description: (r.description || "").trim() || undefined,
+        roomsCount: r.rooms_count ? Number(r.rooms_count) : undefined,
+        roomTypeName: (r.room_type_name || r.room_type || "").trim() || undefined,
+        baseRate: r.base_rate || r.rate ? Number(r.base_rate || r.rate) : undefined,
+      }));
+    } else {
+      const body = await request.json();
+      propertiesInput = body.properties;
+    }
+
+    const parsed = bulkPropertiesPayloadSchema.safeParse({ properties: propertiesInput });
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: { message: parsed.error.issues[0]?.message ?? "Invalid bulk property payload" } },

@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { parseCsvRecords } from "@/lib/csv";
-import { Building2, ChevronRight, BedDouble, Calendar, Upload, FileSpreadsheet } from "lucide-react";
+import { parseCsvRecords, xlsxToCsv, generateSampleXlsx } from "@/lib/csv";
+import { Building2, ChevronRight, BedDouble, Calendar, Upload, FileSpreadsheet, Download } from "lucide-react";
 
 interface Property {
   id: string;
@@ -97,14 +97,46 @@ export default function PropertiesPage() {
       }));
   }, [bulkText]);
 
-  function handleCsvFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleSpreadsheetFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") setBulkText(reader.result);
-    };
-    reader.readAsText(file);
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          const csv = xlsxToCsv(reader.result);
+          setBulkText(csv);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") setBulkText(reader.result);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  function downloadExcelTemplate() {
+    const buffer = generateSampleXlsx(
+      ["name", "code", "city", "country", "currency", "timezone", "rooms_count", "base_rate"],
+      [
+        ["Seaside Resort", "SSR", "San Diego", "USA", "USD", "America/Los_Angeles", 10, 185],
+        ["Mountain Chalet", "MTC", "Aspen", "USA", "USD", "America/Denver", 4, 320],
+        ["Azure Sunset Villa", "ASV", "Santorini", "Greece", "EUR", "Europe/Athens", 1, 240],
+      ],
+    );
+    const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "properties_import_template.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function handleBulkImportSubmit(e: React.FormEvent) {
@@ -256,28 +288,40 @@ export default function PropertiesPage() {
         open={bulkOpen}
         onOpenChange={setBulkOpen}
         title="Bulk Import Properties"
-        description="Upload a CSV file or paste CSV / JSON rows. Each property also initializes default rooms automatically."
+        description="Upload an Excel sheet (.xlsx/.xls) or CSV, or paste CSV / JSON data. Each property initializes default rooms automatically."
       >
         <form onSubmit={handleBulkImportSubmit} className="space-y-4 text-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="inline-flex items-center gap-1.5 cursor-pointer rounded-md border px-2.5 py-1.5 font-medium hover:bg-muted/40">
               <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
-              <span>Upload CSV File</span>
-              <input type="file" accept=".csv,.txt,.json" className="hidden" onChange={handleCsvFileUpload} />
+              <span>Upload Excel (.xlsx) / CSV</span>
+              <input type="file" accept=".xlsx,.xls,.csv,.txt,.json" className="hidden" onChange={handleSpreadsheetFileUpload} />
             </label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => setBulkText(SAMPLE_PROPERTIES_CSV)}
-            >
-              Load Sample CSV
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={downloadExcelTemplate}
+              >
+                <Download className="h-3.5 w-3.5" />
+                Excel Template
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setBulkText(SAMPLE_PROPERTIES_CSV)}
+              >
+                Sample CSV
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="bulk-props-text">CSV (headers: name,code,city,country,currency,timezone,rooms_count,base_rate) or JSON</Label>
+            <Label htmlFor="bulk-props-text">Spreadsheet Data (CSV / JSON preview & edit)</Label>
             <textarea
               id="bulk-props-text"
               rows={6}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { parseCsvRecords } from "@/lib/csv";
+import { parseCsvRecords, xlsxToCsv, generateSampleXlsx } from "@/lib/csv";
 import {
   UserPlus,
   Users,
@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Upload,
   FileSpreadsheet,
+  Download,
 } from "lucide-react";
 
 interface StaffMember {
@@ -121,11 +122,43 @@ Maria Sanchez,maria@yourhotel.com,housekeeping,,`;
   function handleBulkFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") setBulkText(reader.result);
-    };
-    reader.readAsText(file);
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          const csv = xlsxToCsv(reader.result);
+          setBulkText(csv);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") setBulkText(reader.result);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  function downloadExcelTemplate() {
+    const buffer = generateSampleXlsx(
+      ["name", "email", "role", "password", "property_codes"],
+      [
+        ["Elena Rostova", "elena@yourhotel.com", "manager", "StrongPass123!", "LUM"],
+        ["Carlos Mendez", "carlos@yourhotel.com", "front_desk", "FrontDesk123!", "LUM"],
+        ["Maria Sanchez", "maria@yourhotel.com", "housekeeping", "", "LUM"],
+      ],
+    );
+    const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "staff_import_template.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function handleBulkImportSubmit(e: React.FormEvent) {
@@ -527,28 +560,40 @@ Maria Sanchez,maria@yourhotel.com,housekeeping,,`;
         open={bulkOpen}
         onOpenChange={setBulkOpen}
         title="Bulk Import Staff Accounts"
-        description="Upload a CSV file or paste CSV / JSON rows. Users without a password are created as invited."
+        description="Upload an Excel sheet (.xlsx/.xls) or CSV, or paste CSV / JSON data. Users without a password are created as invited."
       >
         <form onSubmit={handleBulkImportSubmit} className="space-y-4 text-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="inline-flex items-center gap-1.5 cursor-pointer rounded-md border px-2.5 py-1.5 font-medium hover:bg-muted/40">
               <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
-              <span>Upload CSV File</span>
-              <input type="file" accept=".csv,.txt,.json" className="hidden" onChange={handleBulkFileUpload} />
+              <span>Upload Excel (.xlsx) / CSV</span>
+              <input type="file" accept=".xlsx,.xls,.csv,.txt,.json" className="hidden" onChange={handleBulkFileUpload} />
             </label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => setBulkText(SAMPLE_USERS_CSV)}
-            >
-              Load Sample CSV
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={downloadExcelTemplate}
+              >
+                <Download className="h-3.5 w-3.5" />
+                Excel Template
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setBulkText(SAMPLE_USERS_CSV)}
+              >
+                Sample CSV
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="bulk-users-text">CSV (headers: name,email,role,password,property_codes) or JSON</Label>
+            <Label htmlFor="bulk-users-text">Spreadsheet Data (CSV / JSON preview & edit)</Label>
             <textarea
               id="bulk-users-text"
               rows={6}

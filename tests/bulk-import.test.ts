@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from "vitest";
 import prisma from "@/lib/db";
 import { createUserWithContext, authenticate } from "@/lib/auth/actions";
-import { parseCsvRecords } from "@/lib/csv";
+import { parseCsvRecords, parseXlsxRecords, xlsxToCsv, generateSampleXlsx } from "@/lib/csv";
 import * as sessionModule from "@/lib/auth/session";
 import { POST as bulkPropertiesPost } from "@/app/api/properties/bulk/route";
 import { POST as bulkStaffPost } from "@/app/api/staff/bulk/route";
@@ -174,5 +174,67 @@ describe("Bulk Imports & Front Desk ISO Arrival Filtering", () => {
     });
     expect(invitedUser?.status).toBe("invited");
     expect(invitedUser?.propertyMemberships).toHaveLength(1);
+  });
+
+  it("5. parseXlsxRecords and xlsxToCsv parse Excel workbooks (.xlsx) with normalized headers and text conversion", () => {
+    const headers = ["Property Name", "Code", "City", "Country", "Rooms Count", "Base Rate"];
+    const rows = [
+      ["Emerald Bay Lodge", "EBL", "Lake Tahoe", "USA", 5, 295],
+      ["Sapphire Peak Cabin", "SPC", "Banff", "Canada", 2, 210],
+    ];
+
+    const xlsxBuffer = generateSampleXlsx(headers, rows);
+    expect(xlsxBuffer.length).toBeGreaterThan(0);
+
+    const parsed = parseXlsxRecords(xlsxBuffer);
+    expect(parsed).toHaveLength(2);
+    expect(parsed[0]).toEqual({
+      property_name: "Emerald Bay Lodge",
+      code: "EBL",
+      city: "Lake Tahoe",
+      country: "USA",
+      rooms_count: "5",
+      base_rate: "295",
+    });
+
+    const csvText = xlsxToCsv(xlsxBuffer);
+    expect(csvText).toContain("Emerald Bay Lodge");
+    expect(csvText).toContain("Sapphire Peak Cabin");
+  });
+
+  it("6. POST /api/properties/bulk supports multipart/form-data with binary .xlsx spreadsheet uploads", async () => {
+    vi.spyOn(sessionModule, "requirePermission").mockResolvedValue(adminUser as never);
+
+    const headers = ["name", "code", "city", "rooms_count", "base_rate"];
+    const rows = [
+      ["Glacier View Suite", "GVS", "Anchorage", 1, 199],
+    ];
+    const xlsxBuffer = generateSampleXlsx(headers, rows);
+
+    const formData = new FormData();
+    const file = new File([xlsxBuffer.buffer as ArrayBuffer], "glacier_properties.xlsx", {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    formData.append("file", file);
+
+    const req = new Request("http://localhost/api/properties/bulk", {
+      method: "POST",
+      body: formData,
+    });
+
+    const res = await bulkPropertiesPost(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(json.success).toBe(true);
+    expect(json.data.imported).toBe(1);
+
+    const createdProp = await prisma.property.findFirst({
+      where: { organizationId: orgId, code: "GVS" },
+      include: { rooms: true },
+    });
+    expect(createdProp).not.toBeNull();
+    expect(createdProp?.rooms).toHaveLength(1);
+    expect(createdProp?.rooms[0]?.name).toBe("Glacier View Suite");
   });
 });
