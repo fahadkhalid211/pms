@@ -13,6 +13,12 @@ import {
   resolveOAuthAuthorizePlan,
 } from "@/lib/integrations/ota";
 import { createReservation, cancelReservation } from "@/lib/reservations";
+import {
+  GET as webhookGet,
+  HEAD as webhookHead,
+  OPTIONS as webhookOptions,
+  POST as webhookPost,
+} from "@/app/api/integrations/webhooks/[provider]/route";
 import crypto from "crypto";
 
 describe("Staff Accounts, Hospitable Two-Way Sync & OTA Sign-In", () => {
@@ -389,5 +395,64 @@ describe("Staff Accounts, Hospitable Two-Way Sync & OTA Sign-In", () => {
     expect(icalRes.eventsFound).toBe(1);
     expect(icalRes.imported).toBe(1);
     expect(icalRes.conflicts).toHaveLength(0);
+  });
+
+  it("5. Hospitable Webhook Handshake & Verification: handles GET, HEAD, OPTIONS probes and initial test ping without errors", async () => {
+    // 5.1 GET Probe: Uptime checks & connectivity checks return 200 OK
+    const getReq = new Request(`https://pms.example.com/api/integrations/webhooks/hospitable?orgId=${orgId}`);
+    const getRes = await webhookGet(getReq, { params: Promise.resolve({ provider: "hospitable" }) });
+    expect(getRes.status).toBe(200);
+    const getJson = await getRes.json();
+    expect(getJson.status).toBe("ok");
+    expect(getJson.provider).toBe("hospitable");
+    expect(getJson.active).toBe(true);
+
+    // 5.2 HEAD Probe: Responds with 200 OK and Allow headers
+    const headReq = new Request(`https://pms.example.com/api/integrations/webhooks/hospitable`);
+    const headRes = await webhookHead(headReq, { params: Promise.resolve({ provider: "hospitable" }) });
+    expect(headRes.status).toBe(200);
+    expect(headRes.headers.get("Allow")).toContain("GET, POST, HEAD, OPTIONS");
+    expect(headRes.headers.get("X-Webhook-Provider")).toBe("hospitable");
+
+    // 5.3 OPTIONS Probe: CORS preflight returns 204
+    const optRes = await webhookOptions();
+    expect(optRes.status).toBe(204);
+    expect(optRes.headers.get("Allow")).toContain("POST");
+
+    // 5.4 POST Ping / Initial Handshake without signature: Acknowledges 200 OK
+    const pingReq = new Request(`https://pms.example.com/api/integrations/webhooks/hospitable?orgId=${orgId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "ping", test: true }),
+    });
+    const pingRes = await webhookPost(pingReq, { params: Promise.resolve({ provider: "hospitable" }) });
+    expect(pingRes.status).toBe(200);
+    const pingJson = await pingRes.json();
+    expect(pingJson.received).toBe(true);
+    expect(pingJson.status).toBe("ok");
+    expect(pingJson.test).toBe(true);
+
+    // 5.5 POST Empty Payload Handshake: Returns 200 OK
+    const emptyReq = new Request(`https://pms.example.com/api/integrations/webhooks/hospitable?orgId=${orgId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "",
+    });
+    const emptyRes = await webhookPost(emptyReq, { params: Promise.resolve({ provider: "hospitable" }) });
+    expect(emptyRes.status).toBe(200);
+    const emptyJson = await emptyRes.json();
+    expect(emptyJson.received).toBe(true);
+    expect(emptyJson.test).toBe(true);
+
+    // 5.6 POST Challenge / Verification token handshake: Returns 200 OK and echoes challenge
+    const challengeReq = new Request(`https://pms.example.com/api/integrations/webhooks/hospitable?orgId=${orgId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "verify", challenge: "hsp_challenge_token_999" }),
+    });
+    const challengeRes = await webhookPost(challengeReq, { params: Promise.resolve({ provider: "hospitable" }) });
+    expect(challengeRes.status).toBe(200);
+    const challengeJson = await challengeRes.json();
+    expect(challengeJson.challenge).toBe("hsp_challenge_token_999");
   });
 });

@@ -29,6 +29,8 @@ import {
   Globe,
   Building2,
   AlertCircle,
+  Terminal,
+  Send,
 } from "lucide-react";
 
 interface SyncSummary {
@@ -100,6 +102,12 @@ export default function IntegrationsPage() {
   const [hospitableWebhookSecret, setHospitableWebhookSecret] = React.useState("");
   const [hospitableSyncing, setHospitableSyncing] = React.useState(false);
   const [copiedWebhook, setCopiedWebhook] = React.useState(false);
+  const [copiedModalWebhook, setCopiedModalWebhook] = React.useState(false);
+
+  // Webhook Public Tunnel & Connectivity Diagnostics State
+  const [tunnelUrl, setTunnelUrl] = React.useState("");
+  const [testingWebhook, setTestingWebhook] = React.useState(false);
+  const [copiedNgrok, setCopiedNgrok] = React.useState(false);
 
   // Airbnb / Booking.com Sign-In & Guided Channel Sync Modal State
   const [channelModalOpen, setChannelModalOpen] = React.useState(false);
@@ -140,6 +148,11 @@ export default function IntegrationsPage() {
   React.useEffect(() => {
     void loadData();
     if (typeof window !== "undefined") {
+      const storedTunnel = localStorage.getItem("lumina_public_tunnel_url");
+      if (storedTunnel) {
+        setTunnelUrl(storedTunnel);
+      }
+
       const params = new URLSearchParams(window.location.search);
       const connected = params.get("connected");
       const oauthError = params.get("oauth_error");
@@ -162,8 +175,65 @@ export default function IntegrationsPage() {
   const hospitableIntegration = integrations.find((i) => i.provider === "hospitable");
   const hospSummary = hospitableIntegration?.config?.lastSyncSummary;
   const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.protocol === "http:");
+
+  const effectiveOrigin = tunnelUrl.trim()
+    ? tunnelUrl.trim().replace(/\/+$/, "")
+    : origin;
+
   const orgIdForWebhook = hospitableIntegration?.organizationId || "";
-  const hospWebhookUrl = `${origin}/api/integrations/webhooks/hospitable${orgIdForWebhook ? `?orgId=${orgIdForWebhook}` : ""}`;
+  const hospWebhookUrl = `${effectiveOrigin}/api/integrations/webhooks/hospitable${orgIdForWebhook ? `?orgId=${orgIdForWebhook}` : ""}`;
+
+  function handleSaveTunnel(val: string) {
+    setTunnelUrl(val);
+    if (typeof window !== "undefined") {
+      if (val.trim()) {
+        localStorage.setItem("lumina_public_tunnel_url", val.trim());
+      } else {
+        localStorage.removeItem("lumina_public_tunnel_url");
+      }
+    }
+  }
+
+  async function handleTestWebhook() {
+    setTestingWebhook(true);
+    const start = Date.now();
+    try {
+      const targetUrl = `/api/integrations/webhooks/hospitable${orgIdForWebhook ? `?orgId=${orgIdForWebhook}` : ""}`;
+      const res = await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "ping", test: true }),
+      });
+      const json = await res.json();
+      const elapsed = Date.now() - start;
+      if (res.ok && (json.received || json.status === "ok")) {
+        toast({
+          title: "Webhook endpoint reachable (200 OK)",
+          description: `Acknowledged test ping in ${elapsed}ms. Route is healthy and ready for Hospitable.`,
+        });
+        void loadData();
+      } else {
+        toast({
+          title: "Webhook returned an error",
+          description: json.error?.message || `Status ${res.status}`,
+          variant: "destructive",
+        });
+      }
+    } catch (err: unknown) {
+      toast({
+        title: "Test ping failed",
+        description: (err as Error).message || "Could not reach webhook endpoint.",
+        variant: "destructive",
+      });
+    } finally {
+      setTestingWebhook(false);
+    }
+  }
 
   async function handleStartSignIn(provider: "hospitable" | "airbnb_ical" | "booking_com") {
     try {
@@ -443,24 +513,123 @@ export default function IntegrationsPage() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
-            <div className="space-y-0.5">
-              <span className="font-semibold text-foreground">Hospitable Real-Time Webhook URL</span>
-              <div className="font-mono text-[11px] text-muted-foreground break-all">{hospWebhookUrl}</div>
+          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3.5 text-xs">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-foreground">Hospitable Real-Time Webhook URL</span>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    POST &bull; GET &bull; HEAD
+                  </Badge>
+                </div>
+                <div className="font-mono text-[11px] text-muted-foreground break-all">{hospWebhookUrl}</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs gap-1 shrink-0"
+                  onClick={() => {
+                    navigator.clipboard.writeText(hospWebhookUrl);
+                    setCopiedWebhook(true);
+                    setTimeout(() => setCopiedWebhook(false), 2000);
+                  }}
+                >
+                  {copiedWebhook ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedWebhook ? "Copied" : "Copy Webhook URL"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 text-xs gap-1 shrink-0"
+                  disabled={testingWebhook}
+                  onClick={() => void handleTestWebhook()}
+                >
+                  <Send className={`h-3 w-3 ${testingWebhook ? "animate-pulse" : ""}`} />
+                  {testingWebhook ? "Testing..." : "Test Ping"}
+                </Button>
+              </div>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs gap-1 shrink-0"
-              onClick={() => {
-                navigator.clipboard.writeText(hospWebhookUrl);
-                setCopiedWebhook(true);
-                setTimeout(() => setCopiedWebhook(false), 2000);
-              }}
-            >
-              {copiedWebhook ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-              {copiedWebhook ? "Copied" : "Copy Webhook URL"}
-            </Button>
+
+            {/* Localhost / HTTP Notice */}
+            {isLocalhost && !tunnelUrl.trim() && (
+              <div className="rounded-md border border-amber-300/80 bg-amber-500/10 p-2.5 text-[11px] space-y-1.5 text-amber-900 dark:text-amber-200">
+                <div className="font-semibold flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>Hospitable Requires a Public HTTPS URL</span>
+                </div>
+                <p className="text-muted-foreground">
+                  Hospitable&apos;s cloud servers cannot reach <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">localhost:3000</code>.
+                  Pasting a localhost or HTTP URL into Hospitable causes:
+                  <em className="block mt-0.5 text-destructive font-medium">&quot;An error occured processing this action - please try again. If this keeps occuring, please contact support.&quot;</em>
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="font-medium text-foreground">For local testing:</span>
+                  <div className="flex items-center gap-1 bg-background/80 border rounded px-2 py-0.5 font-mono text-[10px]">
+                    <Terminal className="h-3 w-3 text-muted-foreground" />
+                    <span>npx ngrok http 3000</span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-6 text-[11px] px-2 gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText("npx ngrok http 3000");
+                      setCopiedNgrok(true);
+                      setTimeout(() => setCopiedNgrok(false), 2000);
+                    }}
+                  >
+                    {copiedNgrok ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                    {copiedNgrok ? "Copied" : "Copy Command"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Public Tunnel / Base Domain Input */}
+            <div className="pt-1 space-y-1">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="tunnel-url" className="text-[11px] text-muted-foreground">
+                  Public HTTPS Base / Tunnel URL (e.g. ngrok or production domain):
+                </Label>
+                {tunnelUrl.trim() && (
+                  <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> Tunnel Active
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  id="tunnel-url"
+                  placeholder="https://your-domain.com or https://xxxx.ngrok-free.app"
+                  value={tunnelUrl}
+                  onChange={(e) => handleSaveTunnel(e.target.value)}
+                  className="h-8 text-xs font-mono"
+                />
+                {tunnelUrl.trim() && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => handleSaveTunnel("")}
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick 3-Step Setup Instructions */}
+            <div className="rounded-md border bg-background/50 p-2.5 text-[11px] space-y-1 text-muted-foreground">
+              <span className="font-semibold text-foreground block">How to connect this webhook in Hospitable:</span>
+              <ol className="list-decimal list-inside space-y-0.5">
+                <li>Sign in to Hospitable and navigate to <strong>Apps &gt; Webhooks</strong>.</li>
+                <li>Click <strong>+ Add new</strong> and paste the public HTTPS Webhook URL above into <strong>Endpoint URL</strong>.</li>
+                <li>Select the events to receive (e.g. <em>reservation.created, reservation.updated, reservation.cancelled</em>) and click <strong>Save</strong>.</li>
+              </ol>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -805,6 +974,40 @@ export default function IntegrationsPage() {
               value={hospitableWebhookSecret}
               onChange={(e) => setHospitableWebhookSecret(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-1.5 rounded-lg border bg-muted/20 p-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-foreground">Hospitable Webhook Endpoint</Label>
+              <Badge variant="outline" className="text-[10px] font-mono">Real-Time Two-Way Sync</Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Add this public HTTPS URL under <strong>Apps &gt; Webhooks &gt; + Add new</strong> in Hospitable so reservation changes notify your PMS immediately.
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="font-mono text-[10px] text-muted-foreground break-all bg-background border rounded px-2 py-1.5 flex-1">
+                {hospWebhookUrl}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1 shrink-0"
+                onClick={() => {
+                  navigator.clipboard.writeText(hospWebhookUrl);
+                  setCopiedModalWebhook(true);
+                  setTimeout(() => setCopiedModalWebhook(false), 2000);
+                }}
+              >
+                {copiedModalWebhook ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                {copiedModalWebhook ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            {isLocalhost && !tunnelUrl.trim() && (
+              <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium pt-0.5">
+                Note: Hospitable requires a public HTTPS URL (e.g. ngrok). Localhost URLs cannot be reached by Hospitable&apos;s cloud servers.
+              </p>
+            )}
           </div>
 
           <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-emerald-800 flex items-center gap-2">
