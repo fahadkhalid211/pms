@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   ShieldCheck,
   LogIn,
@@ -22,7 +23,7 @@ import {
 } from "lucide-react";
 
 interface ReservationRoom {
-  room: { id: string; number: string; status: string; roomType?: { name: string } };
+  room: { id: string; number: string; name?: string | null; status: string; roomType?: { name: string } };
 }
 
 interface PropertyItem {
@@ -53,6 +54,7 @@ interface Room {
   id: string;
   propertyId: string;
   number: string;
+  name?: string | null;
   status: string;
   floor?: string | null;
   roomType?: { name: string };
@@ -262,7 +264,12 @@ export default function FrontDeskPage() {
       if (readinessFilter === "dirty" && room.status !== "dirty") return false;
       if (readinessFilter === "occupied" && room.status !== "occupied") return false;
       const q = searchTerm.trim().toLowerCase();
-      if (q && !room.number.toLowerCase().includes(q) && !(room.roomType?.name ?? "").toLowerCase().includes(q)) {
+      if (
+        q &&
+        !room.number.toLowerCase().includes(q) &&
+        !(room.name ?? "").toLowerCase().includes(q) &&
+        !(room.roomType?.name ?? "").toLowerCase().includes(q)
+      ) {
         return false;
       }
       return true;
@@ -755,7 +762,7 @@ export default function FrontDeskPage() {
                   <div>
                     <div className="flex items-center justify-between">
                       <Link href={`/rooms/${room.id}`} className="text-lg font-bold hover:text-primary hover:underline">
-                        Room {room.number}
+                        {formatRoomDisplayName(room)}
                       </Link>
                       <Badge
                         variant={
@@ -939,7 +946,7 @@ export default function FrontDeskPage() {
                 {checkOutModal.guest ? `${checkOutModal.guest.firstName} ${checkOutModal.guest.lastName}` : "Guest"}
               </div>
               <div className="text-muted-foreground">
-                Room(s): {checkOutModal.rooms?.map((r) => r.room.number).join(", ") ?? "—"}
+                Room(s): {checkOutModal.rooms?.map((r) => formatRoomDisplayName(r.room)).join(", ") ?? "—"}
               </div>
               <div className="mt-1 font-medium text-amber-600">
                 Notice: Vacated room(s) will automatically be flagged dirty with turnover cleaning tasks.
@@ -995,7 +1002,7 @@ export default function FrontDeskPage() {
               <Select value={currentRoomId} onChange={(e) => setCurrentRoomId(e.target.value)}>
                 {moveModal.rooms?.map((r) => (
                   <option key={r.room.id} value={r.room.id}>
-                    Room {r.room.number} ({r.room.status})
+                    {formatRoomDisplayName(r.room)} ({r.room.status})
                   </option>
                 ))}
               </Select>
@@ -1009,7 +1016,7 @@ export default function FrontDeskPage() {
                   .filter((r) => r.id !== currentRoomId && (r.status === "clean" || r.status === "available" || r.status === "inspected"))
                   .map((r) => (
                     <option key={r.id} value={r.id}>
-                      Room {r.number} ({r.roomType?.name ?? "Standard"} - {r.status})
+                      {formatRoomDisplayName(r)} ({r.roomType?.name ?? "Standard"} - {r.status})
                     </option>
                   ))}
               </Select>

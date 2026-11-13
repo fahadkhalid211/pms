@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ToastProvider, useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   Calendar,
   Search,
@@ -663,7 +664,7 @@ function GuestPortalContent() {
                     <div className="rounded-lg bg-slate-950/80 p-2.5 border border-slate-900">
                       <span className="text-slate-400 block">Assigned Rooms</span>
                       <span className="font-semibold text-emerald-400">
-                        {verifiedReservation.rooms.map((r: any) => `Room ${r.number}`).join(", ") || "Auto-assigned"}
+                        {verifiedReservation.rooms.map((r: any) => formatRoomDisplayName(r)).join(", ") || "Auto-assigned"}
                       </span>
                     </div>
                   </div>

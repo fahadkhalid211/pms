@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   ArrowLeft,
   BedDouble,
@@ -100,7 +101,7 @@ export default function RoomDetailPage() {
       if (!res.ok || !json.success) {
         toast({ title: "Status update failed", description: json.error?.message, variant: "destructive" });
       } else {
-        toast({ title: "Room status updated", description: `Room ${room.number} is now ${nextStatus.replace(/_/g, " ")}.` });
+        toast({ title: "Room status updated", description: `${formatRoomDisplayName(room)} is now ${nextStatus.replace(/_/g, " ")}.` });
         await load();
       }
     } finally {
@@ -147,8 +148,10 @@ export default function RoomDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">Room {room.number}</h1>
-                {room.name && <span className="text-sm text-muted-foreground">({room.name})</span>}
+                <h1 className="text-2xl font-bold tracking-tight">{formatRoomDisplayName(room)}</h1>
+                {room.number && room.number.toUpperCase() !== "MAIN" && room.name && room.name.toLowerCase() !== room.number.toLowerCase() && !room.name.includes(room.number) ? (
+                  <span className="text-sm text-muted-foreground">#{room.number}</span>
+                ) : null}
                 <Badge variant="outline" className="capitalize text-xs">{room.status.replace(/_/g, " ")}</Badge>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-0.5">
@@ -186,7 +189,7 @@ export default function RoomDetailPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" strokeWidth={1.5} /> Reservations for Room {room.number} ({room.reservations.length})
+              <Calendar className="h-4 w-4 text-primary" strokeWidth={1.5} /> Reservations for {formatRoomDisplayName(room)} ({room.reservations.length})
             </CardTitle>
             <CardDescription className="text-xs">Click any booking or guest name to inspect full details.</CardDescription>
           </CardHeader>

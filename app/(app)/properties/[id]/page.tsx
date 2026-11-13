@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   ArrowLeft,
   Building2,
@@ -542,7 +543,7 @@ export default function PropertyDetailPage() {
                                 {r.rooms.map((rr, idx) =>
                                   rr.room ? (
                                     <Link key={rr.room.id || idx} href={`/rooms/${rr.room.id}`} className="text-primary hover:underline">
-                                      {rr.room.number || rr.room.name}
+                                      {formatRoomDisplayName(rr.room)}
                                     </Link>
                                   ) : null,
                                 )}
@@ -707,7 +708,7 @@ export default function PropertyDetailPage() {
                   >
                     <div>
                       <div className="font-semibold text-foreground hover:text-primary">
-                        {room.number} {room.name ? `· ${room.name}` : ""}
+                        {formatRoomDisplayName(room)}
                       </div>
                       <div className="text-muted-foreground">
                         {room.roomType?.name || "Standard"} · Cap {room.roomType?.capacity ?? 2} · {property.currency} {Number(room.roomType?.baseRate ?? 0).toFixed(2)}/night

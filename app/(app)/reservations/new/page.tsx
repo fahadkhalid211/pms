@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 
 interface Property {
   id: string;
@@ -14,6 +15,7 @@ interface Property {
 interface Room {
   id: string;
   number: string;
+  name?: string | null;
   roomType: { id: string; name: string; capacity: number; baseRate: number };
 }
 
@@ -134,7 +136,7 @@ export default function NewReservationPage() {
               {rooms.map((room) => (
                 <label key={room.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
                   <span>
-                    Room {room.number} · {room.roomType.name} · sleeps {room.roomType.capacity}
+                    {formatRoomDisplayName(room)} · {room.roomType.name} · sleeps {room.roomType.capacity}
                   </span>
                   <input
                     type="checkbox"

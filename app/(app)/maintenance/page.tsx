@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input, Label, Select } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import { Wrench, CheckCircle2, Play, AlertOctagon, RefreshCw, Ban } from "lucide-react";
 
 interface Ticket {
@@ -17,7 +18,7 @@ interface Ticket {
   roomId?: string | null;
   resolvedAt?: string | null;
   createdAt: string;
-  room: { id: string; number: string; status: string } | null;
+  room: { id: string; number: string; name?: string | null; status: string } | null;
 }
 
 interface Property {
@@ -28,6 +29,7 @@ interface Property {
 interface Room {
   id: string;
   number: string;
+  name?: string | null;
   propertyId: string;
   status: string;
 }
@@ -226,7 +228,7 @@ export default function MaintenancePage() {
                     <div className="mt-1 text-sm text-muted-foreground">
                       {t.room ? (
                         <>
-                          Room {t.room.number} · Current status:{" "}
+                          {formatRoomDisplayName(t.room)} · Current status:{" "}
                           <span className="font-medium text-foreground">{t.room.status}</span>
                         </>
                       ) : (
@@ -283,7 +285,7 @@ export default function MaintenancePage() {
                   <option value="">General property (No specific room)</option>
                   {activeRooms.map((r) => (
                     <option key={r.id} value={r.id}>
-                      Room {r.number} ({r.status})
+                      {formatRoomDisplayName(r)} ({r.status})
                     </option>
                   ))}
                 </Select>

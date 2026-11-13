@@ -87,6 +87,29 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       }),
     ]);
 
+    const legacyRooms = rooms.filter((r) => r.number === "MAIN" || (r.name && /[\s_-]+MAIN$/i.test(r.name)));
+    if (legacyRooms.length > 0) {
+      await Promise.all(
+        legacyRooms.map(async (r) => {
+          const cleanName = (r.name || property.name || "Main Unit").replace(/[\s_-]+MAIN$/i, "").trim();
+          const cleanNumber = cleanName.length <= 50 ? cleanName : cleanName.slice(0, 50);
+          try {
+            await prisma.room.update({
+              where: { id: r.id },
+              data: {
+                number: r.number === "MAIN" ? cleanNumber : r.number,
+                name: cleanName,
+              },
+            });
+            if (r.number === "MAIN") r.number = cleanNumber;
+            r.name = cleanName;
+          } catch {
+            // Ignore if duplicate
+          }
+        }),
+      );
+    }
+
     let totalRevenue = new Prisma.Decimal(0);
     let upcomingBookings = 0;
     let checkedInNow = 0;

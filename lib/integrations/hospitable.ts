@@ -528,15 +528,41 @@ export async function upsertHospitableProperty(input: {
     ? await prisma.room.findFirst({ where: { id: mapped.roomId, propertyId: property.id } })
     : null;
   if (!room) {
-    room = await prisma.room.upsert({
-      where: { propertyId_number: { propertyId: property.id, number: "MAIN" } },
-      update: { roomTypeId: roomType.id, name },
-      create: {
+    room = await prisma.room.findFirst({
+      where: {
+        propertyId: property.id,
+        OR: [
+          { number: "MAIN" },
+          { name },
+          { number: name },
+        ],
+      },
+    });
+  }
+  if (!room) {
+    room = await prisma.room.findFirst({ where: { propertyId: property.id } });
+  }
+
+  const roomDisplayName = name;
+  const roomNumber = name.length <= 50 ? name : name.slice(0, 50);
+
+  if (room) {
+    room = await prisma.room.update({
+      where: { id: room.id },
+      data: {
+        roomTypeId: roomType.id,
+        name: roomDisplayName,
+        number: room.number === "MAIN" ? roomNumber : room.number,
+      },
+    });
+  } else {
+    room = await prisma.room.create({
+      data: {
         organizationId,
         propertyId: property.id,
         roomTypeId: roomType.id,
-        number: "MAIN",
-        name,
+        number: roomNumber,
+        name: roomDisplayName,
         status: "available",
       },
     });

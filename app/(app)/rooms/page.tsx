@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 
 interface Room {
   id: string;
   number: string;
+  name?: string | null;
   status: string;
   roomType: { id: string; name: string; capacity: number; baseRate: string | number } | null;
   property?: { id: string; name: string };
@@ -42,6 +44,7 @@ export default function RoomsPage() {
   const [propertyId, setPropertyId] = React.useState("");
   const [roomTypeId, setRoomTypeId] = React.useState("");
   const [number, setNumber] = React.useState("");
+  const [roomName, setRoomName] = React.useState("");
   
   // Room Type form
   const [rtPropertyId, setRtPropertyId] = React.useState("");
@@ -92,7 +95,13 @@ export default function RoomsPage() {
     const res = await fetch("/api/rooms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propertyId, roomTypeId, number, status: "available" }),
+      body: JSON.stringify({
+        propertyId,
+        roomTypeId,
+        number,
+        name: roomName.trim() || undefined,
+        status: "available",
+      }),
     });
     const json = await res.json();
     setPending(false);
@@ -102,6 +111,7 @@ export default function RoomsPage() {
     }
     toast({ title: "Room added successfully" });
     setNumber("");
+    setRoomName("");
     await load();
   }
 
@@ -166,7 +176,7 @@ export default function RoomsPage() {
               <CardTitle>Add New Room</CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <form className="grid gap-3 sm:grid-cols-4" onSubmit={onAddRoom}>
+              <form className="grid gap-3 sm:grid-cols-5" onSubmit={onAddRoom}>
                 <div className="space-y-2">
                   <Label>Property</Label>
                   <Select value={propertyId} onChange={(e) => setPropertyId(e.target.value)}>
@@ -190,12 +200,20 @@ export default function RoomsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Room Number</Label>
+                  <Label>Room / Unit #</Label>
                   <Input
-                    placeholder="e.g. 101"
+                    placeholder="e.g. 101 or Unit 1"
                     value={number}
                     onChange={(e) => setNumber(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Room Name (optional)</Label>
+                  <Input
+                    placeholder="e.g. Ocean Suite"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
                   />
                 </div>
                 <div className="flex items-end">
@@ -217,7 +235,7 @@ export default function RoomsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
-                      <th className="p-3 text-left">Room Number</th>
+                      <th className="p-3 text-left">Room / Unit Name</th>
                       <th className="p-3 text-left">Property</th>
                       <th className="p-3 text-left">Room Type</th>
                       <th className="p-3 text-left">Base Rate</th>
@@ -236,8 +254,11 @@ export default function RoomsPage() {
                         <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
                           <td className="p-3 font-semibold">
                             <Link href={`/rooms/${r.id}`} className="text-primary hover:underline">
-                              Room {r.number}
+                              {formatRoomDisplayName(r)}
                             </Link>
+                            {r.number && r.number.toUpperCase() !== "MAIN" && r.name && r.name.toLowerCase() !== r.number.toLowerCase() && !r.name.includes(r.number) ? (
+                              <div className="text-xs text-muted-foreground font-normal">#{r.number}</div>
+                            ) : null}
                           </td>
                           <td className="p-3">
                             {r.property ? (

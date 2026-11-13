@@ -195,14 +195,42 @@ export const dal = {
 
   rooms: {
     async findMany(ctx: TenantContext, propertyId?: string) {
-      return prisma.room.findMany({
+      const rooms = await prisma.room.findMany({
         where: {
           organizationId: ctx.organizationId,
           ...(propertyId ? { propertyId } : ctx.propertyId ? { propertyId: ctx.propertyId } : {}),
         },
-        include: { roomType: true },
+        include: {
+          roomType: true,
+          property: { select: { id: true, name: true, code: true, currency: true } },
+        },
         orderBy: { number: "asc" },
       });
+
+      const legacyRooms = rooms.filter((r) => r.number === "MAIN" || (r.name && /[\s_-]+MAIN$/i.test(r.name)));
+      if (legacyRooms.length > 0) {
+        await Promise.all(
+          legacyRooms.map(async (r) => {
+            const cleanName = (r.name || r.property?.name || "Main Unit").replace(/[\s_-]+MAIN$/i, "").trim();
+            const cleanNumber = cleanName.length <= 50 ? cleanName : cleanName.slice(0, 50);
+            try {
+              await prisma.room.update({
+                where: { id: r.id },
+                data: {
+                  number: r.number === "MAIN" ? cleanNumber : r.number,
+                  name: cleanName,
+                },
+              });
+              if (r.number === "MAIN") r.number = cleanNumber;
+              r.name = cleanName;
+            } catch {
+              // Ignore if conflict
+            }
+          }),
+        );
+      }
+
+      return rooms;
     },
 
     async findUnique(ctx: TenantContext, id: string) {

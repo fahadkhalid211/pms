@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -321,7 +322,7 @@ export default function CalendarPage() {
       propertyId: property.id,
       propertyName: property.name,
       roomId: room.id,
-      roomLabel: `Room ${room.number}${room.roomType?.name ? ` (${room.roomType.name})` : ""}`,
+      roomLabel: `${formatRoomDisplayName(room)}${room.roomType?.name ? ` (${room.roomType.name})` : ""}`,
     });
     setQbCheckIn(dateIso);
     setQbCheckOut(addDaysIso(dateIso, 2));
@@ -627,7 +628,7 @@ export default function CalendarPage() {
                             <div className="flex items-center justify-between gap-1">
                               <span className="font-semibold text-xs text-foreground group-hover:text-primary flex items-center gap-1.5 truncate">
                                 <BedDouble className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary shrink-0" strokeWidth={1.5} />
-                                Room {room.number}
+                                {formatRoomDisplayName(room)}
                               </span>
                               <Badge
                                 variant={
@@ -656,7 +657,7 @@ export default function CalendarPage() {
                                 <button
                                   key={colIso}
                                   type="button"
-                                  title={`Click to create booking on Room ${room.number} starting ${colIso}`}
+                                  title={`Click to create booking on ${formatRoomDisplayName(room)} starting ${colIso}`}
                                   onClick={() => openQuickBookForCell(property, room, colIso)}
                                   className={`flex-1 min-w-[44px] border-r text-left transition-colors hover:bg-primary/10 ${
                                     isToday ? "bg-primary/5" : ""
@@ -797,7 +798,7 @@ export default function CalendarPage() {
                     <span>
                       <span className="text-muted-foreground block text-[10px]">Room</span>
                       <span className="font-semibold text-foreground">
-                        Room {rr.room.number} {rr.room.roomType?.name ? `· ${rr.room.roomType.name}` : ""}
+                        {formatRoomDisplayName(rr.room)} {rr.room.roomType?.name ? `· ${rr.room.roomType.name}` : ""}
                       </span>
                     </span>
                   </span>

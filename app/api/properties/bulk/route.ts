@@ -115,14 +115,15 @@ export async function POST(request: Request) {
           });
 
           for (let rIdx = 0; rIdx < item.roomsCount; rIdx += 1) {
-            const roomNumber = item.roomsCount === 1 ? "MAIN" : String(101 + rIdx);
+            const roomNumber = item.roomsCount === 1 ? (item.roomTypeName || item.name).slice(0, 50) : String(101 + rIdx);
+            const roomName = item.roomsCount === 1 ? item.name : `${item.name} - Unit ${rIdx + 1}`;
             await tx.room.create({
               data: {
                 organizationId,
                 propertyId: property.id,
                 roomTypeId: roomType.id,
                 number: roomNumber,
-                name: `${item.name} ${roomNumber}`,
+                name: roomName,
                 status: "available",
               },
             });

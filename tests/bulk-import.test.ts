@@ -30,7 +30,7 @@ describe("Bulk Imports & Front Desk ISO Arrival Filtering", () => {
       id: user.id,
       email: user.email,
       name: user.name ?? "Bulk Test Admin",
-      roleKey: user.roleKey,
+      roleKey: user.roleKey ?? "admin",
       organizationId: organization.id,
       permissions: ["*"],
     };

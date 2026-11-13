@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import { ArrowLeft, User, Mail, Phone, Calendar, Building2, Pencil, RefreshCw, ChevronRight } from "lucide-react";
 
 interface GuestDetail {
@@ -231,7 +232,7 @@ export default function GuestDetailPage() {
                       </Link>
                       {r.rooms[0]?.room && (
                         <Link href={`/rooms/${r.rooms[0].room.id}`} className="hover:text-primary">
-                          Room {r.rooms[0].room.number}
+                          {formatRoomDisplayName(r.rooms[0].room)}
                         </Link>
                       )}
                     </div>

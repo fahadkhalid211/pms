@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import {
   ArrowLeft,
   Calendar,
@@ -420,7 +421,7 @@ export default function ReservationDetailPage() {
                   href={`/rooms/${rr.room.id}`}
                   className="flex items-center justify-between text-xs font-semibold hover:text-primary transition-colors"
                 >
-                  <span>Room {rr.room.number} {rr.room.roomType?.name ? `(${rr.room.roomType.name})` : ""}</span>
+                  <span>{formatRoomDisplayName(rr.room)} {rr.room.roomType?.name ? `(${rr.room.roomType.name})` : ""}</span>
                   <Badge variant="outline" className="text-[10px] capitalize">{rr.room.status}</Badge>
                 </Link>
               ))

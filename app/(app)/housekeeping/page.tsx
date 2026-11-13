@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { formatRoomDisplayName } from "@/lib/utils";
 import { Sparkles, CheckCircle2, Play, MessageSquare, Paperclip, UploadCloud, RefreshCw } from "lucide-react";
 
 interface TaskComment {
@@ -26,7 +27,7 @@ interface Task {
   notes: string | null;
   dueAt: string | null;
   completedAt: string | null;
-  room: { id: string; number: string; status: string; roomType: { name: string } | null } | null;
+  room: { id: string; number: string; name?: string | null; status: string; roomType: { name: string } | null } | null;
   comments?: TaskComment[];
 }
 
@@ -38,6 +39,7 @@ interface Property {
 interface Room {
   id: string;
   number: string;
+  name?: string | null;
   propertyId: string;
   status: string;
   roomType?: { name: string };
@@ -290,7 +292,7 @@ export default function HousekeepingPage() {
                       </Badge>
                     </div>
                     <div className="mt-1 text-sm text-muted-foreground">
-                      Room {t.room?.number ?? "—"} ({t.room?.roomType?.name ?? "Standard"}) · Current status:{" "}
+                      {formatRoomDisplayName(t.room)} ({t.room?.roomType?.name ?? "Standard"}) · Current status:{" "}
                       <span className="font-medium text-foreground">{t.room?.status ?? "unknown"}</span>
                     </div>
                     {t.notes && <div className="mt-1 text-xs text-muted-foreground italic">{t.notes}</div>}
@@ -348,7 +350,7 @@ export default function HousekeepingPage() {
                   <option value="">Select room…</option>
                   {activeRooms.map((r) => (
                     <option key={r.id} value={r.id}>
-                      Room {r.number} ({r.roomType?.name ?? "Room"} - {r.status})
+                      {formatRoomDisplayName(r)} ({r.roomType?.name ?? "Room"} - {r.status})
                     </option>
                   ))}
                 </Select>
@@ -388,7 +390,7 @@ export default function HousekeepingPage() {
       <Dialog
         open={Boolean(activeTask)}
         onOpenChange={(open) => !open && setActiveTask(null)}
-        title={`Cleaning Notes — Room ${activeTask?.room?.number ?? ""}`}
+        title={`Cleaning Notes — ${formatRoomDisplayName(activeTask?.room)}`}
         description="View instructions, inspection logs, and post photo attachments."
       >
         {activeTask && (
