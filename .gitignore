@@ -40,4 +40,4 @@ pnpm-debug.log*
 logs
 *.log
 storage/uploads/
-uploads/
+/uploads/

@@ -258,6 +258,10 @@ model Organization {
   id                    String                   @id @default(cuid())
   name                  String
   slug                  String                   @unique
+  logoUrl               String?                  @db.Text
+  primaryColor          String?                  @default("#0f172a")
+  accentColor           String?                  @default("#3b82f6")
+  branding              Json?
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
 

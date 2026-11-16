@@ -7,6 +7,7 @@ export const ALLOWED_MIME_TYPES = new Map<string, string>([
   ["image/png", ".png"],
   ["image/webp", ".webp"],
   ["image/gif", ".gif"],
+  ["image/svg+xml", ".svg"],
   ["application/pdf", ".pdf"],
   ["text/plain", ".txt"],
 ]);

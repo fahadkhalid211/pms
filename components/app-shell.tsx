@@ -37,6 +37,8 @@ import { cn } from "@/lib/utils";
 import { ToastProvider } from "@/components/ui/toast";
 import { GlobalSearch } from "@/components/global-search";
 import { QuickCreate } from "@/components/quick-create";
+import type { OrganizationBranding } from "@/lib/branding";
+import { buildBrandingCss } from "@/lib/branding";
 
 export interface NavItem {
   label: string;
@@ -68,12 +70,38 @@ const NAV: NavItem[] = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export function AppShell({ userName, children }: { userName: string; children: React.ReactNode }) {
+export function AppShell({
+  userName,
+  initialBranding,
+  children,
+}: {
+  userName: string;
+  initialBranding?: OrganizationBranding | null;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+  const [branding, setBranding] = React.useState<OrganizationBranding | null>(initialBranding || null);
+
+  // Sync with initialBranding prop
+  React.useEffect(() => {
+    if (initialBranding) setBranding(initialBranding);
+  }, [initialBranding]);
+
+  // Listen for real-time branding updates across the app
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent<OrganizationBranding>;
+      if (customEvent.detail) {
+        setBranding(customEvent.detail);
+      }
+    };
+    window.addEventListener("lumina:branding-updated", handler);
+    return () => window.removeEventListener("lumina:branding-updated", handler);
+  }, []);
 
   // Restore sidebar preference from localStorage
   React.useEffect(() => {
@@ -110,6 +138,16 @@ export function AppShell({ userName, children }: { userName: string; children: R
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* Dynamic Branding Styles */}
+      {branding && (
+        <style
+          id="lumina-dynamic-branding"
+          dangerouslySetInnerHTML={{
+            __html: buildBrandingCss(branding.primaryColor, branding.accentColor),
+          }}
+        />
+      )}
+
       {/* Desktop & Mobile Sidebar */}
       <aside
         className={cn(
@@ -120,20 +158,61 @@ export function AppShell({ userName, children }: { userName: string; children: R
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex h-16 items-center justify-between border-b px-3.5">
           {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm shadow-sm">
-                L
+            <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
+              {branding?.logoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.name || "Brand Logo"}
+                  className="h-8 max-w-[110px] object-contain rounded"
+                />
+              ) : (
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-primary-foreground font-bold text-sm shadow-sm"
+                  style={{ backgroundColor: branding?.primaryColor || undefined }}
+                >
+                  {(branding?.name || "L").charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex flex-col truncate">
+                <span className="text-sm font-bold tracking-tight truncate text-foreground">
+                  {branding?.name || "Lumina PMS"}
+                </span>
+                {branding?.branding?.tagline ? (
+                  <span className="text-[10px] text-muted-foreground truncate font-normal">
+                    {branding.branding.tagline}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    PMS Hospitality
+                  </span>
+                )}
               </div>
-              <span className="text-lg font-bold tracking-tight">
-                Lumina<span className="text-primary font-medium">PMS</span>
-              </span>
             </Link>
           )}
           {collapsed && (
-            <Link href="/dashboard" className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm shadow-sm" title="Lumina PMS">
-              L
+            <Link
+              href="/dashboard"
+              className="mx-auto flex items-center justify-center"
+              title={branding?.name || "Lumina PMS"}
+            >
+              {branding?.logoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.name || "Brand Logo"}
+                  className="h-8 w-8 object-contain rounded"
+                />
+              ) : (
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-primary-foreground font-bold text-sm shadow-sm"
+                  style={{ backgroundColor: branding?.primaryColor || undefined }}
+                >
+                  {(branding?.name || "L").charAt(0).toUpperCase()}
+                </div>
+              )}
             </Link>
           )}
 
