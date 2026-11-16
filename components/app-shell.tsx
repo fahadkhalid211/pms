@@ -29,6 +29,8 @@ import {
   ChevronRight,
   LogOut,
   User as UserIcon,
+  TrendingUp,
+  FileSpreadsheet,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,7 @@ export interface NavItem {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Analytics", href: "/analytics", icon: TrendingUp },
   { label: "Reservations", href: "/reservations", icon: CalendarDays },
   { label: "Calendar", href: "/calendar", icon: CalendarRange },
   { label: "Front Desk", href: "/frontdesk", icon: MonitorSmartphone },
@@ -54,7 +57,7 @@ const NAV: NavItem[] = [
   { label: "Maintenance", href: "/maintenance", icon: Wrench },
   { label: "Billing", href: "/billing", icon: CreditCard },
   { label: "Notifications", href: "/notifications", icon: Bell },
-  { label: "Reports", href: "/reports", icon: BarChart3 },
+  { label: "Reports", href: "/reports", icon: FileSpreadsheet },
   { label: "Activity Logs", href: "/activity-logs", icon: Activity },
   { label: "Support", href: "/support", icon: MessageSquare },
   { label: "AI Operations", href: "/ai", icon: Bot },

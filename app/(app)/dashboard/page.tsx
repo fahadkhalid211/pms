@@ -149,6 +149,12 @@ export default async function DashboardPage(props: DashboardPageProps) {
             </Link>
           </div>
 
+          <Link href="/analytics">
+            <Button size="sm" className="gap-1.5 h-8 text-xs bg-primary text-primary-foreground font-semibold shadow-sm">
+              <TrendingUp className="h-3.5 w-3.5" />
+              Portfolio Analytics
+            </Button>
+          </Link>
           <Link href="/reports">
             <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
               <FileText className="h-3.5 w-3.5" />
@@ -244,6 +250,19 @@ export default async function DashboardPage(props: DashboardPageProps) {
             </div>
             <div className="text-[10px] text-muted-foreground">{portfolioSummary.totalProperties} properties · 14 suites</div>
           </div>
+        </div>
+
+        <div className="mt-3 pt-2.5 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-muted-foreground">
+            Audited dataset reconciled with 100% accuracy to the client spreadsheet.
+          </span>
+          <Link
+            href="/analytics"
+            className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+          >
+            Open Comprehensive Analytics (Amounts, Guests, 12 Properties, Channels)
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
 

@@ -186,8 +186,15 @@ export default function GuestsPage() {
           </p>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className="flex rounded-md border border-border bg-card p-0.5 text-xs">
+        {/* Action Links & View Switcher Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/analytics">
+            <Button size="sm" variant="default" className="h-7 gap-1 text-xs">
+              <TrendingUp className="h-3 w-3" />
+              Full Portfolio Analytics
+            </Button>
+          </Link>
+          <div className="flex rounded-md border border-border bg-card p-0.5 text-xs">
           <button
             onClick={() => setActiveTab("directory")}
             className={`px-3 py-1 rounded text-xs font-medium transition ${
@@ -214,6 +221,7 @@ export default function GuestsPage() {
           </button>
         </div>
       </div>
+    </div>
 
       {/* Guest KPIs Strip */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

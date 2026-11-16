@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -277,6 +278,12 @@ export default function ReportsPage() {
             <Badge variant="outline" className="text-xs font-mono border-primary/40 text-primary">
               The Penthouse Living
             </Badge>
+            <Link href="/analytics" className="ml-2">
+              <Button size="sm" variant="default" className="h-7 gap-1 text-xs">
+                <TrendingUp className="h-3 w-3" />
+                Portfolio Analytics Dashboard
+              </Button>
+            </Link>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             Complete portfolio financials, revenue stream breakdowns, property rankings, and channel acquisition stats.
