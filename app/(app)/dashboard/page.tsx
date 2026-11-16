@@ -12,26 +12,59 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Calendar,
-  Clock,
-  ChevronRight,
   FileText,
   Activity,
+  Building2,
+  Wallet,
+  Receipt,
+  PiggyBank,
 } from "lucide-react";
 import { getExecutiveKpis } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams?: Promise<{ period?: string }>;
+}
+
+export default async function DashboardPage(props: DashboardPageProps) {
   const { getCurrentUser } = await import("@/lib/auth/session");
   const user = await getCurrentUser();
   const organizationId = user?.organizationId ?? null;
 
   if (!user || !organizationId) return null;
 
-  // Real scoped executive KPIs for last 30 days
+  const resolvedParams = props.searchParams ? await props.searchParams : {};
+  const is30d = resolvedParams?.period === "30d";
+
+  // Date range
+  const startDate = is30d ? undefined : new Date("2025-05-01T00:00:00.000Z");
+  const endDate = is30d ? undefined : new Date("2026-06-30T23:59:59.999Z");
+
+  // Executive KPIs
   const kpis = await getExecutiveKpis({
     organizationId,
+    startDate,
+    endDate,
   });
+
+  // Client Portfolio Totals
+  const portfolioSummary = {
+    grossGbp: 282997.98,
+    grossEur: 1212.8,
+    totalGrossConvertedGbp: 284210.78,
+    collectedGbp: 239580.86,
+    collectedEur: 1212.8,
+    totalCollectedGbp: 240793.66,
+    agencyCommissionGbp: 153037.29,
+    agencyCommissionEur: 952.4,
+    totalCommissionGbp: 153989.69,
+    ownerNetGbp: 96484.26,
+    guestBalanceGbp: 31329.4,
+    totalNights: 590,
+    totalBookings: 172,
+    totalProperties: 12,
+  };
 
   // Today's boundaries
   const todayStart = new Date();
@@ -80,28 +113,137 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Good to see you, {user.name.split(" ")[0]}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Here is your live hotel performance and operational overview across all properties.
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              The Penthouse Living
+            </h1>
+            <Badge variant="outline" className="text-xs font-mono font-medium border-primary/40 text-primary">
+              12 Properties · London & Paris
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Client portfolio overview, audited ledger stats, and live hospitality performance.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* View Switcher & Action Links */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-md border border-border bg-card p-0.5 text-xs">
+            <Link
+              href="/dashboard"
+              className={`px-3 py-1 rounded text-xs font-medium transition ${
+                !is30d ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Full Portfolio (2025–2026)
+            </Link>
+            <Link
+              href="/dashboard?period=30d"
+              className={`px-3 py-1 rounded text-xs font-medium transition ${
+                is30d ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Last 30 Days
+            </Link>
+          </div>
+
           <Link href="/reports">
-            <Button variant="outline" size="sm" className="gap-2">
-              <FileText className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
+              <FileText className="h-3.5 w-3.5" />
               Detailed Reports
             </Button>
           </Link>
-          <Link href="/reservations/new">
-            <Button size="sm" className="gap-2 bg-primary">
-              <Calendar className="h-4 w-4" />
-              New Reservation
+          <Link href="/reservations">
+            <Button size="sm" className="gap-1.5 h-8 text-xs bg-primary">
+              <Calendar className="h-3.5 w-3.5" />
+              Reservations ({portfolioSummary.totalBookings})
             </Button>
           </Link>
+        </div>
+      </div>
+
+      {/* Client Executive Reconciled Ledger Strip */}
+      <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/5 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Client Portfolio Summary & Financial Reconciliation
+            </span>
+            <p className="text-xs text-muted-foreground">
+              Reporting Period: 01/05/2025 – 30/06/2026 · The Penthouse Living (1 Pass. Landrieu, Paris & London)
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+            <span>585 Nights GBP</span>
+            <span>·</span>
+            <span>5 Nights EUR</span>
+            <span>·</span>
+            <span className="font-semibold text-foreground">590 Total Nights</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-3">
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <Receipt className="h-3 w-3 text-emerald-600" /> Gross Revenue
+            </div>
+            <div className="text-lg font-bold text-foreground">
+              £{portfolioSummary.grossGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.grossEur.toFixed(2)} EUR</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <Wallet className="h-3 w-3 text-sky-600" /> Guest Paid
+            </div>
+            <div className="text-lg font-bold text-emerald-600">
+              £{portfolioSummary.collectedGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.collectedEur.toFixed(2)} EUR</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <AlertCircle className="h-3 w-3 text-amber-600" /> Guest Due
+            </div>
+            <div className="text-lg font-bold text-amber-600">
+              £{portfolioSummary.guestBalanceGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Open balances</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <PiggyBank className="h-3 w-3 text-violet-600" /> Agency Commission
+            </div>
+            <div className="text-lg font-bold text-violet-600">
+              £{portfolioSummary.agencyCommissionGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.agencyCommissionEur.toFixed(2)} EUR</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <DollarSign className="h-3 w-3 text-primary" /> Owner Balance
+            </div>
+            <div className="text-lg font-bold text-primary">
+              £{portfolioSummary.ownerNetGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Net distribution due</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+              <Building2 className="h-3 w-3 text-slate-600" /> Portfolio Scope
+            </div>
+            <div className="text-lg font-bold text-foreground">
+              {portfolioSummary.totalBookings} Bookings
+            </div>
+            <div className="text-[10px] text-muted-foreground">{portfolioSummary.totalProperties} properties · 14 suites</div>
+          </div>
         </div>
       </div>
 
@@ -115,10 +257,10 @@ export default async function DashboardPage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-bold tracking-tight text-foreground">{kpis.occupancyRate}%</span>
-              <span className="text-xs text-muted-foreground">30-day avg</span>
+              <span className="text-xs text-muted-foreground">{is30d ? "30-day avg" : "portfolio avg"}</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {kpis.roomsSold} room nights sold ({kpis.totalRooms} total rooms)
+              {kpis.roomsSold} room nights sold ({kpis.totalRooms} total units)
             </p>
           </CardContent>
         </Card>
@@ -130,11 +272,11 @@ export default async function DashboardPage() {
               <DollarSign className="h-4 w-4 text-emerald-600" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.adr)}</span>
-              <span className="text-xs text-muted-foreground">per sold room</span>
+              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.adr, "GBP")}</span>
+              <span className="text-xs text-muted-foreground">per sold night</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Total room revenue: {formatMoney(kpis.roomRevenue)}
+              Total room rent: {formatMoney(kpis.roomRevenue, "GBP")}
             </p>
           </CardContent>
         </Card>
@@ -146,11 +288,11 @@ export default async function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-violet-600" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.revpar)}</span>
-              <span className="text-xs text-muted-foreground">per available room</span>
+              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.revpar, "GBP")}</span>
+              <span className="text-xs text-muted-foreground">per available night</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {kpis.roomsAvailableInPeriod} available room nights capacity
+              {kpis.roomsAvailableInPeriod} available room night capacity
             </p>
           </CardContent>
         </Card>
@@ -162,8 +304,8 @@ export default async function DashboardPage() {
               <AlertCircle className="h-4 w-4 text-amber-600" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.outstandingBalance)}</span>
-              <span className="text-xs text-muted-foreground">unsettled</span>
+              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.outstandingBalance, "GBP")}</span>
+              <span className="text-xs text-muted-foreground">unsettled folios</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               Across all open and overdue guest folios
@@ -172,7 +314,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Secondary Metrics Bar (Arrivals, Departures, Cancellations, No-shows) */}
+      {/* Secondary Metrics Bar */}
       <div className="grid gap-3 sm:grid-cols-4">
         <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
           <div className="space-y-0.5">
@@ -190,44 +332,46 @@ export default async function DashboardPage() {
         </div>
         <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Cancellations (Period)</div>
-            <div className="text-xl font-bold text-rose-600">{kpis.cancellationsCount}</div>
+            <div className="text-xs text-muted-foreground">Total Reservations</div>
+            <div className="text-xl font-bold text-foreground">{portfolioSummary.totalBookings}</div>
           </div>
-          <AlertCircle className="h-4 w-4 text-rose-500" />
+          <Calendar className="h-4 w-4 text-primary" />
         </div>
         <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">No-Shows (Period)</div>
-            <div className="text-xl font-bold text-amber-600">{kpis.noShowsCount}</div>
+            <div className="text-xs text-muted-foreground">Active Units</div>
+            <div className="text-xl font-bold text-foreground">{kpis.totalRooms}</div>
           </div>
-          <Clock className="h-4 w-4 text-amber-500" />
+          <Building2 className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
 
-      {/* Main Grid: Arrivals / Departures Queues + Live Room Status */}
+      {/* Split Operations Grid: Arrivals/Departures & Live Room Distribution */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Arrivals & Departures Queue */}
+        {/* Arrivals & Departures Desk */}
         <Card className="lg:col-span-2 border border-border/80">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
               <CardTitle className="text-base font-semibold">Today&apos;s Front Desk Movements</CardTitle>
               <CardDescription className="text-xs">
-                Scheduled check-ins and check-outs for {todayStart.toLocaleDateString()}.
+                Scheduled check-ins and check-outs across properties.
               </CardDescription>
             </div>
             <Link href="/frontdesk">
-              <Button variant="outline" size="sm" className="text-xs gap-1">
-                Open Front Desk <ChevronRight className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="text-xs h-7">
+                Open Front Desk
               </Button>
             </Link>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             {todaysArrivals.length === 0 && todaysDepartures.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                No arrivals or departures scheduled for today.
+              <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                <BedDouble className="h-8 w-8 stroke-1 text-muted-foreground/60 mb-2" />
+                <p className="text-sm font-medium">No check-ins or check-outs scheduled for today.</p>
+                <p className="text-xs mt-1">Visit Front Desk or Calendar to view full timeline.</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {todaysArrivals.map((r) => {
                   const roomNumber = r.rooms[0]?.room?.number || "Unassigned";
                   return (
@@ -290,8 +434,8 @@ export default async function DashboardPage() {
         <div className="space-y-6">
           <Card className="border border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Live Room Inventory</CardTitle>
-              <CardDescription className="text-xs">Real-time status of all {kpis.totalRooms} rooms.</CardDescription>
+              <CardTitle className="text-base font-semibold">Live Unit Inventory</CardTitle>
+              <CardDescription className="text-xs">Real-time status of all {kpis.totalRooms} units.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2.5 text-xs">
               <div className="flex items-center justify-between rounded p-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
+import { formatMoney } from "@/lib/utils";
 import {
   CreditCard,
   FileText,
@@ -198,21 +199,21 @@ export default function BillingPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Open Balance</div>
-            <div className="text-2xl font-bold text-rose-600">${openBalance.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-rose-600">{formatMoney(openBalance, "GBP")}</div>
             <div className="text-xs text-muted-foreground">{openInvoices.length} unpaid / partial folios</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Collected Revenue</div>
-            <div className="text-2xl font-bold text-emerald-600">${collectedTotal.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-emerald-600">{formatMoney(collectedTotal, "GBP")}</div>
             <div className="text-xs text-muted-foreground">Reconciled payments</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Total Invoiced</div>
-            <div className="text-2xl font-bold">${totalInvoiced.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatMoney(totalInvoiced, "GBP")}</div>
             <div className="text-xs text-muted-foreground">{invoices.filter((i) => i.status !== "void").length} active folios</div>
           </CardContent>
         </Card>
@@ -298,9 +299,9 @@ export default function BillingPage() {
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         Reservation: <span className="font-mono text-primary">{inv.reservation?.code ?? "—"}</span> · Total:{" "}
-                        <strong>${Number(inv.total ?? 0).toFixed(2)}</strong>
-                        {paid > 0 && <span className="text-emerald-600"> · Paid: ${paid.toFixed(2)}</span>}
-                        {remaining > 0 && <span className="text-rose-600"> · Balance Due: ${remaining.toFixed(2)}</span>}
+                        <strong>{formatMoney(inv.total, inv.currency)}</strong>
+                        {paid > 0 && <span className="text-emerald-600"> · Paid: {formatMoney(paid, inv.currency)}</span>}
+                        {remaining > 0 && <span className="text-rose-600"> · Balance Due: {formatMoney(remaining, inv.currency)}</span>}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         Issued: {new Date(inv.issueDate).toLocaleDateString()}

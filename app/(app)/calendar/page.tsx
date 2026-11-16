@@ -447,6 +447,31 @@ export default function CalendarPage() {
             className="h-8 w-36 text-xs"
           />
 
+          <select
+            aria-label="Quick jump to month"
+            onChange={(e) => {
+              if (e.target.value) setStartDateIso(e.target.value);
+            }}
+            defaultValue=""
+            className="h-8 rounded-md border border-input bg-background px-2 text-xs font-medium"
+          >
+            <option value="" disabled>Jump to month...</option>
+            <option value="2025-05-01">May 2025</option>
+            <option value="2025-06-01">Jun 2025</option>
+            <option value="2025-07-01">Jul 2025</option>
+            <option value="2025-08-01">Aug 2025</option>
+            <option value="2025-09-01">Sep 2025</option>
+            <option value="2025-10-01">Oct 2025</option>
+            <option value="2025-11-01">Nov 2025</option>
+            <option value="2025-12-01">Dec 2025</option>
+            <option value="2026-01-01">Jan 2026</option>
+            <option value="2026-02-01">Feb 2026</option>
+            <option value="2026-03-01">Mar 2026</option>
+            <option value="2026-04-01">Apr 2026</option>
+            <option value="2026-05-01">May 2026</option>
+            <option value="2026-06-01">Jun 2026</option>
+          </select>
+
           <div className="h-6 w-px bg-border mx-0.5 hidden sm:block" />
 
           {[7, 14, 30].map((cnt) => (
