@@ -5,9 +5,12 @@ import { requirePermission } from "@/lib/auth/session";
 export async function GET(request: Request) {
   try {
     const user = await requirePermission("guests.view");
+    const organizationId = user.organizationId ?? "";
     const url = new URL(request.url);
     const query = url.searchParams.get("query") ?? undefined;
-    const where: any = { organizationId: user.organizationId ?? "" };
+    const limit = parseInt(url.searchParams.get("limit") || "250", 10);
+
+    const where: any = { organizationId };
     if (query) {
       where.OR = [
         { firstName: { contains: query } },
@@ -15,13 +18,26 @@ export async function GET(request: Request) {
         { email: { contains: query } },
       ];
     }
+
     const guests = await prisma.guest.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      take: 50,
-      include: { _count: { select: { reservations: true } } },
+      take: limit,
+      include: {
+        profile: true,
+        _count: { select: { reservations: true } },
+      },
     });
-    return NextResponse.json({ success: true, data: guests });
+
+    const totalGuests = await prisma.guest.count({ where: { organizationId } });
+
+    return NextResponse.json({
+      success: true,
+      data: guests,
+      meta: {
+        total: totalGuests,
+      },
+    });
   } catch (error: any) {
     if (error?.status === 403) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 403 });
     if (error?.message === "Unauthorized") return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
