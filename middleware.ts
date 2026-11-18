@@ -73,13 +73,21 @@ export function middleware(request: NextRequest) {
   ) {
     const origin = request.headers.get("origin");
     const referer = request.headers.get("referer");
-    const host = request.headers.get("host");
+    const host = request.headers.get("host") || "";
+
+    const isLocalHost = (h: string) =>
+      h.startsWith("localhost:") ||
+      h === "localhost" ||
+      h.startsWith("127.0.0.1:") ||
+      h === "127.0.0.1" ||
+      h.startsWith("0.0.0.0:") ||
+      h === "0.0.0.0";
 
     if (origin && host) {
       try {
         const originUrl = new URL(origin);
-        // Allow same-origin or localhost variants in development
-        if (originUrl.host !== host && !host.startsWith("localhost:") && !host.startsWith("127.0.0.1:")) {
+        // Allow same-origin or localhost/loopback variants in development
+        if (originUrl.host !== host && !(isLocalHost(originUrl.host) && isLocalHost(host))) {
           return new NextResponse(JSON.stringify({ success: false, error: { message: "Cross-Site Request Forgery origin mismatch" } }), {
             status: 403,
             headers: { "Content-Type": "application/json" },
@@ -95,7 +103,7 @@ export function middleware(request: NextRequest) {
     } else if (referer && host) {
       try {
         const refererUrl = new URL(referer);
-        if (refererUrl.host !== host && !host.startsWith("localhost:") && !host.startsWith("127.0.0.1:")) {
+        if (refererUrl.host !== host && !(isLocalHost(refererUrl.host) && isLocalHost(host))) {
           return new NextResponse(JSON.stringify({ success: false, error: { message: "Cross-Site Request Forgery referer mismatch" } }), {
             status: 403,
             headers: { "Content-Type": "application/json" },

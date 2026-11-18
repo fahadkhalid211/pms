@@ -33,8 +33,17 @@ export default function LoginPage() {
 
 function SignInForm() {
   const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next");
-  const targetDestination = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/dashboard";
+  const rawNext = searchParams.get("next");
+  const isDisallowed =
+    !rawNext ||
+    rawNext === "/login" ||
+    rawNext.startsWith("/login?") ||
+    rawNext.startsWith("/login/") ||
+    rawNext === "/register" ||
+    rawNext.startsWith("/register?") ||
+    !rawNext.startsWith("/") ||
+    rawNext.startsWith("//");
+  const targetDestination = isDisallowed ? "/dashboard" : rawNext;
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -43,11 +52,14 @@ function SignInForm() {
 
   React.useEffect(() => {
     let active = true;
-    fetch("/api/auth/session")
+    fetch("/api/auth/session", {
+      credentials: "include",
+      cache: "no-store",
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
         if (active && json?.success && json?.data?.user) {
-          window.location.href = targetDestination;
+          window.location.replace(targetDestination);
         }
       })
       .catch(() => {});
@@ -64,6 +76,7 @@ function SignInForm() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       const json = await response.json();
@@ -72,7 +85,7 @@ function SignInForm() {
         setError(json.error?.message ?? "Sign in failed");
         return;
       }
-      window.location.href = targetDestination;
+      window.location.replace(targetDestination);
     } catch {
       setPending(false);
       setError("An unexpected network error occurred. Please try again.");

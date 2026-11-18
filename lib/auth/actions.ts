@@ -49,10 +49,25 @@ export async function hashSession(user: {
   return signSessionToken(payload);
 }
 
-export async function setSessionCookie(response: NextResponse, token: string) {
+export function isSecureConnection(request?: Request): boolean {
+  if (request) {
+    const proto = request.headers.get("x-forwarded-proto");
+    if (proto) {
+      return proto.toLowerCase() === "https";
+    }
+    return request.url.startsWith("https://");
+  }
+  if (process.env.AUTH_URL?.startsWith("https://") || process.env.NEXTAUTH_URL?.startsWith("https://")) {
+    return true;
+  }
+  return false;
+}
+
+export async function setSessionCookie(response: NextResponse, token: string, request?: Request) {
+  const secure = isSecureConnection(request);
   response.cookies.set("lumina.session", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
@@ -60,10 +75,11 @@ export async function setSessionCookie(response: NextResponse, token: string) {
   return response;
 }
 
-export function clearSessionCookie(response: NextResponse) {
+export function clearSessionCookie(response: NextResponse, request?: Request) {
+  const secure = isSecureConnection(request);
   response.cookies.set("lumina.session", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     sameSite: "lax",
     path: "/",
     maxAge: 0,

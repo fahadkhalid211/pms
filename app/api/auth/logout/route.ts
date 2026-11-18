@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { clearSessionCookie } from "@/lib/auth/actions";
 
-export async function POST() {
+export async function POST(request: Request) {
   const response = NextResponse.json({ success: true, data: null });
-  return clearSessionCookie(response);
+  return clearSessionCookie(response, request);
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   const response = NextResponse.json({ success: true, data: null });
-  return clearSessionCookie(response);
+  return clearSessionCookie(response, request);
 }
 
 export async function GET(request: Request) {
@@ -34,5 +34,5 @@ export async function GET(request: Request) {
   }
 
   const response = NextResponse.redirect(new URL(target, `${proto}://${safeHost}`));
-  return clearSessionCookie(response);
+  return clearSessionCookie(response, request);
 }

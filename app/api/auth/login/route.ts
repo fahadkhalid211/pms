@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       entityId: user.id,
     });
     const response = NextResponse.json({ success: true, data: { id: user.id, email: user.email, name: user.name } });
-    return setSessionCookie(response, token);
+    return setSessionCookie(response, token, request);
   } catch (error: any) {
     if (error?.status === 401) {
       return NextResponse.json({ success: false, error: { message: error.message } }, { status: 401 });

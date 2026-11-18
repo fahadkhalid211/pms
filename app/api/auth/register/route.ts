@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       },
     }, { status: 201 });
 
-    return setSessionCookie(response, token);
+    return setSessionCookie(response, token, request);
   } catch (error: any) {
     if (error?.status === 409) {
       return NextResponse.json({ success: false, error: { message: error.message } }, { status: 409 });

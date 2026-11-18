@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { authenticate } from "@/lib/auth/actions";
+import { authenticate, setSessionCookie, isSecureConnection } from "@/lib/auth/actions";
 import { verifySessionToken } from "@/lib/auth/jwt";
 import { resolveUserContext } from "@/lib/auth/session";
 import { middleware } from "@/middleware";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 describe("WP0 Gate: Login and Session resolution", () => {
   it("authenticates seeded admin user and resolves valid session context", async () => {
@@ -81,5 +81,25 @@ describe("WP0 Gate: Login and Session resolution", () => {
     const location = res.headers.get("location") || "";
     expect(location).not.toContain("0.0.0.0");
     expect(location).toContain("localhost:3000");
+  });
+
+  it("setSessionCookie sets secure=false for HTTP connections and secure=true for HTTPS", async () => {
+    const httpReq = new Request("http://localhost:3000/api/auth/login");
+    const httpRes = NextResponse.json({ ok: true });
+    await setSessionCookie(httpRes, "test-token", httpReq);
+    const httpCookie = httpRes.cookies.get("lumina.session");
+    expect(httpCookie).toBeDefined();
+    expect(httpCookie?.value).toBe("test-token");
+    expect(isSecureConnection(httpReq)).toBe(false);
+
+    const httpsReq = new Request("https://example.com/api/auth/login");
+    const httpsRes = NextResponse.json({ ok: true });
+    await setSessionCookie(httpsRes, "test-token", httpsReq);
+    expect(isSecureConnection(httpsReq)).toBe(true);
+
+    const forwardedHttpsReq = new Request("http://example.com/api/auth/login", {
+      headers: { "x-forwarded-proto": "https" },
+    });
+    expect(isSecureConnection(forwardedHttpsReq)).toBe(true);
   });
 });
