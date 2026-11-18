@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,9 @@ export default function LoginPage() {
           <CardDescription>Sign in to your Lumina PMS workspace.</CardDescription>
         </CardHeader>
         <CardContent>
-          <SignInForm />
+          <React.Suspense fallback={<div className="py-4 text-center text-sm text-muted-foreground">Loading sign in form...</div>}>
+            <SignInForm />
+          </React.Suspense>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             New to Lumina?{" "}
             <Link href="/register" className="font-medium text-primary hover:underline">
@@ -29,6 +32,10 @@ export default function LoginPage() {
 }
 
 function SignInForm() {
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const targetDestination = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/dashboard";
+
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -38,18 +45,23 @@ function SignInForm() {
     e.preventDefault();
     setError(null);
     setPending(true);
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const json = await response.json();
-    setPending(false);
-    if (!response.ok || !json.success) {
-      setError(json.error?.message ?? "Sign in failed");
-      return;
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const json = await response.json();
+      setPending(false);
+      if (!response.ok || !json.success) {
+        setError(json.error?.message ?? "Sign in failed");
+        return;
+      }
+      window.location.href = targetDestination;
+    } catch {
+      setPending(false);
+      setError("An unexpected network error occurred. Please try again.");
     }
-    window.location.href = "/dashboard";
   }
 
   return (

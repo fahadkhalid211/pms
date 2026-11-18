@@ -1,5 +1,33 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
+
+const AUTH_SECRET = process.env.AUTH_SECRET || "lumina-dev-only-insecure-secret-change-me-32b";
+const AUTH_SECRET_BYTES = new TextEncoder().encode(AUTH_SECRET);
+
+async function isValidSessionToken(token?: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const { payload } = await jwtVerify(token, AUTH_SECRET_BYTES, {
+      algorithms: ["HS256"],
+    });
+    return Boolean(payload?.sub);
+  } catch {
+    return false;
+  }
+}
+
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
+  );
+  return response;
+}
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -23,7 +51,7 @@ const PROTECTED_PREFIXES = [
   "/activity-logs",
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
@@ -76,30 +104,45 @@ export function middleware(request: NextRequest) {
   const isProtectedPath = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const sessionCookie = request.cookies.get("lumina.session")?.value;
 
-  if (isProtectedPath && !sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+  if (isProtectedPath) {
+    const hasValidSession = await isValidSessionToken(sessionCookie);
+    if (!hasValidSession) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      if (sessionCookie) {
+        redirectResponse.cookies.delete("lumina.session");
+      }
+      return applySecurityHeaders(redirectResponse);
+    }
   }
 
-  // If already authenticated and visiting /login or /register, redirect to /dashboard
-  if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // 3. Guest visiting /login or /register
+  if (pathname === "/login" || pathname === "/register") {
+    const hasNext = request.nextUrl.searchParams.has("next");
+
+    // If redirected to login explicitly with next param, never loop back to dashboard
+    if (hasNext && sessionCookie) {
+      const response = NextResponse.next();
+      response.cookies.delete("lumina.session");
+      return applySecurityHeaders(response);
+    }
+
+    if (!hasNext && sessionCookie) {
+      const hasValidSession = await isValidSessionToken(sessionCookie);
+      if (hasValidSession) {
+        return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", request.url)));
+      } else {
+        // Stale or invalid session cookie: delete and allow login view
+        const response = NextResponse.next();
+        response.cookies.delete("lumina.session");
+        return applySecurityHeaders(response);
+      }
+    }
   }
 
   const response = NextResponse.next();
-
-  // 3. Security Headers
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  response.headers.set(
-    "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
-  );
-
-  return response;
+  return applySecurityHeaders(response);
 }
 
 export const config = {

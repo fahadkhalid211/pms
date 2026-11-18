@@ -25,8 +25,8 @@ export interface AuthContext {
   hasPropertyAccess: (propertyId: string) => boolean;
 }
 
-export async function resolveUserContext(userId: string): Promise<SessionUser | null> {
-  const user = await prisma.user.findUnique({
+export async function resolveUserContext(userId: string, fallbackEmail?: string): Promise<SessionUser | null> {
+  let user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       memberships: {
@@ -38,6 +38,22 @@ export async function resolveUserContext(userId: string): Promise<SessionUser | 
       },
     },
   });
+
+  if (!user && fallbackEmail) {
+    user = await prisma.user.findUnique({
+      where: { email: fallbackEmail.toLowerCase().trim() },
+      include: {
+        memberships: {
+          where: { status: "active" },
+          include: { organization: true, role: true },
+        },
+        propertyMemberships: {
+          where: { status: "active" },
+        },
+      },
+    });
+  }
+
   if (!user || user.status !== "active") return null;
 
   const membership = user.memberships[0];
@@ -101,7 +117,7 @@ export async function getSession(request?: Request): Promise<Session | null> {
     const payload = await verifySessionToken(token);
     if (!payload?.sub) return null;
 
-    const user = await resolveUserContext(payload.sub);
+    const user = await resolveUserContext(payload.sub, payload.email);
     if (!user) return null;
 
     return { user };
