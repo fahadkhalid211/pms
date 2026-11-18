@@ -120,8 +120,11 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("lumina.session")?.value;
 
   if (isProtectedPath && !sessionCookie) {
-    const safeOrigin = getSafeOrigin(request);
-    const loginUrl = new URL("/login", safeOrigin);
+    const loginUrl = request.nextUrl.clone();
+    if (loginUrl.hostname === "0.0.0.0") {
+      loginUrl.hostname = "localhost";
+    }
+    loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
     return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }

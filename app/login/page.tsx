@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
   return (
@@ -45,10 +46,9 @@ function SignInForm() {
     rawNext.startsWith("//");
   const targetDestination = isDisallowed ? "/dashboard" : rawNext;
 
+  const [state, formAction, isPending] = React.useActionState(loginAction, undefined);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
-  const [pending, setPending] = React.useState(false);
 
   React.useEffect(() => {
     let active = true;
@@ -68,43 +68,40 @@ function SignInForm() {
     };
   }, [targetDestination]);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setPending(true);
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-      const json = await response.json();
-      setPending(false);
-      if (!response.ok || !json.success) {
-        setError(json.error?.message ?? "Sign in failed");
-        return;
-      }
-      window.location.replace(targetDestination);
-    } catch {
-      setPending(false);
-      setError("An unexpected network error occurred. Please try again.");
-    }
-  }
-
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
+    <form className="space-y-4" action={formAction}>
+      <input type="hidden" name="next" value={targetDestination} />
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
       </div>
-      {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
+      {state?.error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {state.error}
+        </div>
+      )}
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

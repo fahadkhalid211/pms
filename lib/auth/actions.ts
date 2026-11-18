@@ -65,25 +65,46 @@ export function isSecureConnection(request?: Request): boolean {
 
 export async function setSessionCookie(response: NextResponse, token: string, request?: Request) {
   const secure = isSecureConnection(request);
-  response.cookies.set("lumina.session", token, {
+  const options = {
     httpOnly: true,
     secure,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
-  });
+  };
+
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    cookieStore.set("lumina.session", token, options);
+  } catch {
+    // cookies() may throw outside Next.js request context (e.g. in tests)
+  }
+
+  response.cookies.set("lumina.session", token, options);
   return response;
 }
 
 export function clearSessionCookie(response: NextResponse, request?: Request) {
   const secure = isSecureConnection(request);
-  response.cookies.set("lumina.session", "", {
+  const options = {
     httpOnly: true,
     secure,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 0,
-  });
+  };
+
+  try {
+    import("next/headers").then(async ({ cookies }) => {
+      const cookieStore = await cookies();
+      cookieStore.delete("lumina.session");
+    }).catch(() => {});
+  } catch {
+    // Ignore outside request context
+  }
+
+  response.cookies.set("lumina.session", "", options);
   return response;
 }
 
