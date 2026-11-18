@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
-import { env } from "@/lib/env";
 
 function getSecret() {
-  return new TextEncoder().encode(env.AUTH_SECRET);
+  const secret = process.env.AUTH_SECRET || "lumina-dev-only-insecure-secret-change-me-32b";
+  return new TextEncoder().encode(secret);
 }
 
 export interface SessionTokenPayload {

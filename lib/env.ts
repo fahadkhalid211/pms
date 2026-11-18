@@ -37,8 +37,9 @@ const envSchema = z
     AIRBNB_CLIENT_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    // When running in production (outside Next.js build phase), refuse insecure defaults and zero keys
+    // When running in production on server (outside Next.js build phase), refuse insecure defaults and zero keys
     const isProductionRuntime =
+      typeof window === "undefined" &&
       (data.NODE_ENV === "production" || process.env.NODE_ENV === "production") &&
       process.env.NEXT_PHASE !== "phase-production-build";
 
@@ -80,13 +81,41 @@ const envSchema = z
     }
   });
 
-const parsed = envSchema.safeParse(process.env);
+const isServer = typeof window === "undefined";
 
-if (!parsed.success) {
-  const formatted = JSON.stringify(parsed.error.format(), null, 2);
-  console.error("[lumina] Invalid environment configuration:\n", formatted);
-  throw new Error(`[lumina] Invalid environment configuration: ${parsed.error.message}`);
+let envData: z.infer<typeof envSchema>;
+
+if (isServer) {
+  const parsed = envSchema.safeParse(process.env);
+  if (!parsed.success) {
+    const formatted = JSON.stringify(parsed.error.format(), null, 2);
+    console.error("[lumina] Invalid environment configuration:\n", formatted);
+    throw new Error(`[lumina] Invalid environment configuration: ${parsed.error.message}`);
+  }
+  envData = parsed.data;
+} else {
+  // Client-side environment fallback (Next.js client bundles strip private server secrets)
+  envData = {
+    NODE_ENV: (process.env.NODE_ENV as any) || "development",
+    DATABASE_URL: "",
+    AUTH_SECRET: "",
+    AUTH_ENCRYPTION_KEY: ZERO_KEY,
+    AUTH_URL: "",
+    AUTH_TRUST_HOST: "true",
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "Lumina PMS",
+    NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@lumina.pms",
+    NEXT_PUBLIC_CHATBOT_ENABLED: process.env.NEXT_PUBLIC_CHATBOT_ENABLED || "true",
+    NEXT_PUBLIC_DEFAULT_TIMEZONE: process.env.NEXT_PUBLIC_DEFAULT_TIMEZONE || "America/New_York",
+    EMAIL_PROVIDER: "log",
+    EMAIL_FROM: "no-reply@lumina.pms",
+    SMTP_HOST: "",
+    SMTP_PORT: "587",
+    SMTP_USER: "",
+    SMTP_PASS: "",
+    INTEGRATION_ENCRYPTION_KEY: ZERO_KEY,
+    INTEGRATION_WEBHOOK_SECRET: "",
+  };
 }
 
-export const env = parsed.data;
+export const env = envData;
 export type Env = z.infer<typeof envSchema>;

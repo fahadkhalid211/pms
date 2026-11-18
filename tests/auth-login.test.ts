@@ -102,4 +102,12 @@ describe("WP0 Gate: Login and Session resolution", () => {
     });
     expect(isSecureConnection(forwardedHttpsReq)).toBe(true);
   });
+
+  it("middleware sets CSP allowing Google Fonts stylesheets and fonts", async () => {
+    const req = new NextRequest("http://localhost:3000/login");
+    const res = await middleware(req);
+    const csp = res.headers.get("content-security-policy") || "";
+    expect(csp).toContain("https://fonts.googleapis.com");
+    expect(csp).toContain("https://fonts.gstatic.com");
+  });
 });

@@ -5,7 +5,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { forgotPasswordSchema } from "@/lib/auth/actions";
+import { forgotPasswordSchema } from "@/lib/auth/schemas";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = React.useState("");
