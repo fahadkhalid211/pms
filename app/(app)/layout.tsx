@@ -9,7 +9,7 @@ import type { OrganizationBranding } from "@/lib/branding";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/api/auth/logout?next=/login");
+    redirect("/login");
   }
 
   let branding: OrganizationBranding | null = null;

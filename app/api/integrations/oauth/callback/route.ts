@@ -7,7 +7,8 @@ import { logActivity } from "@/lib/audit";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const appOrigin = process.env.AUTH_URL?.replace(/\/$/, "") || origin;
+  const rawOrigin = process.env.AUTH_URL?.replace(/\/$/, "") || origin;
+  const appOrigin = rawOrigin.replace("0.0.0.0", "localhost");
 
   const errorParam = searchParams.get("error");
   const code = searchParams.get("code");

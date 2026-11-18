@@ -69,4 +69,17 @@ describe("WP0 Gate: Login and Session resolution", () => {
     // Should NOT redirect back to /dashboard
     expect(res.status).not.toBe(307);
   });
+
+  it("middleware safely sanitizes 0.0.0.0 socket bindings to localhost on redirect", async () => {
+    const req = new NextRequest("http://0.0.0.0:3000/dashboard", {
+      headers: {
+        host: "0.0.0.0:3000",
+      },
+    });
+    const res = await middleware(req);
+    expect(res.status).toBe(307);
+    const location = res.headers.get("location") || "";
+    expect(location).not.toContain("0.0.0.0");
+    expect(location).toContain("localhost:3000");
+  });
 });

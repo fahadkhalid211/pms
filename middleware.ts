@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+function getSafeOrigin(request: NextRequest): string {
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+
+  let safeHost = host;
+  if (!safeHost || safeHost.startsWith("0.0.0.0")) {
+    const port = safeHost.split(":")[1] || "3000";
+    safeHost = `localhost:${port}`;
+  }
+
+  // Determine protocol
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  let proto = forwardedProto;
+  if (!proto) {
+    if (safeHost.includes("localhost") || safeHost.includes("127.0.0.1")) {
+      proto = "http";
+    } else {
+      proto = request.url.startsWith("https://") ? "https" : "http";
+    }
+  }
+
+  return `${proto}://${safeHost}`;
+}
+
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -89,7 +112,8 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("lumina.session")?.value;
 
   if (isProtectedPath && !sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
+    const safeOrigin = getSafeOrigin(request);
+    const loginUrl = new URL("/login", safeOrigin);
     loginUrl.searchParams.set("next", pathname);
     return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
