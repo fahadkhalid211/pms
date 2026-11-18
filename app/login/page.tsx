@@ -41,6 +41,21 @@ function SignInForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
 
+  React.useEffect(() => {
+    let active = true;
+    fetch("/api/auth/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (active && json?.success && json?.data?.user) {
+          window.location.href = targetDestination;
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [targetDestination]);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);

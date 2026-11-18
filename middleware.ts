@@ -1,21 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-
-const AUTH_SECRET = process.env.AUTH_SECRET || "lumina-dev-only-insecure-secret-change-me-32b";
-const AUTH_SECRET_BYTES = new TextEncoder().encode(AUTH_SECRET);
-
-async function isValidSessionToken(token?: string): Promise<boolean> {
-  if (!token) return false;
-  try {
-    const { payload } = await jwtVerify(token, AUTH_SECRET_BYTES, {
-      algorithms: ["HS256"],
-    });
-    return Boolean(payload?.sub);
-  } catch {
-    return false;
-  }
-}
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Frame-Options", "DENY");
@@ -51,7 +35,7 @@ const PROTECTED_PREFIXES = [
   "/activity-logs",
 ];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
@@ -104,41 +88,10 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const sessionCookie = request.cookies.get("lumina.session")?.value;
 
-  if (isProtectedPath) {
-    const hasValidSession = await isValidSessionToken(sessionCookie);
-    if (!hasValidSession) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("next", pathname);
-      const redirectResponse = NextResponse.redirect(loginUrl);
-      if (sessionCookie) {
-        redirectResponse.cookies.delete("lumina.session");
-      }
-      return applySecurityHeaders(redirectResponse);
-    }
-  }
-
-  // 3. Guest visiting /login or /register
-  if (pathname === "/login" || pathname === "/register") {
-    const hasNext = request.nextUrl.searchParams.has("next");
-
-    // If redirected to login explicitly with next param, never loop back to dashboard
-    if (hasNext && sessionCookie) {
-      const response = NextResponse.next();
-      response.cookies.delete("lumina.session");
-      return applySecurityHeaders(response);
-    }
-
-    if (!hasNext && sessionCookie) {
-      const hasValidSession = await isValidSessionToken(sessionCookie);
-      if (hasValidSession) {
-        return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", request.url)));
-      } else {
-        // Stale or invalid session cookie: delete and allow login view
-        const response = NextResponse.next();
-        response.cookies.delete("lumina.session");
-        return applySecurityHeaders(response);
-      }
-    }
+  if (isProtectedPath && !sessionCookie) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   const response = NextResponse.next();

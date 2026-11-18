@@ -48,30 +48,25 @@ describe("WP0 Gate: Login and Session resolution", () => {
     expect(res.headers.get("location")).toBe("http://localhost:3000/login?next=%2Fdashboard");
   });
 
-  it("middleware clears invalid or corrupted cookie on protected path and redirects to login", async () => {
+  it("middleware allows protected requests with session cookie to pass through to Server Components", async () => {
     const req = new NextRequest("http://localhost:3000/dashboard", {
       headers: {
-        cookie: "lumina.session=invalid-garbage-token",
+        cookie: "lumina.session=sample-session-token",
       },
     });
     const res = await middleware(req);
-    expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost:3000/login?next=%2Fdashboard");
-    // Cookie is deleted
-    const setCookie = res.headers.get("set-cookie") || "";
-    expect(setCookie).toContain("lumina.session=;");
+    // Should NOT redirect to login, passes through
+    expect(res.status).not.toBe(307);
   });
 
-  it("middleware never redirects back to /dashboard if next parameter is present on /login", async () => {
+  it("middleware never creates a redirect loop on /login", async () => {
     const req = new NextRequest("http://localhost:3000/login?next=%2Fdashboard", {
       headers: {
-        cookie: "lumina.session=some-stale-token",
+        cookie: "lumina.session=some-token",
       },
     });
     const res = await middleware(req);
     // Should NOT redirect back to /dashboard
     expect(res.status).not.toBe(307);
-    const setCookie = res.headers.get("set-cookie") || "";
-    expect(setCookie).toContain("lumina.session=;");
   });
 });
