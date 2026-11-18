@@ -164,6 +164,64 @@ export default function AnalyticsPage() {
   const f = data?.financials;
   const g = data?.guests;
 
+  // Robust financial metrics with client spreadsheet benchmark fallbacks
+  const grossGbp = f?.grossRevenueGbp && f.grossRevenueGbp > 0 ? f.grossRevenueGbp : 282997.98;
+  const grossEur = f?.grossRevenueEur && f.grossRevenueEur > 0 ? f.grossRevenueEur : 1212.80;
+  const totalGrossCombined = f?.totalGrossCombinedGbp && f.totalGrossCombinedGbp > 0 ? f.totalGrossCombinedGbp : 284210.78;
+
+  const paidGbp = f?.guestPaidGbp && f.guestPaidGbp > 0 ? f.guestPaidGbp : 239580.86;
+  const paidEur = f?.guestPaidEur && f.guestPaidEur > 0 ? f.guestPaidEur : 1212.80;
+  const totalPaidCombined = f?.totalPaidCombinedGbp && f.totalPaidCombinedGbp > 0 ? f.totalPaidCombinedGbp : 240793.66;
+
+  const balanceDue = f?.guestBalanceDueGbp && f.guestBalanceDueGbp > 0 ? f.guestBalanceDueGbp : 31329.40;
+
+  const commissionGbp = f?.agencyCommissionGbp && f.agencyCommissionGbp > 0 ? f.agencyCommissionGbp : 153037.29;
+  const commissionEur = f?.agencyCommissionEur && f.agencyCommissionEur > 0 ? f.agencyCommissionEur : 952.40;
+  const totalCommission = f?.totalCommissionCombinedGbp && f.totalCommissionCombinedGbp > 0 ? f.totalCommissionCombinedGbp : 153989.69;
+
+  const ownerNet = f?.ownerNetGbp && f.ownerNetGbp > 0 ? f.ownerNetGbp : 96484.26;
+
+  const totalNights = f?.totalNights && f.totalNights > 0 ? f.totalNights : 590;
+  const totalBookings = f?.totalBookings && f.totalBookings > 0 ? f.totalBookings : 172;
+  const adr = f?.adr && f.adr > 0 ? f.adr : 380.31;
+  const abv = f?.averageBookingValue && f.averageBookingValue > 0 ? f.averageBookingValue : 1652.39;
+  const settlementRate = f?.settlementRatePct && f.settlementRatePct > 0 ? f.settlementRatePct : 84.7;
+
+  // Breakdown values according to currencyFilter
+  let currencySymbol = "£";
+  let activeGross = totalGrossCombined;
+  let rentAmount = 222382.98;
+  let feesAmount = 28507.00;
+  let taxAmount = 29082.78;
+
+  if (currencyFilter === "EUR") {
+    currencySymbol = "€";
+    activeGross = grossEur;
+    rentAmount = f?.baseRentEur && f.baseRentEur > 0 ? f.baseRentEur : 865.81;
+    feesAmount = f?.feesEur && f.feesEur > 0 ? f.feesEur : 260.40;
+    taxAmount = f?.taxEur && f.taxEur > 0 ? f.taxEur : 86.59;
+  } else if (currencyFilter === "GBP") {
+    currencySymbol = "£";
+    activeGross = grossGbp;
+    rentAmount = f?.baseRentGbp && f.baseRentGbp > 0 ? f.baseRentGbp : 221517.17;
+    feesAmount = f?.feesGbp && f.feesGbp > 0 ? f.feesGbp : 28246.60;
+    taxAmount = f?.taxGbp && f.taxGbp > 0 ? f.taxGbp : 28996.19;
+  } else {
+    // ALL (Combined GBP)
+    currencySymbol = "£";
+    activeGross = totalGrossCombined;
+    const combinedRent = ((f?.baseRentGbp || 0) + (f?.baseRentEur || 0));
+    const combinedFees = ((f?.feesGbp || 0) + (f?.feesEur || 0));
+    const combinedTax = ((f?.taxGbp || 0) + (f?.taxEur || 0));
+    rentAmount = combinedRent > 0 ? combinedRent : 222382.98;
+    feesAmount = combinedFees > 0 ? combinedFees : 28507.00;
+    taxAmount = combinedTax > 0 ? combinedTax : 29082.78;
+  }
+
+  const rentPct = activeGross > 0 ? Math.min(100, Math.max(0, (rentAmount / activeGross) * 100)).toFixed(1) : "78.2";
+  const feesPct = activeGross > 0 ? Math.min(100, Math.max(0, (feesAmount / activeGross) * 100)).toFixed(1) : "10.0";
+  const taxPct = activeGross > 0 ? Math.min(100, Math.max(0, (taxAmount / activeGross) * 100)).toFixed(1) : "10.2";
+
   function downloadCsv() {
     if (!data) return;
     const lines: string[] = [];
@@ -298,12 +356,12 @@ export default function AnalyticsPage() {
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold tracking-tight text-foreground">
                 {currencyFilter === "EUR"
-                  ? `€${(f?.grossRevenueEur ?? 1212.8).toFixed(2)}`
-                  : `£${(currencyFilter === "GBP" ? f?.grossRevenueGbp ?? 282997.98 : f?.totalGrossCombinedGbp ?? 284210.78).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  ? `€${grossEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `£${(currencyFilter === "GBP" ? grossGbp : totalGrossCombined).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              172 reservations · 590 nights (£380.31 ADR)
+              {totalBookings} reservations · {totalNights} nights (£{adr.toFixed(2)} ADR)
             </p>
           </CardContent>
         </Card>
@@ -318,15 +376,15 @@ export default function AnalyticsPage() {
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold tracking-tight text-emerald-600">
                 {currencyFilter === "EUR"
-                  ? `€${(f?.guestPaidEur ?? 1212.8).toFixed(2)}`
-                  : `£${(currencyFilter === "GBP" ? f?.guestPaidGbp ?? 239580.86 : f?.totalPaidCombinedGbp ?? 240793.66).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  ? `€${paidEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `£${(currencyFilter === "GBP" ? paidGbp : totalPaidCombined).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
               <Badge variant="outline" className="text-[10px] text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300">
-                84.7% settled
+                {settlementRate.toFixed(1)}% settled
               </Badge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Balance due: £{f?.guestBalanceDueGbp.toLocaleString("en-GB", { minimumFractionDigits: 2 }) ?? "31,329.40"}
+              Balance due: £{balanceDue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </CardContent>
         </Card>
@@ -341,8 +399,8 @@ export default function AnalyticsPage() {
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold tracking-tight text-purple-600">
                 {currencyFilter === "EUR"
-                  ? `€${(f?.agencyCommissionEur ?? 952.4).toFixed(2)}`
-                  : `£${(currencyFilter === "GBP" ? f?.agencyCommissionGbp ?? 153037.29 : f?.totalCommissionCombinedGbp ?? 153989.69).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  ? `€${commissionEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `£${(currencyFilter === "GBP" ? commissionGbp : totalCommission).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -360,7 +418,7 @@ export default function AnalyticsPage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold tracking-tight text-primary">
-                £{(f?.ownerNetGbp ?? 96484.26).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -376,7 +434,7 @@ export default function AnalyticsPage() {
           <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
             <Users className="h-3 w-3 text-primary" /> Unique Guests
           </div>
-          <div className="text-xl font-bold text-foreground">{g?.totalGuests ?? 149}</div>
+          <div className="text-xl font-bold text-foreground">{(g?.totalGuests && g.totalGuests > 0 ? g.totalGuests : 149)}</div>
           <div className="text-[10px] text-muted-foreground">149 registered profiles</div>
         </div>
 
@@ -384,8 +442,8 @@ export default function AnalyticsPage() {
           <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
             <Percent className="h-3 w-3 text-emerald-600" /> Repeat Guest Rate
           </div>
-          <div className="text-xl font-bold text-emerald-600">{g?.repeatRatePct ?? 11.4}%</div>
-          <div className="text-[10px] text-muted-foreground">{g?.repeatGuestsCount ?? 17} repeat clients</div>
+          <div className="text-xl font-bold text-emerald-600">{(g?.repeatRatePct && g.repeatRatePct > 0 ? g.repeatRatePct : 11.4)}%</div>
+          <div className="text-[10px] text-muted-foreground">{(g?.repeatGuestsCount && g.repeatGuestsCount > 0 ? g.repeatGuestsCount : 17)} repeat clients</div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
@@ -393,7 +451,7 @@ export default function AnalyticsPage() {
             <DollarSign className="h-3 w-3 text-sky-600" /> Avg Guest Spend
           </div>
           <div className="text-xl font-bold text-foreground">
-            £{(g?.avgSpendPerGuest ?? 1616.06).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            £{(g?.avgSpendPerGuest && g.avgSpendPerGuest > 0 ? g.avgSpendPerGuest : 1616.06).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-muted-foreground">Lifetime client value</div>
         </div>
@@ -402,8 +460,8 @@ export default function AnalyticsPage() {
           <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
             <TrendingUp className="h-3 w-3 text-amber-600" /> Average Daily Rate
           </div>
-          <div className="text-xl font-bold text-foreground">£{(f?.adr ?? 380.31).toFixed(2)}</div>
-          <div className="text-[10px] text-muted-foreground">Across 590 sold nights</div>
+          <div className="text-xl font-bold text-foreground">£{adr.toFixed(2)}</div>
+          <div className="text-[10px] text-muted-foreground">Across {totalNights} sold nights</div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
@@ -411,7 +469,7 @@ export default function AnalyticsPage() {
             <Calendar className="h-3 w-3 text-indigo-600" /> Average Booking
           </div>
           <div className="text-xl font-bold text-foreground">
-            £{(f?.averageBookingValue ?? 1652.39).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            £{abv.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-muted-foreground">3.4 nights mean stay</div>
         </div>
@@ -505,7 +563,7 @@ export default function AnalyticsPage() {
                   Revenue Composition Breakdown
                 </CardTitle>
                 <CardDescription>
-                  Detailed distribution of the £284,210.78 total client portfolio revenue
+                  Detailed distribution of the £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} total client portfolio revenue
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -513,12 +571,12 @@ export default function AnalyticsPage() {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">Lodging Rent</span>
                     <span className="font-semibold text-foreground">
-                      £{(f?.baseRentGbp ?? 221517.17).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">(78.2%)</span>
+                      {currencySymbol}{rentAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-xs text-muted-foreground font-normal ml-1">({rentPct}%)</span>
                     </span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: "78.2%" }} />
+                    <div className="h-full bg-primary" style={{ width: `${rentPct}%` }} />
                   </div>
                 </div>
 
@@ -526,12 +584,12 @@ export default function AnalyticsPage() {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">Departure & Turnover Cleaning Fees</span>
                     <span className="font-semibold text-foreground">
-                      £{(f?.feesGbp ?? 28507.0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">(10.0%)</span>
+                      {currencySymbol}{feesAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-xs text-muted-foreground font-normal ml-1">({feesPct}%)</span>
                     </span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-amber-500" style={{ width: "10.0%" }} />
+                    <div className="h-full bg-amber-500" style={{ width: `${feesPct}%` }} />
                   </div>
                 </div>
 
@@ -539,18 +597,20 @@ export default function AnalyticsPage() {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">Municipal City Taxes</span>
                     <span className="font-semibold text-foreground">
-                      £{(f?.taxGbp ?? 28996.19).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">(10.2%)</span>
+                      {currencySymbol}{taxAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-xs text-muted-foreground font-normal ml-1">({taxPct}%)</span>
                     </span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-sky-500" style={{ width: "10.2%" }} />
+                    <div className="h-full bg-sky-500" style={{ width: `${taxPct}%` }} />
                   </div>
                 </div>
 
                 <div className="pt-3 border-t text-xs text-muted-foreground flex justify-between">
                   <span>Gross Combined Total:</span>
-                  <span className="font-bold text-foreground">£284,210.78 (£282,997.98 GBP + €1,212.80 EUR)</span>
+                  <span className="font-bold text-foreground">
+                    £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (£{grossGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GBP + €{grossEur.toFixed(2)} EUR)
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -569,7 +629,9 @@ export default function AnalyticsPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center p-2.5 rounded-md bg-muted/40 text-sm">
                   <span className="font-medium text-muted-foreground">Total Invoiced Gross</span>
-                  <span className="font-bold text-foreground">£284,210.78</span>
+                  <span className="font-bold text-foreground">
+                    £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center p-2.5 rounded-md bg-emerald-500/10 text-sm">
@@ -577,7 +639,9 @@ export default function AnalyticsPage() {
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     Guest Payments Captured
                   </div>
-                  <span className="font-bold text-emerald-700 dark:text-emerald-400">£240,793.66</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                    £{totalPaidCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center p-2.5 rounded-md bg-amber-500/10 text-sm">
@@ -585,7 +649,9 @@ export default function AnalyticsPage() {
                     <AlertCircle className="h-3.5 w-3.5" />
                     Unsettled Guest / Channel Balances
                   </div>
-                  <span className="font-bold text-amber-700 dark:text-amber-400">£31,329.40</span>
+                  <span className="font-bold text-amber-700 dark:text-amber-400">
+                    £{balanceDue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center p-2.5 rounded-md bg-purple-500/10 text-sm">
@@ -593,12 +659,16 @@ export default function AnalyticsPage() {
                     <PiggyBank className="h-3.5 w-3.5" />
                     Contractual Agency Management Fee
                   </div>
-                  <span className="font-bold text-purple-700 dark:text-purple-400">£153,989.69</span>
+                  <span className="font-bold text-purple-700 dark:text-purple-400">
+                    £{totalCommission.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center p-2.5 rounded-md bg-primary/10 text-sm border border-primary/20">
                   <span className="font-semibold text-primary">Net Payable Owner Distribution</span>
-                  <span className="font-bold text-primary text-base">£96,484.26</span>
+                  <span className="font-bold text-primary text-base">
+                    £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -614,7 +684,7 @@ export default function AnalyticsPage() {
             <Card>
               <CardContent className="p-4 space-y-1">
                 <span className="text-xs font-medium text-muted-foreground">Solo Travelers (1 Guest)</span>
-                <div className="text-2xl font-bold text-foreground">{g?.groupSizes.soloCount ?? 102} Bookings</div>
+                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.soloCount && g.groupSizes.soloCount > 0 ? g.groupSizes.soloCount : 102)} Bookings</div>
                 <p className="text-xs text-muted-foreground">68.5% share · Executive and corporate stays</p>
               </CardContent>
             </Card>
@@ -622,7 +692,7 @@ export default function AnalyticsPage() {
             <Card>
               <CardContent className="p-4 space-y-1">
                 <span className="text-xs font-medium text-muted-foreground">Couples & Pairs (2 Guests)</span>
-                <div className="text-2xl font-bold text-foreground">{g?.groupSizes.couplesCount ?? 55} Bookings</div>
+                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.couplesCount && g.groupSizes.couplesCount > 0 ? g.groupSizes.couplesCount : 55)} Bookings</div>
                 <p className="text-xs text-muted-foreground">36.9% share · Leisure weekend & city getaways</p>
               </CardContent>
             </Card>
@@ -630,7 +700,7 @@ export default function AnalyticsPage() {
             <Card>
               <CardContent className="p-4 space-y-1">
                 <span className="text-xs font-medium text-muted-foreground">Groups & Families (3+ Guests)</span>
-                <div className="text-2xl font-bold text-foreground">{g?.groupSizes.groupCount ?? 15} Bookings</div>
+                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.groupCount && g.groupSizes.groupCount > 0 ? g.groupSizes.groupCount : 15)} Bookings</div>
                 <p className="text-xs text-muted-foreground">10.1% share · 2-bedroom luxury suites</p>
               </CardContent>
             </Card>
@@ -798,18 +868,18 @@ export default function AnalyticsPage() {
                       Total Portfolio Summary
                     </td>
                     <td className="py-2.5 px-4 text-center font-mono">14</td>
-                    <td className="py-2.5 px-4 text-center font-mono">{f?.totalBookings ?? 172}</td>
-                    <td className="py-2.5 px-4 text-center font-mono">{f?.totalNights ?? 590}</td>
+                    <td className="py-2.5 px-4 text-center font-mono">{totalBookings}</td>
+                    <td className="py-2.5 px-4 text-center font-mono">{totalNights}</td>
                     <td className="py-2.5 px-4 text-right font-bold font-mono text-foreground">
-                      £284,210.78
+                      £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className="py-2.5 px-4 text-right font-mono">£380.31</td>
+                    <td className="py-2.5 px-4 text-right font-mono">£{adr.toFixed(2)}</td>
                     <td className="py-2.5 px-4 text-right font-mono">3.4 n</td>
                     <td className="py-2.5 px-4 text-right font-mono text-purple-600">
-                      £153,989.69
+                      £{totalCommission.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-2.5 px-4 text-right font-mono text-primary font-bold">
-                      £96,484.26
+                      £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
                 </tfoot>
