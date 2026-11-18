@@ -35,6 +35,14 @@ export function isSecureConnection(request?: Request): boolean {
     if (proto) {
       return proto.toLowerCase() === "https";
     }
+    const origin = request.headers.get("origin");
+    if (origin) {
+      return origin.startsWith("https://");
+    }
+    const referer = request.headers.get("referer");
+    if (referer) {
+      return referer.startsWith("https://");
+    }
     return request.url.startsWith("https://");
   }
   if (process.env.AUTH_URL?.startsWith("https://") || process.env.NEXTAUTH_URL?.startsWith("https://")) {

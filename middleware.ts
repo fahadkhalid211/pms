@@ -58,60 +58,129 @@ const PROTECTED_PREFIXES = [
   "/activity-logs",
 ];
 
+function isOriginAllowed(request: NextRequest): boolean {
+  const origin = request.headers.get("origin");
+  const referer = request.headers.get("referer");
+
+  // If neither origin nor referer is provided, allow (non-browser or same-origin direct clients)
+  if (!origin && !referer) {
+    return true;
+  }
+
+  const validHosts = new Set<string>();
+
+  // 1. Host header
+  const rawHost = request.headers.get("host");
+  if (rawHost) {
+    validHosts.add(rawHost.toLowerCase());
+    validHosts.add(rawHost.split(":")[0].toLowerCase());
+  }
+
+  // 2. X-Forwarded-Host (can be comma-separated list of proxies)
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    forwardedHost.split(",").forEach((h) => {
+      const trimmed = h.trim().toLowerCase();
+      if (trimmed) {
+        validHosts.add(trimmed);
+        validHosts.add(trimmed.split(":")[0]);
+      }
+    });
+  }
+
+  // 3. Next.js internal URL host
+  if (request.nextUrl?.host) {
+    validHosts.add(request.nextUrl.host.toLowerCase());
+    validHosts.add(request.nextUrl.hostname.toLowerCase());
+  }
+
+  // 4. Configured AUTH_URL / NEXTAUTH_URL
+  const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+  if (authUrl) {
+    try {
+      const u = new URL(authUrl);
+      validHosts.add(u.host.toLowerCase());
+      validHosts.add(u.hostname.toLowerCase());
+    } catch {}
+  }
+
+  const isLocalHost = (h: string) => {
+    const clean = h.split(":")[0].toLowerCase();
+    return clean === "localhost" || clean === "127.0.0.1" || clean === "0.0.0.0" || clean === "::1";
+  };
+
+  const hasLocalHost = Array.from(validHosts).some(isLocalHost);
+
+  // Check Origin header first
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      const originHost = originUrl.host.toLowerCase();
+      const originHostname = originUrl.hostname.toLowerCase();
+
+      if (validHosts.has(originHost) || validHosts.has(originHostname)) {
+        return true;
+      }
+      if (isLocalHost(originHostname) && hasLocalHost) {
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  // Fallback to Referer header if Origin is not present
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      const refererHost = refererUrl.host.toLowerCase();
+      const refererHostname = refererUrl.hostname.toLowerCase();
+
+      if (validHosts.has(refererHost) || validHosts.has(refererHostname)) {
+        return true;
+      }
+      if (isLocalHost(refererHostname) && hasLocalHost) {
+        return true;
+      }
+      return false;
+    } catch {
+      return true; // Ignore malformed referers if origin was not present
+    }
+  }
+
+  return true;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
-  // 1. CSRF Origin Verification for state-modifying requests (webhooks, integrations webhooks, public chatbot, and portal endpoints are exempt)
+  // 1. CSRF Origin Verification for state-modifying requests
+  // Webhooks, integrations, public chatbot, customer portal, auth endpoints, and Next.js Server Actions are exempt
+  const isServerAction = request.headers.has("next-action");
+  const isAuthOrPublicEndpoint =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/api/auth/") ||
+    pathname.startsWith("/api/webhooks") ||
+    pathname.startsWith("/api/integrations/webhooks") ||
+    pathname.startsWith("/api/integrations/ical") ||
+    pathname.startsWith("/api/chatbot") ||
+    pathname.startsWith("/api/portal");
+
   if (
     ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
-    !pathname.startsWith("/api/webhooks") &&
-    !pathname.startsWith("/api/integrations/webhooks") &&
-    !pathname.startsWith("/api/integrations/ical") &&
-    !pathname.startsWith("/api/chatbot") &&
-    !pathname.startsWith("/api/portal")
+    !isServerAction &&
+    !isAuthOrPublicEndpoint
   ) {
-    const origin = request.headers.get("origin");
-    const referer = request.headers.get("referer");
-    const host = request.headers.get("host") || "";
-
-    const isLocalHost = (h: string) =>
-      h.startsWith("localhost:") ||
-      h === "localhost" ||
-      h.startsWith("127.0.0.1:") ||
-      h === "127.0.0.1" ||
-      h.startsWith("0.0.0.0:") ||
-      h === "0.0.0.0";
-
-    if (origin && host) {
-      try {
-        const originUrl = new URL(origin);
-        // Allow same-origin or localhost/loopback variants in development
-        if (originUrl.host !== host && !(isLocalHost(originUrl.host) && isLocalHost(host))) {
-          return new NextResponse(JSON.stringify({ success: false, error: { message: "Cross-Site Request Forgery origin mismatch" } }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-      } catch {
-        // Invalid origin format
-        return new NextResponse(JSON.stringify({ success: false, error: { message: "Invalid Origin header" } }), {
+    if (!isOriginAllowed(request)) {
+      return new NextResponse(
+        JSON.stringify({ success: false, error: { message: "Cross-Site Request Forgery origin mismatch" } }),
+        {
           status: 403,
           headers: { "Content-Type": "application/json" },
-        });
-      }
-    } else if (referer && host) {
-      try {
-        const refererUrl = new URL(referer);
-        if (refererUrl.host !== host && !(isLocalHost(refererUrl.host) && isLocalHost(host))) {
-          return new NextResponse(JSON.stringify({ success: false, error: { message: "Cross-Site Request Forgery referer mismatch" } }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-      } catch {
-        // Ignore malformed referers if origin was not present
-      }
+        },
+      );
     }
   }
 
@@ -120,7 +189,22 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("lumina.session")?.value;
 
   if (isProtectedPath && !sessionCookie) {
+    const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const forwardedProto = request.headers.get("x-forwarded-proto");
     const loginUrl = request.nextUrl.clone();
+
+    if (forwardedHost) {
+      const [h, p] = forwardedHost.split(":");
+      loginUrl.hostname = h;
+      if (p) {
+        loginUrl.port = p;
+      } else if (forwardedProto === "https") {
+        loginUrl.port = "";
+      }
+    }
+    if (forwardedProto) {
+      loginUrl.protocol = `${forwardedProto}:`;
+    }
     if (loginUrl.hostname === "0.0.0.0") {
       loginUrl.hostname = "localhost";
     }

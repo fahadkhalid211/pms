@@ -48,7 +48,21 @@ export async function loginAction(
 
   const headerList = await headers();
   const proto = headerList.get("x-forwarded-proto");
-  const isHttps = proto === "https" || process.env.AUTH_URL?.startsWith("https://") || false;
+  const referer = headerList.get("referer");
+  const origin = headerList.get("origin");
+
+  // Setting secure: true over plain HTTP causes all modern browsers to discard the cookie.
+  const isPlainHttp =
+    proto === "http" ||
+    origin?.startsWith("http://") === true ||
+    referer?.startsWith("http://") === true;
+
+  const isHttps =
+    !isPlainHttp &&
+    (proto === "https" ||
+      origin?.startsWith("https://") === true ||
+      referer?.startsWith("https://") === true ||
+      (process.env.AUTH_URL?.startsWith("https://") && !headerList.get("host")?.includes("localhost")));
 
   const cookieStore = await cookies();
   cookieStore.set("lumina.session", token, {
