@@ -20,12 +20,20 @@ export default function LoginPage() {
           <React.Suspense fallback={<div className="py-4 text-center text-sm text-muted-foreground">Loading sign in form...</div>}>
             <SignInForm />
           </React.Suspense>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            New to Lumina?{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
-              Create an account
-            </Link>
-          </p>
+          <div className="mt-4 space-y-2 text-center text-sm text-muted-foreground">
+            <p>
+              Forgot your password?{" "}
+              <Link href="/forgot-password" className="font-medium text-primary hover:underline">
+                Reset password
+              </Link>
+            </p>
+            <p>
+              New to Lumina?{" "}
+              <Link href="/register" className="font-medium text-primary hover:underline">
+                Create an account
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -84,7 +92,15 @@ function SignInForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-muted-foreground hover:text-primary hover:underline"
+          >
+            Reset password?
+          </Link>
+        </div>
         <Input
           id="password"
           name="password"
