@@ -175,10 +175,10 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-200 gap-2">
           <div>
             <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-950">
-              Client Portfolio Summary & Financial Reconciliation
+              Portfolio Money & Performance Summary
             </span>
             <p className="text-xs text-zinc-700 font-medium">
-              Reporting Period: 01/05/2025 – 30/06/2026 · The Penthouse Living (1 Pass. Landrieu, Paris & London)
+              Reporting Period: 01/05/2025 – 30/06/2026 · The Penthouse Living (Paris & London Portfolios)
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs font-mono text-zinc-700 font-semibold">
@@ -193,7 +193,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-3">
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <Receipt className="h-3 w-3 text-emerald-700" /> Gross Revenue
+              <Receipt className="h-3 w-3 text-emerald-700" /> Total Income (Gross)
             </div>
             <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.grossGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -203,7 +203,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <Wallet className="h-3 w-3 text-sky-700" /> Guest Paid
+              <Wallet className="h-3 w-3 text-sky-700" /> Money Collected
             </div>
             <div className="text-lg font-black text-emerald-700">
               £{portfolioSummary.collectedGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -213,17 +213,17 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3 text-amber-700" /> Guest Due
+              <AlertCircle className="h-3 w-3 text-amber-700" /> Still Unpaid by Guests
             </div>
             <div className="text-lg font-black text-amber-700">
               £{portfolioSummary.guestBalanceGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-zinc-600 font-medium">Open balances</div>
+            <div className="text-[10px] text-zinc-600 font-medium">Open guest balances</div>
           </div>
 
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <PiggyBank className="h-3 w-3 text-zinc-900" /> Agency Commission
+              <PiggyBank className="h-3 w-3 text-zinc-900" /> Platform & Booking Fees
             </div>
             <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.agencyCommissionGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -233,17 +233,17 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <DollarSign className="h-3 w-3 text-zinc-950" /> Owner Balance
+              <DollarSign className="h-3 w-3 text-zinc-950" /> Net Payout to Owner
             </div>
             <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.ownerNetGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-zinc-600 font-medium">Net distribution due</div>
+            <div className="text-[10px] text-zinc-600 font-medium">Net profit to owner</div>
           </div>
 
           <div className="space-y-0.5">
             <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
-              <Building2 className="h-3 w-3 text-zinc-700" /> Portfolio Scope
+              <Building2 className="h-3 w-3 text-zinc-700" /> Total Bookings
             </div>
             <div className="text-lg font-black text-zinc-950">
               {portfolioSummary.totalBookings} Bookings
@@ -260,18 +260,18 @@ export default async function DashboardPage(props: DashboardPageProps) {
             href="/analytics"
             className="inline-flex items-center gap-1 font-bold text-black hover:underline"
           >
-            Open Comprehensive Analytics (Amounts, Guests, 12 Properties, Channels)
+            Open 5-Year Plan & Predictive Profit Projections
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>
 
-      {/* Primary KPI Grid (ADR, RevPAR, Occupancy, Outstanding) */}
+      {/* Primary KPI Grid (Simple, Clean, No Jargon) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Occupancy Rate</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Rooms Filled (Occupancy)</span>
               <BedDouble className="h-4 w-4 text-black" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -279,7 +279,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
               <span className="text-xs text-zinc-600 font-bold">{is30d ? "30-day avg" : "portfolio avg"}</span>
             </div>
             <p className="mt-1 text-xs text-zinc-700 font-medium">
-              {kpis.roomsSold} room nights sold ({kpis.totalRooms} total units)
+              {kpis.roomsSold} room nights sold ({kpis.totalRooms} total rooms)
             </p>
           </CardContent>
         </Card>
@@ -287,12 +287,12 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">ADR (Avg Daily Rate)</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Average Price Per Night</span>
               <DollarSign className="h-4 w-4 text-emerald-700" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.adr, "GBP")}</span>
-              <span className="text-xs text-zinc-600 font-bold">per sold night</span>
+              <span className="text-xs text-zinc-600 font-bold">per booked night</span>
             </div>
             <p className="mt-1 text-xs text-zinc-700 font-medium">
               Total room rent: {formatMoney(kpis.roomRevenue, "GBP")}
@@ -303,12 +303,12 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">RevPAR</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Earnings Per Available Room</span>
               <TrendingUp className="h-4 w-4 text-zinc-950" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.revpar, "GBP")}</span>
-              <span className="text-xs text-zinc-600 font-bold">per available night</span>
+              <span className="text-xs text-zinc-600 font-bold">nightly earnings across all rooms</span>
             </div>
             <p className="mt-1 text-xs text-zinc-700 font-medium">
               {kpis.roomsAvailableInPeriod} available room night capacity
@@ -319,15 +319,15 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Outstanding Balance</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Uncollected Guest Balances</span>
               <AlertCircle className="h-4 w-4 text-amber-700" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.outstandingBalance, "GBP")}</span>
-              <span className="text-xs text-zinc-600 font-bold">unsettled folios</span>
+              <span className="text-xs text-zinc-600 font-bold">money still to collect</span>
             </div>
             <p className="mt-1 text-xs text-zinc-700 font-medium">
-              Across all open and overdue guest folios
+              Across all open and pending guest accounts
             </p>
           </CardContent>
         </Card>
@@ -358,7 +358,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
         </div>
         <div className="rounded-lg border border-zinc-300 bg-white p-3 flex items-center justify-between shadow-xs">
           <div className="space-y-0.5">
-            <div className="text-xs text-zinc-700 font-bold">Active Units</div>
+            <div className="text-xs text-zinc-700 font-bold">Managed Rooms</div>
             <div className="text-xl font-black text-zinc-950">{kpis.totalRooms}</div>
           </div>
           <Building2 className="h-4 w-4 text-zinc-700" />
@@ -371,9 +371,9 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <Card className="lg:col-span-2 border border-border/80">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-base font-semibold">Today&apos;s Front Desk Movements</CardTitle>
+              <CardTitle className="text-base font-semibold">Today&apos;s Guest Check-Ins & Check-Outs</CardTitle>
               <CardDescription className="text-xs">
-                Scheduled check-ins and check-outs across properties.
+                Scheduled arrivals and departures across properties.
               </CardDescription>
             </div>
             <Link href="/frontdesk">
@@ -453,32 +453,32 @@ export default async function DashboardPage(props: DashboardPageProps) {
         <div className="space-y-6">
           <Card className="border border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold text-zinc-950">Live Unit Inventory</CardTitle>
-              <CardDescription className="text-xs text-zinc-700 font-medium">Real-time status of all {kpis.totalRooms} units.</CardDescription>
+              <CardTitle className="text-base font-bold text-zinc-950">Current Room Status</CardTitle>
+              <CardDescription className="text-xs text-zinc-700 font-medium">Real-time status of all {kpis.totalRooms} rooms.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2.5 text-xs">
               <div className="flex items-center justify-between rounded p-2.5 border border-emerald-300 bg-emerald-50 text-emerald-950 font-medium">
-                <span className="font-bold">Available</span>
+                <span className="font-bold">Available (Ready to Book)</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.available || 0}</span>
               </div>
               <div className="flex items-center justify-between rounded p-2.5 border border-zinc-900 bg-black text-white font-medium">
-                <span className="font-bold">Occupied</span>
+                <span className="font-bold">Occupied (Guest In Room)</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.occupied || 0}</span>
               </div>
               <div className="flex items-center justify-between rounded p-2.5 border border-amber-300 bg-amber-50 text-amber-950 font-medium">
-                <span className="font-bold">Turnover / Dirty</span>
+                <span className="font-bold">Needs Cleaning</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.dirty || 0}</span>
               </div>
               <div className="flex items-center justify-between rounded p-2.5 border border-sky-300 bg-sky-50 text-sky-950 font-medium">
-                <span className="font-bold">Clean / Ready</span>
+                <span className="font-bold">Clean & Ready</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.clean || 0}</span>
               </div>
               <div className="flex items-center justify-between rounded p-2.5 border border-zinc-300 bg-zinc-100 text-zinc-950 font-medium">
-                <span className="font-bold">Inspection Required</span>
+                <span className="font-bold">Awaiting Inspection</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.inspection || 0}</span>
               </div>
               <div className="flex items-center justify-between rounded p-2.5 border border-rose-300 bg-rose-50 text-rose-950 font-medium">
-                <span className="font-bold">Out of Order / Maintenance</span>
+                <span className="font-bold">Maintenance / Out of Order</span>
                 <span className="font-black text-sm">{kpis.roomStatusBreakdown.out_of_order || 0}</span>
               </div>
             </CardContent>

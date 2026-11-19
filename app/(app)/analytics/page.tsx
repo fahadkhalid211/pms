@@ -296,13 +296,13 @@ export default function AnalyticsPage() {
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
                 Pent House PMS
-                <span className="text-xs px-2 py-0.5 rounded-full bg-black text-white font-medium">
-                  Institutional Investor Analytics
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-black text-white font-semibold">
+                  Financial Plan & Profit Projections
                 </span>
               </h1>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-zinc-600 font-medium flex items-center gap-1.5 mt-0.5">
                 <MapPin className="h-3.5 w-3.5" />
-                Fifty One London · 51-55 Cromwell Road, South Kensington SW7 · Managed by The Penthouse Living (TPL)
+                Fifty One London · 120 Luxury Rooms in South Kensington (SW7) · Managed by The Penthouse Living
               </p>
             </div>
           </div>
@@ -313,10 +313,10 @@ export default function AnalyticsPage() {
             variant="outline"
             size="sm"
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 border-black/20 hover:bg-zinc-100 shadow-xs text-xs font-semibold"
+            className="flex items-center gap-1.5 border-zinc-300 hover:bg-zinc-100 shadow-xs text-xs font-bold"
           >
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-            Export 5-Year Plan CSV
+            <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
+            Download 5-Year Plan (CSV)
           </Button>
 
           <Button
@@ -324,114 +324,127 @@ export default function AnalyticsPage() {
             size="sm"
             onClick={() => {
               toast({
-                title: "Data Synchronized",
-                description: "Predictive financial forecasts updated with latest operating data.",
+                title: "Numbers Refreshed",
+                description: "Financial forecasts updated with latest operating data.",
               });
               fetchAnalytics();
             }}
             disabled={loading}
-            className="flex items-center gap-1.5 bg-black text-white hover:bg-zinc-800 text-xs font-semibold shadow-xs"
+            className="flex items-center gap-1.5 bg-black text-white hover:bg-zinc-800 text-xs font-bold shadow-xs"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            Refresh Numbers
           </Button>
         </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* Executive Investor KPI Strip                                  */}
+      {/* Executive Investor 4-Card Summary (Simple, Clean, No Jargon)  */}
       {/* ------------------------------------------------------------- */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
-          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
-            <Receipt className="h-3.5 w-3.5 text-black" /> Y1 Base Revenue
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 border-zinc-300 bg-white shadow-xs">
+          <div className="text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
+            <Receipt className="h-4 w-4 text-black" /> Year 1 Total Income
           </div>
-          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
+          <div className="text-2xl md:text-3xl font-black text-zinc-950 mt-2">
             {fmtGbp(pHighlights.baseYearRevenueGbp)}
           </div>
-          <div className="text-[10px] text-zinc-600 font-medium mt-0.5">
-            Academic 2025/26 @ 95% Occ
-          </div>
+          <p className="text-xs text-zinc-600 font-medium mt-1">
+            Total money coming in from 120 rooms at 95% occupancy
+          </p>
         </Card>
 
-        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
-          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
-            <ArrowUpRight className="h-3.5 w-3.5 text-emerald-700" /> Y5 Target Revenue
+        <Card className="p-4 border-emerald-300 bg-emerald-50/80 shadow-xs">
+          <div className="text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+            <TrendingUp className="h-4 w-4 text-emerald-700" /> Year 1 Net Profit
           </div>
-          <div className="text-xl md:text-2xl font-black text-emerald-700 mt-1">
-            {fmtGbp(pHighlights.yearFiveRevenueGbp)}
-          </div>
-          <div className="text-[10px] text-emerald-800 font-bold mt-0.5">
-            +{pHighlights.fiveYearRevenueCagrPct}% Annualized CAGR
-          </div>
-        </Card>
-
-        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
-          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
-            <TrendingUp className="h-3.5 w-3.5 text-black" /> Y1 EBITDA (NOI)
-          </div>
-          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
+          <div className="text-2xl md:text-3xl font-black text-emerald-800 mt-2">
             {fmtGbp(pHighlights.baseYearEbitdaGbp)}
           </div>
-          <div className="text-[10px] text-zinc-600 font-medium mt-0.5">
-            68.8% Base Operating Margin
-          </div>
+          <p className="text-xs text-emerald-950 font-bold mt-1">
+            What you keep after all bills & staff (69% profit margin)
+          </p>
         </Card>
 
-        <Card className="p-3.5 border-emerald-300 bg-emerald-50 shadow-xs">
-          <div className="text-[11px] font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1">
-            <Flame className="h-3.5 w-3.5 text-emerald-700" /> Y5 EBITDA (NOI)
+        <Card className="p-4 border-emerald-300 bg-emerald-50/80 shadow-xs">
+          <div className="text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+            <Flame className="h-4 w-4 text-emerald-700" /> Year 5 Expected Profit
           </div>
-          <div className="text-xl md:text-2xl font-black text-emerald-800 mt-1">
+          <div className="text-2xl md:text-3xl font-black text-emerald-800 mt-2">
             {fmtGbp(pHighlights.yearFiveEbitdaGbp)}
           </div>
-          <div className="text-[10px] text-emerald-950 font-black mt-0.5">
-            73.4% Target Margin (+4.6%)
-          </div>
+          <p className="text-xs text-emerald-950 font-bold mt-1">
+            +£1.57M extra profit/year from summer rentals & add-ons (73% margin)
+          </p>
         </Card>
 
-        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
-          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
-            <PiggyBank className="h-3.5 w-3.5 text-black" /> 5-Yr Asset Equity
+        <Card className="p-4 border-zinc-900 bg-zinc-950 text-white shadow-xs">
+          <div className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Crown className="h-4 w-4 text-amber-400" /> Estimated Building Worth
           </div>
-          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
+          <div className="text-2xl md:text-3xl font-black text-white mt-2">
             {fmtGbp(pHighlights.terminalValuationGbp)}
           </div>
-          <div className="text-[10px] text-zinc-700 font-bold mt-0.5">
-            +£{Math.round((pHighlights.equityValueCreatedGbp) / 1000000)}M Equity Value Added
-          </div>
+          <p className="text-xs text-amber-300 font-semibold mt-1">
+            Property worth rises from £78M to £108M (+£30M wealth created)
+          </p>
         </Card>
+      </div>
 
-        <Card className="p-3.5 border-zinc-900 bg-zinc-950 text-white shadow-xs">
-          <div className="text-[11px] font-extrabold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
-            <Crown className="h-3.5 w-3.5 text-amber-400" /> 5-Yr Free Cashflow
+      {/* 3-Point Big Picture Summary Banner */}
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-start gap-3">
+          <div className="h-7 w-7 rounded-full bg-black text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
+            1
           </div>
-          <div className="text-xl md:text-2xl font-black text-white mt-1">
-            {fmtGbp(pHighlights.totalFiveYearFreeCashflowGbp)}
+          <div>
+            <div className="text-xs font-black text-zinc-950">High Profit Margin (69% → 73%)</div>
+            <div className="text-xs text-zinc-600 font-medium mt-0.5">
+              The building keeps roughly 70p in clear profit for every £1 of rent received.
+            </div>
           </div>
-          <div className="text-[10px] text-zinc-300 font-semibold mt-0.5">
-            Cumulative Operating Cash
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="h-7 w-7 rounded-full bg-emerald-700 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
+            2
           </div>
-        </Card>
+          <div>
+            <div className="text-xs font-black text-zinc-950">+£943,000 / Year Extra Income</div>
+            <div className="text-xs text-zinc-600 font-medium mt-0.5">
+              Renting rooms in summer & offering cleaning/airport rides adds cash with zero building work.
+            </div>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="h-7 w-7 rounded-full bg-zinc-900 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
+            3
+          </div>
+          <div>
+            <div className="text-xs font-black text-zinc-950">+£30 Million Property Value Gain</div>
+            <div className="text-xs text-zinc-600 font-medium mt-0.5">
+              Because profit grows to £5.67M/year, the market value of the building reaches £108 Million.
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
       {/* Navigation Tabs (Monochrome Black & White)                     */}
       {/* ------------------------------------------------------------- */}
-      <div className="flex border-b border-border text-sm overflow-x-auto gap-1">
+      <div className="flex border-b border-zinc-200 text-sm overflow-x-auto gap-1">
         <button
           type="button"
           onClick={() => setActiveTab("predictive")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "predictive"
-              ? "border-black text-black "
-              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
+              ? "border-black text-black"
+              : "border-transparent text-zinc-600 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <LineChartIcon className="h-4 w-4" />
-          5-Year Predictive Plan & Profits
-          <Badge className="text-[10px] py-0 px-1.5 bg-black text-white ">
-            Forecast
+          5-Year Profit Forecast & Plans
+          <Badge className="text-[10px] py-0 px-1.5 bg-black text-white font-bold">
+            Summary
           </Badge>
         </button>
 
@@ -440,12 +453,12 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("fifty_one")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "fifty_one"
-              ? "border-black text-black "
-              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
+              ? "border-black text-black"
+              : "border-transparent text-zinc-600 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Bed className="h-4 w-4" />
-          Fifty One London Inventory & Pricing
+          Room Prices (120 Rooms)
         </button>
 
         <button
@@ -453,12 +466,12 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("services")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "services"
-              ? "border-black text-black "
-              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
+              ? "border-black text-black"
+              : "border-transparent text-zinc-600 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Sparkles className="h-4 w-4" />
-          30 All-Inclusive Services Catalog
+          30 Free Included Amenities
         </button>
 
         <button
@@ -466,12 +479,12 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("portfolio")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "portfolio"
-              ? "border-black text-black "
-              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
+              ? "border-black text-black"
+              : "border-transparent text-zinc-600 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Building2 className="h-4 w-4" />
-          Serviced Operating Portfolio (12 Units)
+          Current 12 Managed Residences
         </button>
       </div>
 
@@ -482,21 +495,21 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           {/* Visual Graphs Row: 5-Year Revenue & Profit Trajectory + Equity Growth */}
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Chart 1: 5-Year Revenue & EBITDA Trajectory */}
-            <Card className="border-zinc-300">
+            {/* Chart 1: 5-Year Revenue & Profit Trajectory */}
+            <Card className="border-zinc-300 bg-white shadow-xs">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-emerald-600" />
-                      5-Year Predictive Revenue & EBITDA Growth (£M)
+                    <CardTitle className="text-base font-bold text-zinc-950 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-emerald-700" />
+                      Yearly Income vs. Net Profit (£ Millions)
                     </CardTitle>
-                    <CardDescription>
-                      Gross revenue expanding from £5.95M to £7.72M with EBITDA margin widening to 73.4%
+                    <CardDescription className="text-xs text-zinc-600">
+                      Black bar is total money coming in. Green bar is what you keep in profit after all bills and staff.
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className="text-xs font-mono font-bold">
-                    +£1.57M Net Profit Uplift
+                  <Badge variant="outline" className="text-xs font-bold border-emerald-300 bg-emerald-50 text-emerald-950 self-start sm:self-auto">
+                    +£1.57M / Year Extra Profit
                   </Badge>
                 </div>
               </CardHeader>
@@ -523,20 +536,20 @@ export default function AnalyticsPage() {
                           itemStyle={{ color: "#ffffff", fontWeight: 700 }}
                           labelStyle={{ color: "#e4e4e7", fontWeight: 700 }}
                           formatter={(value: any, name: any) => [
-                            `£${Number(value).toFixed(2)}M`,
-                            name === "grossRevenueM" ? "Gross Invoiced Revenue" : "EBITDA Net Operating Income",
+                            `£${Number(value).toFixed(2)} Million`,
+                            name === "grossRevenueM" ? "Total Income (Money In)" : "Net Profit (What You Keep)",
                           ]}
                         />
                         <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px", color: "#18181b", fontWeight: 600 }} />
                         <Bar
                           dataKey="grossRevenueM"
-                          name="Gross Revenue (£M)"
+                          name="Total Income"
                           fill="#18181b"
                           radius={[4, 4, 0, 0]}
                         />
                         <Bar
                           dataKey="ebitdaM"
-                          name="EBITDA Profit (£M)"
+                          name="Net Profit (What You Keep)"
                           fill="#059669"
                           radius={[4, 4, 0, 0]}
                         />
@@ -544,28 +557,28 @@ export default function AnalyticsPage() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-600 font-medium">
-                      Rendering forecast chart...
+                      Loading chart...
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Chart 2: Asset Equity Valuation Trajectory */}
-            <Card className="border-zinc-300">
+            {/* Chart 2: Asset Valuation Trajectory */}
+            <Card className="border-zinc-300 bg-white shadow-xs">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Landmark className="h-4 w-4 text-black " />
-                      Asset Valuation Progression (£M @ 5.25% Cap)
+                    <CardTitle className="text-base font-bold text-zinc-950 flex items-center gap-2">
+                      <Landmark className="h-4 w-4 text-black" />
+                      Estimated Property Value Over 5 Years (£ Millions)
                     </CardTitle>
-                    <CardDescription>
-                      Implied institutional gross asset value increasing from £78.0M to £108.0M
+                    <CardDescription className="text-xs text-zinc-600">
+                      As yearly profit increases, the total market value of the building rises from £78M to £108M.
                     </CardDescription>
                   </div>
-                  <Badge className="bg-black text-white  text-xs font-mono font-bold">
-                    +£30.0M Equity
+                  <Badge className="bg-black text-white text-xs font-bold self-start sm:self-auto">
+                    +£30.0M Value Created
                   </Badge>
                 </div>
               </CardHeader>
@@ -597,13 +610,13 @@ export default function AnalyticsPage() {
                           }}
                           itemStyle={{ color: "#ffffff", fontWeight: 700 }}
                           labelStyle={{ color: "#e4e4e7", fontWeight: 700 }}
-                          formatter={(value: any) => [`£${value}M`, "Asset Capital Value"]}
+                          formatter={(value: any) => [`£${value} Million`, "Estimated Building Worth"]}
                         />
                         <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px", color: "#18181b", fontWeight: 600 }} />
                         <Area
                           type="monotone"
                           dataKey="valuationM"
-                          name="Asset Valuation (£M)"
+                          name="Estimated Building Worth"
                           stroke="#18181b"
                           strokeWidth={2.5}
                           fillOpacity={1}
@@ -612,8 +625,8 @@ export default function AnalyticsPage() {
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                      Rendering chart...
+                    <div className="h-full flex items-center justify-center text-xs text-zinc-600 font-medium">
+                      Loading chart...
                     </div>
                   )}
                 </div>
@@ -621,24 +634,22 @@ export default function AnalyticsPage() {
             </Card>
           </div>
 
-          {/* Comprehensive 5-Year Financial Forecast Table */}
-          <Card className="border-zinc-300">
+          {/* Simple 5-Year Financial Summary Table */}
+          <Card className="border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <CardTitle className="text-base flex items-center gap-2">
+                  <CardTitle className="text-base font-bold text-zinc-950 flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-black" />
-                    5-Year Institutional Financial Model (2025/26 → 2029/30)
+                    Simple 5-Year Financial Summary
                   </CardTitle>
-                  <CardDescription>
-                    Audited academic year baseline extrapolated with 4 core value-add profit expansion levers
+                  <CardDescription className="text-xs text-zinc-600">
+                    A clear overview of all money coming in, building bills, what you keep in net profit, and building worth.
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs font-mono">
-                    South Kensington Prime PBSA
-                  </Badge>
-                </div>
+                <Badge variant="outline" className="text-xs font-bold border-zinc-400 bg-zinc-100 text-zinc-900">
+                  120 Rooms · South Kensington
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -646,94 +657,71 @@ export default function AnalyticsPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-3 px-3">Financial Metric (£ GBP)</th>
+                      <th className="py-3 px-3">Where the Money Goes</th>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <th key={y.year} className="py-3 px-3 text-right">
-                          {y.academicYear}
+                          {y.academicYear.split(" ")[0]}
                         </th>
                       ))}
                       <th className="py-3 px-3 text-right">5-Year Growth</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
-                    {/* Operating Metrics */}
+                    {/* Section 1: Money In */}
                     <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
                       <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
-                        1. Operating Metrics & Keys
+                        1. Money Coming In (Income)
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Portfolio Keys</td>
-                      {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
-                          {y.totalKeys} keys
-                        </td>
-                      ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-zinc-900">120 Units</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Occupancy Rate</td>
-                      {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-zinc-950">
-                          {y.occupancyPct.toFixed(1)}%
-                        </td>
-                      ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-bold">+3.5%</td>
-                    </tr>
-
-                    {/* Revenue Breakdown */}
-                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
-                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
-                        2. Revenue Streams Breakdown
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-semibold">
+                        Student University Term Rents (120 Rooms)
                       </td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Core Academic Contract Rent</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
                           {fmtGbp(y.baseRentRevenue)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-bold">+18.7%</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-emerald-700 font-bold">+18.7%</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
-                        Superior Studios Activation (2 Keys)
-                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Value-Add</Badge>
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-semibold flex items-center gap-1.5">
+                        Summer Holiday Rentals (July & August)
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Extra Bookings</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
-                          {y.superiorStudioRevenue > 0 ? fmtGbp(y.superiorStudioRevenue) : "£0 (Sold Out)"}
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
+                          {y.summerVoidMonetization > 0 ? fmtGbp(y.summerVoidMonetization) : "£0"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£145k/yr</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">+£275k/yr</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
-                        Summer Void Monetization (Jul–Aug)
-                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Yield Lever</Badge>
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-semibold flex items-center gap-1.5">
+                        Top-Floor Luxury Penthouse Studios (2 Rooms)
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Top Rent</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
-                          {y.summerVoidMonetization > 0 ? fmtGbp(y.summerVoidMonetization) : "£0 (Unmonetized)"}
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
+                          {y.superiorStudioRevenue > 0 ? fmtGbp(y.superiorStudioRevenue) : "£0"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£275k/yr</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">+£145k/yr</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
-                        Ancillary Services & Upsells
-                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">High-Margin</Badge>
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-semibold flex items-center gap-1.5">
+                        Extra Services (Cleaning, Laundry & Airport Rides)
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Add-ons</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
                           {y.ancillaryServicesIncome > 0 ? fmtGbp(y.ancillaryServicesIncome) : "£0"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£240k/yr</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">+£240k/yr</td>
                     </tr>
-                    <tr className="bg-zinc-200/80 font-bold border-y border-zinc-300">
-                      <td className="py-2.5 px-3 text-zinc-950 font-black">Total Invoiced Gross Revenue</td>
+                    <tr className="bg-zinc-200/90 font-bold border-y border-zinc-300">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black">TOTAL ANNUAL INCOME</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-2.5 px-3 text-right font-mono text-zinc-950 font-black">
                           {fmtGbp(y.grossRevenue)}
@@ -742,32 +730,32 @@ export default function AnalyticsPage() {
                       <td className="py-2.5 px-3 text-right font-mono text-emerald-700 font-black">+29.8%</td>
                     </tr>
 
-                    {/* Cost Structure */}
+                    {/* Section 2: Money Out */}
                     <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
                       <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
-                        3. Operating Expenses Structure
+                        2. Money Going Out (Operating Bills)
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Direct Services OpEx (£132/wk base)</td>
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-medium">Building Running Costs (Bills, Wi-Fi, 24/7 Security & Cleaning)</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono text-zinc-800 font-medium">
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono text-zinc-800 font-medium">
                           {fmtGbp(y.directOperatingCosts)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-zinc-800 font-semibold">+13.6% (Inflation)</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-zinc-800 font-semibold">+13.6%</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Revenue-Linked Costs & Agency Fees</td>
+                      <td className="py-2.5 px-3 pl-6 text-zinc-800 font-medium">Booking Platform & Management Fees</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono text-zinc-800 font-medium">
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono text-zinc-800 font-medium">
                           {fmtGbp(y.revenueLinkedCosts)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-semibold">-3.0% Take Rate</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-emerald-700 font-semibold">-3% Lower Fees</td>
                     </tr>
                     <tr className="font-bold text-zinc-900 bg-zinc-50 border-t border-zinc-300">
-                      <td className="py-2 px-3">Total Operating Expenses</td>
+                      <td className="py-2 px-3">TOTAL ANNUAL BILLS</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-zinc-900">
                           {fmtGbp(y.totalOperatingCosts)}
@@ -776,11 +764,11 @@ export default function AnalyticsPage() {
                       <td className="py-2 px-3 text-right font-mono text-zinc-900 font-bold">+10.7%</td>
                     </tr>
 
-                    {/* EBITDA / Net Operating Income */}
+                    {/* Section 3: Profit & Value */}
                     <tr className="bg-emerald-100/90 font-black border-y-2 border-emerald-400 text-emerald-950">
-                      <td className="py-3 px-3 text-emerald-950 font-black flex items-center gap-1.5">
+                      <td className="py-3 px-3 text-emerald-950 font-black flex items-center gap-1.5 text-sm">
                         <Flame className="h-4 w-4 text-emerald-700" />
-                        EBITDA / Net Operating Income (NOI)
+                        NET PROFIT (What You Keep in Bank)
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-3 px-3 text-right font-mono text-emerald-950 font-black text-sm">
@@ -788,11 +776,11 @@ export default function AnalyticsPage() {
                         </td>
                       ))}
                       <td className="py-3 px-3 text-right font-mono text-emerald-950 font-black">
-                        +{pHighlights.fiveYearEbitdaCagrPct}% CAGR
+                        +{pHighlights.fiveYearEbitdaCagrPct}% / Year
                       </td>
                     </tr>
                     <tr className="bg-emerald-50 font-bold text-emerald-950 border-b border-emerald-200">
-                      <td className="py-2 px-3 pl-6">EBITDA Margin (%)</td>
+                      <td className="py-2 px-3 pl-6">Profit Margin (% of Income Kept as Profit)</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-2 px-3 text-right font-mono font-bold">
                           {y.ebitdaMarginPct.toFixed(1)}%
@@ -801,34 +789,10 @@ export default function AnalyticsPage() {
                       <td className="py-2 px-3 text-right font-mono font-bold">+4.6% Margin Expansion</td>
                     </tr>
 
-                    {/* Valuation & Capital Performance */}
-                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
-                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
-                        4. Institutional Valuation & Capital Returns
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Annualized Revenue per Key</td>
-                      {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
-                          {fmtGbp(y.annualizedRevPerKey)}
-                        </td>
-                      ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+22.2%</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Annualized EBITDA per Key</td>
-                      {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-emerald-700">
-                          {fmtGbp(y.annualizedEbitdaPerKey)}
-                        </td>
-                      ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+30.4%</td>
-                    </tr>
                     <tr className="bg-black text-white font-black">
-                      <td className="py-3 px-3 text-white font-black flex items-center gap-1.5">
+                      <td className="py-3 px-3 text-white font-black flex items-center gap-1.5 text-sm">
                         <Crown className="h-4 w-4 text-amber-400" />
-                        Implied Gross Asset Valuation (@ 5.25% Cap)
+                        ESTIMATED BUILDING VALUE (Market Worth)
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-3 px-3 text-right font-mono text-white font-black text-sm">
@@ -836,7 +800,7 @@ export default function AnalyticsPage() {
                         </td>
                       ))}
                       <td className="py-3 px-3 text-right font-mono text-amber-300 font-black">
-                        +{fmtGbp(pHighlights.equityValueCreatedGbp)} Equity
+                        +{fmtGbp(pHighlights.equityValueCreatedGbp)} Total Gain
                       </td>
                     </tr>
                   </tbody>
@@ -847,35 +811,35 @@ export default function AnalyticsPage() {
 
           {/* Strategic Value-Add Levers Grid */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-black " />
-                  Strategic Value-Add Levers & Profit Catalysts
+                  <Zap className="h-4 w-4 text-black" />
+                  5 Simple Ways We Increase Your Yearly Profit (+£943,000 / Year)
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  Concrete operational actions that drive the predictive margin expansion from 68.8% to 73.4%
+                <p className="text-xs text-zinc-600 font-medium">
+                  Practical steps we take to make extra money from the same 120 rooms without any construction or building work.
                 </p>
               </div>
-              <Badge className="bg-black text-white  text-xs font-mono">
-                +£943,000 Total Annual EBITDA Uplift
+              <Badge className="bg-black text-white text-xs font-mono font-bold self-start sm:self-auto">
+                +£943,000 Extra Cash Per Year
               </Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {predictiveModel.valueAddLevers.map((lever) => (
-                <Card key={lever.title} className="p-4 border-zinc-300 flex flex-col justify-between hover:shadow-md transition">
+                <Card key={lever.title} className="p-4 border-zinc-300 bg-white flex flex-col justify-between hover:shadow-md transition shadow-xs">
                   <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
-                      <Badge variant="outline" className="text-[10px] font-semibold">
+                      <Badge variant="outline" className="text-[10px] font-bold border-zinc-300 bg-zinc-100 text-zinc-900">
                         {lever.category}
                       </Badge>
                       <div className="text-right">
-                        <span className="text-sm font-black text-emerald-600 ">
+                        <span className="text-sm font-black text-emerald-700">
                           +{fmtGbp(lever.annualImpactGbp)}/yr
                         </span>
-                        <div className="text-[9px] text-muted-foreground font-mono">
-                          +{lever.marginImpactPct}% margin
+                        <div className="text-[9px] text-zinc-600 font-mono font-semibold">
+                          +{lever.marginImpactPct}% margin boost
                         </div>
                       </div>
                     </div>
@@ -910,18 +874,18 @@ export default function AnalyticsPage() {
                 <div>
                   <CardTitle className="text-lg font-black text-zinc-950 flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-black" />
-                    Fifty One London — 120 Keys Baseline Asset Underwriting
+                    Fifty One London — 120 Rooms Building Plan
                   </CardTitle>
                   <CardDescription className="text-xs text-zinc-700 font-medium">
-                    All-inclusive long-let student living asset · 51-55 Cromwell Road, South Kensington SW7
+                    All-inclusive student living · 51-55 Cromwell Road, South Kensington, London SW7
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-black text-white text-xs font-mono font-bold">
-                    120 Keys Portfolio
+                    120 Rooms Total
                   </Badge>
                   <Badge variant="outline" className="text-xs font-mono font-bold border-zinc-400 bg-zinc-100 text-zinc-900">
-                    95% Base Occupancy
+                    95% Target Occupancy (Rooms Filled)
                   </Badge>
                 </div>
               </div>
@@ -929,28 +893,28 @@ export default function AnalyticsPage() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 border-t border-zinc-200 text-sm">
                 <div>
-                  <span className="text-xs text-zinc-700 font-semibold">Lettable Priced Keys</span>
+                  <span className="text-xs text-zinc-700 font-semibold">Rooms for Rent</span>
                   <div className="font-black text-zinc-950 text-base">
-                    118 Keys <span className="text-xs text-zinc-600 font-medium">(+2 sold-out)</span>
+                    118 Student Rooms <span className="text-xs text-zinc-600 font-medium">(+2 Penthouse Studios)</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-zinc-700 font-semibold">Academic Year Rent</span>
+                  <span className="text-xs text-zinc-700 font-semibold">Total Student Rent Collected</span>
                   <div className="font-black text-zinc-950 text-base">
-                    {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
+                    {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)} <span className="text-xs text-zinc-600 font-medium">/ year</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-zinc-700 font-semibold">Direct Service OpEx</span>
+                  <span className="text-xs text-zinc-700 font-semibold">Building Running Costs</span>
                   <div className="font-black text-zinc-950 text-base">
-                    {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
+                    {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)} <span className="text-xs text-zinc-600 font-medium">/ year</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-zinc-700 font-semibold">Net Operating Income (NOI)</span>
+                  <span className="text-xs text-zinc-700 font-semibold">Net Operating Profit (What You Keep)</span>
                   <div className="font-black text-emerald-700 text-base">
                     {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}{" "}
-                    <span className="text-xs font-bold">({fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%)</span>
+                    <span className="text-xs font-bold">({fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}% profit margin)</span>
                   </div>
                 </div>
               </div>
@@ -964,10 +928,10 @@ export default function AnalyticsPage() {
                 <div>
                   <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                     <Bed className="h-4 w-4 text-black" />
-                    Room Tiers, Dimensions & Contract Pricing
+                    Room Types, Prices & Yearly Income
                   </CardTitle>
                   <CardDescription className="text-xs text-zinc-700 font-medium">
-                    All 8 priced room types and unpriced Superior Studios from source Checklist fifty one.xlsx
+                    Clear breakdown of all 8 student room types, weekly rental rates, and yearly income collected.
                   </CardDescription>
                 </div>
               </div>
@@ -978,15 +942,14 @@ export default function AnalyticsPage() {
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-3 px-3">Room Type</th>
-                      <th className="py-3 px-2 text-center">Keys</th>
-                      <th className="py-3 px-3 text-right">44-Wk Rate</th>
-                      <th className="py-3 px-3 text-right">51-Wk Rate</th>
-                      <th className="py-3 px-3 text-right">Weighted/Key</th>
-                      <th className="py-3 px-3 text-right">Full Rev (100%)</th>
-                      <th className="py-3 px-3 text-right">Model Rev (95%)</th>
-                      <th className="py-3 px-2 text-center">Share</th>
-                      <th className="py-3 px-3">Size</th>
-                      <th className="py-3 px-3">Highlights</th>
+                      <th className="py-3 px-2 text-center">Rooms</th>
+                      <th className="py-3 px-3 text-right">School Year Rate (44 Wks)</th>
+                      <th className="py-3 px-3 text-right">Full Year Rate (51 Wks)</th>
+                      <th className="py-3 px-3 text-right">Average Yearly Rent</th>
+                      <th className="py-3 px-3 text-right">Total Yearly Income</th>
+                      <th className="py-3 px-2 text-center">% of Total</th>
+                      <th className="py-3 px-3">Room Size</th>
+                      <th className="py-3 px-3">Room Features</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -1015,9 +978,6 @@ export default function AnalyticsPage() {
                         <td className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
                           {rt.weightedAnnualRentPerKey > 0 ? fmtGbp(rt.weightedAnnualRentPerKey) : "—"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-zinc-700 font-medium">
-                          {rt.fullOccupancyRevenue > 0 ? fmtGbp(rt.fullOccupancyRevenue) : "—"}
-                        </td>
                         <td className="py-2.5 px-3 text-right font-mono font-black text-zinc-950">
                           {rt.modelOccupancyRevenue > 0 ? fmtGbp(rt.modelOccupancyRevenue) : "£0"}
                         </td>
@@ -1031,22 +991,19 @@ export default function AnalyticsPage() {
                       </tr>
                     ))}
                     <tr className="bg-zinc-200/90 font-black border-t-2 border-zinc-400 text-zinc-950">
-                      <td className="py-3 px-3 text-zinc-950">Total (120 Keys Portfolio)</td>
+                      <td className="py-3 px-3 text-zinc-950">Total (120 Rooms Building)</td>
                       <td className="py-3 px-2 text-center font-mono">{fiftyOneModel.assumptions.totalKeys}</td>
                       <td className="py-3 px-3 text-right font-mono">—</td>
                       <td className="py-3 px-3 text-right font-mono">—</td>
                       <td className="py-3 px-3 text-right font-mono">
-                        {fmtGbp(fiftyOneModel.financialSummary.annualisedRevenuePerKey)}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono text-zinc-700 font-semibold">
-                        {fmtGbp(fiftyOneModel.financialSummary.grossRevenueFullOccupancy)}
+                        {fmtGbp(fiftyOneModel.financialSummary.annualisedRevenuePerKey)} / room
                       </td>
                       <td className="py-3 px-3 text-right font-mono text-black text-sm font-black">
                         {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
                       </td>
                       <td className="py-3 px-2 text-center font-mono font-bold">100.0%</td>
                       <td className="py-3 px-3 font-semibold text-zinc-800" colSpan={2}>
-                        118 priced units · 95% occupancy baseline
+                        118 student rooms + 2 top-floor studios (at 95% rooms filled)
                       </td>
                     </tr>
                   </tbody>
@@ -1061,21 +1018,21 @@ export default function AnalyticsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                   <Clock className="h-4 w-4 text-emerald-700" />
-                  Instalment Payment Schedule (Cash Inflows)
+                  When Rent Money is Collected (Payment Schedule)
                 </CardTitle>
                 <CardDescription className="text-xs text-zinc-700 font-medium">
-                  Contract collection dates based on source 4-instalment schedule
+                  Students pay their annual rent in 4 scheduled instalments across the academic year.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-2.5 px-3">Instalment</th>
-                      <th className="py-2.5 px-3">Payment Date</th>
-                      <th className="py-2.5 px-2 text-center">Share</th>
-                      <th className="py-2.5 px-3 text-right">Cash Inflow</th>
-                      <th className="py-2.5 px-3 text-right">Cumulative</th>
+                      <th className="py-2.5 px-3">Payment #</th>
+                      <th className="py-2.5 px-3">Due Date</th>
+                      <th className="py-2.5 px-2 text-center">% of Total Rent</th>
+                      <th className="py-2.5 px-3 text-right">Money Collected</th>
+                      <th className="py-2.5 px-3 text-right">Total Collected So Far</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -1104,20 +1061,20 @@ export default function AnalyticsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                   <Zap className="h-4 w-4 text-black" />
-                  Direct Operating Services (£132 / key / week)
+                  Where Running Costs Go (£132 Per Room / Week)
                 </CardTitle>
                 <CardDescription className="text-xs text-zinc-700 font-medium">
-                  Accrues over 51 weeks on all leased units (£754,657 direct total)
+                  Covers all weekly services, 24/7 staff, utilities, and fast Wi-Fi for 51 weeks (£754,657 per year).
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-2.5 px-3">Cost Line</th>
-                      <th className="py-2.5 px-3 text-right">Rate / Key / Wk</th>
-                      <th className="py-2.5 px-3 text-right">Annual Cost</th>
-                      <th className="py-2.5 px-3">Category</th>
+                      <th className="py-2.5 px-3">Service / Expense</th>
+                      <th className="py-2.5 px-3 text-right">Weekly Cost Per Room</th>
+                      <th className="py-2.5 px-3 text-right">Total Yearly Cost</th>
+                      <th className="py-2.5 px-3">What It Covers</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -1136,14 +1093,14 @@ export default function AnalyticsPage() {
                       );
                     })}
                     <tr className="bg-zinc-200/90 font-black border-t-2 border-zinc-400 text-zinc-950">
-                      <td className="py-2.5 px-3 text-zinc-950 font-black">Total Direct Services</td>
+                      <td className="py-2.5 px-3 text-zinc-950 font-black">Total Running Costs</td>
                       <td className="py-2.5 px-3 text-right font-mono text-black font-black">
-                        £{fiftyOneModel.assumptions.weeklyDirectCostPerKey} / wk
+                        £{fiftyOneModel.assumptions.weeklyDirectCostPerKey} / room / wk
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono text-black font-black">
                         {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
                       </td>
-                      <td className="py-2.5 px-3 text-xs text-zinc-800 font-bold">9 service lines</td>
+                      <td className="py-2.5 px-3 text-xs text-zinc-800 font-bold">9 core services included</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1164,10 +1121,10 @@ export default function AnalyticsPage() {
                 <div>
                   <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-black " />
-                    30 All-Inclusive Building Services & Cost Mapping
+                    30 Free Amenities & Services Included with Rent
                   </CardTitle>
                   <CardDescription className="text-xs text-zinc-700 font-medium">
-                    Complete mapping from source Services.pdf to P&L operating cost lines
+                    All residents get 30 premium services included in their rent with zero hidden fees — from fast Wi-Fi and 24/7 front desk security to gym access and weekly housekeeping.
                   </CardDescription>
                 </div>
 
@@ -1180,7 +1137,7 @@ export default function AnalyticsPage() {
                       serviceFilter === "all" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
                     }`}
                   >
-                    All (30)
+                    All Amenities (30)
                   </Button>
                   <Button
                     size="sm"
@@ -1190,7 +1147,7 @@ export default function AnalyticsPage() {
                       serviceFilter === "all_inclusive" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
                     }`}
                   >
-                    Included in OpEx (21)
+                    Paid by Building (21)
                   </Button>
                   <Button
                     size="sm"
@@ -1200,7 +1157,7 @@ export default function AnalyticsPage() {
                       serviceFilter === "partner_perk" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
                     }`}
                   >
-                    Partner Perks (9)
+                    Exclusive Partner Perks (9)
                   </Button>
                 </div>
               </div>
@@ -1211,10 +1168,10 @@ export default function AnalyticsPage() {
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-2.5 px-3 text-center">#</th>
-                      <th className="py-2.5 px-4">Service Name</th>
-                      <th className="py-2.5 px-3">Resident Fee</th>
-                      <th className="py-2.5 px-4">P&L Cost Line</th>
-                      <th className="py-2.5 px-3 text-center">In OpEx?</th>
+                      <th className="py-2.5 px-4">Amenity / Service</th>
+                      <th className="py-2.5 px-3">Cost to Resident</th>
+                      <th className="py-2.5 px-4">How It Is Provided</th>
+                      <th className="py-2.5 px-3 text-center">Included in Rent?</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -1236,10 +1193,10 @@ export default function AnalyticsPage() {
                         <td className="py-2.5 px-3 text-center">
                           {s.includedInOpEx ? (
                             <Badge className="bg-black text-white text-[9px] py-0 font-bold">
-                              Yes
+                              Always Free (Included)
                             </Badge>
                           ) : (
-                            <span className="text-zinc-400 text-xs font-bold">—</span>
+                            <span className="text-zinc-500 text-xs font-semibold">Special Partner Perk</span>
                           )}
                         </td>
                       </tr>
@@ -1261,10 +1218,10 @@ export default function AnalyticsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-black" />
-                Audited 12-Property Serviced Apartment Portfolio Performance
+                Current 12 Managed Residences in London & Paris
               </CardTitle>
               <CardDescription className="text-xs text-zinc-700 font-medium">
-                Short-stay operating portfolio across London & Europe with detailed property-level revenue, rent, and owner distributions
+                Real operating track record across our 12 existing residences: total bookings, nights stayed, money collected, and net payouts to owners.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -1272,16 +1229,16 @@ export default function AnalyticsPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-2.5 px-4">Property</th>
-                      <th className="py-2.5 px-2 text-center">Units</th>
+                      <th className="py-2.5 px-4">Residence</th>
+                      <th className="py-2.5 px-2 text-center">Suites</th>
                       <th className="py-2.5 px-2 text-center">Bookings</th>
-                      <th className="py-2.5 px-2 text-center">Nights</th>
-                      <th className="py-2.5 px-3 text-right">Gross Rev</th>
-                      <th className="py-2.5 px-3 text-right">Rent</th>
-                      <th className="py-2.5 px-3 text-right">Commission</th>
-                      <th className="py-2.5 px-3 text-right">Net Owner Balance</th>
-                      <th className="py-2.5 px-3 text-right">ADR</th>
-                      <th className="py-2.5 px-2 text-center">ALOS</th>
+                      <th className="py-2.5 px-2 text-center">Nights Stayed</th>
+                      <th className="py-2.5 px-3 text-right">Total Income</th>
+                      <th className="py-2.5 px-3 text-right">Base Rent</th>
+                      <th className="py-2.5 px-3 text-right">Platform & Booking Fees</th>
+                      <th className="py-2.5 px-3 text-right">Net Payout to Owner</th>
+                      <th className="py-2.5 px-3 text-right">Average Nightly Price</th>
+                      <th className="py-2.5 px-2 text-center">Average Stay Length</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -1306,7 +1263,7 @@ export default function AnalyticsPage() {
                           £{p.ownerBalance.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-zinc-900">£{p.adr.toFixed(2)}</td>
-                        <td className="py-2.5 px-2 text-center font-mono font-semibold text-zinc-800">{p.alos} n</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-semibold text-zinc-800">{p.alos} nights</td>
                       </tr>
                     ))}
                   </tbody>

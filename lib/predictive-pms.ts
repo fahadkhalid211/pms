@@ -26,7 +26,7 @@ export interface YearForecast {
 
 export interface ValueAddLever {
   title: string;
-  category: "Revenue Expansion" | "Cost Compression" | "Occupancy Yield";
+  category: string;
   annualImpactGbp: number;
   marginImpactPct: number;
   description: string;
@@ -172,49 +172,49 @@ export function generatePredictivePortfolioModel(): PredictivePortfolioModel {
 
   const valueAddLevers: ValueAddLever[] = [
     {
-      title: "Summer Void Monetization (July–August)",
-      category: "Occupancy Yield",
+      title: "Rent Empty Rooms in Summer (July & August)",
+      category: "Extra Bookings",
       annualImpactGbp: 275000,
       marginImpactPct: 3.5,
       description:
-        "The 44-week contracts leave ~35 suites vacant for 7 summer weeks. Partnering with Imperial College & Queen's Gate summer schools at £700/week captures £275k of pure incremental margin.",
-      implementationTimeline: "Phase 1: Summer 2026",
+        "When students leave for the summer, ~35 rooms are vacant for 7 weeks. We rent these rooms to tourists and summer school students at £700/week to bring in an extra £275k every summer.",
+      implementationTimeline: "Starts Summer 2026",
     },
     {
-      title: "Superior Studios Activation (2 Penthouse Units)",
-      category: "Revenue Expansion",
+      title: "Rent 2 Top-Floor Luxury Penthouse Studios",
+      category: "Extra Rent",
       annualImpactGbp: 145000,
       marginImpactPct: 1.9,
       description:
-        "The 2 Superior Studios (22.4 m²) marked as SOLD OUT with £0 in source workbook are leased at £1,420/week on 51-week institutional contracts, unlocking £145k annual revenue.",
-      implementationTimeline: "Immediate: Academic Year 2026/27",
+        "The two largest penthouse studios (22.4 m²) can be rented for £1,420/week on full-year contracts, adding £145k in pure annual income.",
+      implementationTimeline: "Starts School Year 2026/27",
     },
     {
-      title: "Direct Channel Commission Compression",
-      category: "Cost Compression",
+      title: "Cut Out Booking Fees with Direct Website Bookings",
+      category: "Lower Expenses",
       annualImpactGbp: 185000,
       marginImpactPct: 2.4,
       description:
-        "Transitioning from 3rd-party student portals (6% commission) to Pent House direct repeat bookings cuts agency commissions from 6.0% to 3.5%, preserving £185k annually directly into EBITDA.",
-      implementationTimeline: "Rolling: Years 2 through 4",
+        "Booking guests directly through penthousepms.com instead of third-party agencies lowers commission fees from 6% to 3.5%, keeping an extra £185k of profit each year.",
+      implementationTimeline: "Rolling rollout (Years 2 to 4)",
     },
     {
-      title: "Ancillary & Hospitality Upsells",
-      category: "Revenue Expansion",
+      title: "Extra Guest Services (Laundry, Cleaning & Airport Pickups)",
+      category: "Service Add-ons",
       annualImpactGbp: 240000,
       marginImpactPct: 2.8,
       description:
-        "Premium weekly laundry turnaround, mid-week clean upgrades, private Heathrow chauffeured transfers, and summer luggage storage packages generate high-margin recurring non-rent revenue.",
-      implementationTimeline: "Phase 2: Full rollout by Year 3",
+        "Students and parents happily pay for convenience: weekly laundry turnaround, mid-week room tidying, and chauffeured airport pickups generate £240k in extra high-profit income.",
+      implementationTimeline: "Phase 2 (Year 3 onwards)",
     },
     {
-      title: "Utopi IoT Smart Energy Hedging",
-      category: "Cost Compression",
+      title: "Smart Thermostats to Cut Heating & Electric Bills",
+      category: "Lower Expenses",
       annualImpactGbp: 48000,
       marginImpactPct: 0.7,
       description:
-        "Automated IoT climate setbacks during vacant lectures & university holidays reduce communal and in-room heating/electricity consumption by 14% without impacting guest comfort.",
-      implementationTimeline: "Immediate deployment with hardware installation",
+        "Smart room sensors lower heating automatically when students are at class or away, cutting energy bills by 14% without affecting comfort.",
+      implementationTimeline: "Immediate installation",
     },
   ];
 

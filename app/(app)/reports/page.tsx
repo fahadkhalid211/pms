@@ -445,7 +445,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 pt-3 text-xs">
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <Receipt className="h-3 w-3 text-emerald-600" /> Gross Invoiced
+                  <Receipt className="h-3 w-3 text-emerald-600" /> Total Income (Gross)
                 </div>
                 <div className="text-lg font-bold text-foreground">
                   £282,997.98
@@ -455,7 +455,7 @@ export default function ReportsPage() {
 
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <Wallet className="h-3 w-3 text-sky-600" /> Payments Collected
+                  <Wallet className="h-3 w-3 text-sky-600" /> Money Collected
                 </div>
                 <div className="text-lg font-bold text-emerald-600">
                   £239,580.86
@@ -465,7 +465,7 @@ export default function ReportsPage() {
 
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 text-amber-600" /> Guest Balance Due
+                  <AlertCircle className="h-3 w-3 text-amber-600" /> Still Unpaid by Guests
                 </div>
                 <div className="text-lg font-bold text-amber-600">
                   £31,329.40
@@ -475,7 +475,7 @@ export default function ReportsPage() {
 
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <PiggyBank className="h-3 w-3 text-foreground" /> Agency Commission
+                  <PiggyBank className="h-3 w-3 text-foreground" /> Platform & Booking Fees
                 </div>
                 <div className="text-lg font-bold text-foreground">
                   £153,037.29
@@ -485,7 +485,7 @@ export default function ReportsPage() {
 
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <DollarSign className="h-3 w-3 text-primary" /> Net Due to Owner
+                  <DollarSign className="h-3 w-3 text-primary" /> Net Payout to Owner
                 </div>
                 <div className="text-lg font-bold text-primary">
                   £96,484.26
@@ -565,8 +565,8 @@ export default function ReportsPage() {
                   £1,652.39
                 </div>
                 <div className="flex justify-between text-[11px] text-muted-foreground border-t border-border/40 pt-1.5">
-                  <span>ADR: £380.31/night</span>
-                  <span>ALOS: 3.43 nights</span>
+                  <span>Avg Price: £380.31/night</span>
+                  <span>Avg Stay: 3.43 nights</span>
                 </div>
               </CardContent>
             </Card>
@@ -578,7 +578,7 @@ export default function ReportsPage() {
               <div>
                 <CardTitle className="text-base font-semibold">Monthly Financial Progression</CardTitle>
                 <CardDescription className="text-xs">
-                  Month-by-month revenue, night volume, collections, and ADR performance.
+                  Month-by-month revenue, night volume, collections, and average nightly pricing.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="text-xs font-mono">
@@ -595,7 +595,7 @@ export default function ReportsPage() {
                       <th className="py-3 px-3">Sold Nights</th>
                       <th className="py-3 px-3">Gross Revenue</th>
                       <th className="py-3 px-3">Collections</th>
-                      <th className="py-3 px-3">ADR (GBP)</th>
+                      <th className="py-3 px-3">Avg Price / Night</th>
                       <th className="py-3 px-3">Settlement %</th>
                     </tr>
                   </thead>
@@ -643,7 +643,7 @@ export default function ReportsPage() {
                 <Building2 className="h-4 w-4 text-primary" /> Property Performance & Profitability Matrix
               </CardTitle>
               <CardDescription className="text-xs">
-                Audited comparison across all 12 properties showing volume, gross revenue, fees, agency commission, and net owner balances.
+                Audited comparison across all 12 properties showing volume, gross revenue, fees, platform fees, and net owner payouts.
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-xs font-mono">
@@ -660,12 +660,12 @@ export default function ReportsPage() {
                     <th className="py-3 px-3">Suites</th>
                     <th className="py-3 px-3">Bookings</th>
                     <th className="py-3 px-3">Sold Nights</th>
-                    <th className="py-3 px-3">Gross Total</th>
+                    <th className="py-3 px-3">Total Income</th>
                     <th className="py-3 px-3">Collected</th>
-                    <th className="py-3 px-3">Agency Due</th>
-                    <th className="py-3 px-3">Owner Net</th>
-                    <th className="py-3 px-3">ADR</th>
-                    <th className="py-3 px-3">ALOS</th>
+                    <th className="py-3 px-3">Platform Fees</th>
+                    <th className="py-3 px-3">Owner Payout</th>
+                    <th className="py-3 px-3">Avg Price / Night</th>
+                    <th className="py-3 px-3">Avg Stay Length</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40 font-mono">
@@ -686,7 +686,7 @@ export default function ReportsPage() {
                         <td className="py-2.5 px-3 text-foreground font-semibold">{sym}{p.agencyCommission.toFixed(2)}</td>
                         <td className="py-2.5 px-3 text-primary font-semibold">{sym}{p.ownerBalance.toFixed(2)}</td>
                         <td className="py-2.5 px-3">{sym}{p.adr.toFixed(2)}</td>
-                        <td className="py-2.5 px-3">{p.alos}d</td>
+                        <td className="py-2.5 px-3">{p.alos} nights</td>
                       </tr>
                     );
                   })}
@@ -827,8 +827,8 @@ export default function ReportsPage() {
                       <th className="py-3 px-3">Sold Nights</th>
                       <th className="py-3 px-3">Occupancy %</th>
                       <th className="py-3 px-3">Room Revenue</th>
-                      <th className="py-3 px-3">ADR</th>
-                      <th className="py-3 px-3">RevPAR</th>
+                      <th className="py-3 px-3">Avg Price / Night</th>
+                      <th className="py-3 px-3">Earnings / Available Room</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40 font-mono">
