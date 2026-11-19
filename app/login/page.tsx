@@ -111,7 +111,7 @@ function SignInForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit} action={formAction}>
+    <form className="space-y-4" onSubmit={handleSubmit}>
       <input type="hidden" name="next" value={targetDestination} />
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>

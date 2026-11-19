@@ -30,24 +30,23 @@ export async function hashSession(user: {
 }
 
 export function isSecureConnection(request?: Request): boolean {
+  // 1. Trust AUTH_URL as the canonical source of truth — most reliable behind a reverse proxy
+  const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+  if (authUrl?.startsWith("https://")) return true;
+
   if (request) {
     const proto = request.headers.get("x-forwarded-proto");
-    if (proto) {
-      return proto.toLowerCase() === "https";
-    }
+    // Only trust x-forwarded-proto when it is explicitly "https"
+    if (proto === "https") return true;
+    if (proto === "http") return false;
+    // No proto header — fall back to origin/referer (do NOT let http origin override AUTH_URL)
     const origin = request.headers.get("origin");
-    if (origin) {
-      return origin.startsWith("https://");
-    }
+    if (origin?.startsWith("https://")) return true;
     const referer = request.headers.get("referer");
-    if (referer) {
-      return referer.startsWith("https://");
-    }
+    if (referer?.startsWith("https://")) return true;
     return request.url.startsWith("https://");
   }
-  if (process.env.AUTH_URL?.startsWith("https://") || process.env.NEXTAUTH_URL?.startsWith("https://")) {
-    return true;
-  }
+
   return false;
 }
 

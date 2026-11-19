@@ -51,18 +51,13 @@ export async function loginAction(
   const referer = headerList.get("referer");
   const origin = headerList.get("origin");
 
-  // Setting secure: true over plain HTTP causes all modern browsers to discard the cookie.
-  const isPlainHttp =
-    proto === "http" ||
-    origin?.startsWith("http://") === true ||
-    referer?.startsWith("http://") === true;
-
+  // Trust AUTH_URL first (canonical production signal), then fall back to headers.
+  const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL || "";
   const isHttps =
-    !isPlainHttp &&
-    (proto === "https" ||
-      origin?.startsWith("https://") === true ||
-      referer?.startsWith("https://") === true ||
-      (process.env.AUTH_URL?.startsWith("https://") && !headerList.get("host")?.includes("localhost")));
+    authUrl.startsWith("https://") ||
+    proto === "https" ||
+    (!proto && origin?.startsWith("https://") === true) ||
+    (!proto && !origin && referer?.startsWith("https://") === true);
 
   const cookieStore = await cookies();
   cookieStore.set("lumina.session", token, {
