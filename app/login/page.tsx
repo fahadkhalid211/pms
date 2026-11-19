@@ -54,9 +54,14 @@ function SignInForm() {
     rawNext.startsWith("//");
   const targetDestination = isDisallowed ? "/dashboard" : rawNext;
 
-  const [state, formAction, isPending] = React.useActionState(loginAction, undefined);
+  const [state, formAction, isServerPending] = React.useActionState(loginAction, undefined);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [clientLoading, setClientLoading] = React.useState(false);
+  const [clientError, setClientError] = React.useState<string | null>(null);
+
+  const isPending = isServerPending || clientLoading;
+  const displayError = clientError || state?.error;
 
   React.useEffect(() => {
     let active = true;
@@ -76,8 +81,37 @@ function SignInForm() {
     };
   }, [targetDestination]);
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setClientError(null);
+    setClientLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (res.ok && json?.success) {
+        // Full page redirect ensures the freshly set cookie is present in the browser
+        window.location.href = targetDestination;
+        return;
+      }
+
+      setClientError(json?.error?.message || "Invalid email or password.");
+    } catch {
+      setClientError("Unable to connect to authentication service. Please retry.");
+    } finally {
+      setClientLoading(false);
+    }
+  }
+
   return (
-    <form className="space-y-4" action={formAction}>
+    <form className="space-y-4" onSubmit={handleSubmit} action={formAction}>
       <input type="hidden" name="next" value={targetDestination} />
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -111,9 +145,9 @@ function SignInForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      {state?.error && (
+      {displayError && (
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {state.error}
+          {displayError}
         </div>
       )}
       <Button type="submit" className="w-full" disabled={isPending}>
