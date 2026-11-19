@@ -114,7 +114,7 @@ export function GlobalSearch() {
       case "room":
         return <BedDouble className="h-4 w-4 text-amber-500" />;
       case "invoice":
-        return <CreditCard className="h-4 w-4 text-purple-500" />;
+        return <CreditCard className="h-4 w-4 text-foreground" />;
       default:
         return <Search className="h-4 w-4 text-muted-foreground" />;
     }

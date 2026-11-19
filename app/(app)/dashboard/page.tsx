@@ -116,33 +116,33 @@ export default async function DashboardPage(props: DashboardPageProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-black tracking-tight text-zinc-950">
               The Penthouse Living
             </h1>
-            <Badge variant="outline" className="text-xs font-mono font-medium border-primary/40 text-primary">
+            <Badge variant="outline" className="text-xs font-mono font-bold border-zinc-400 bg-zinc-100 text-zinc-950">
               12 Properties · London & Paris
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-sm text-zinc-700 font-medium mt-0.5">
             Client portfolio overview, audited ledger stats, and live hospitality performance.
           </p>
         </div>
 
         {/* View Switcher & Action Links */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-md border border-border bg-card p-0.5 text-xs">
+          <div className="flex rounded-md border border-zinc-300 bg-white p-0.5 text-xs shadow-xs">
             <Link
               href="/dashboard"
-              className={`px-3 py-1 rounded text-xs font-medium transition ${
-                !is30d ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`px-3 py-1 rounded text-xs font-bold transition ${
+                !is30d ? "bg-black text-white shadow-xs" : "text-zinc-700 hover:text-black hover:bg-zinc-100"
               }`}
             >
               Full Portfolio (2025–2026)
             </Link>
             <Link
               href="/dashboard?period=30d"
-              className={`px-3 py-1 rounded text-xs font-medium transition ${
-                is30d ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`px-3 py-1 rounded text-xs font-bold transition ${
+                is30d ? "bg-black text-white shadow-xs" : "text-zinc-700 hover:text-black hover:bg-zinc-100"
               }`}
             >
               Last 30 Days
@@ -150,19 +150,19 @@ export default async function DashboardPage(props: DashboardPageProps) {
           </div>
 
           <Link href="/analytics">
-            <Button size="sm" className="gap-1.5 h-8 text-xs bg-primary text-primary-foreground font-semibold shadow-sm">
-              <TrendingUp className="h-3.5 w-3.5" />
+            <Button size="sm" className="gap-1.5 h-8 text-xs bg-black text-white hover:bg-zinc-800 font-bold shadow-xs">
+              <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
               Portfolio Analytics
             </Button>
           </Link>
           <Link href="/reports">
-            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
+            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs border-zinc-300 font-bold hover:bg-zinc-100">
               <FileText className="h-3.5 w-3.5" />
               Detailed Reports
             </Button>
           </Link>
           <Link href="/reservations">
-            <Button size="sm" className="gap-1.5 h-8 text-xs bg-primary">
+            <Button size="sm" className="gap-1.5 h-8 text-xs bg-black text-white hover:bg-zinc-800 font-bold">
               <Calendar className="h-3.5 w-3.5" />
               Reservations ({portfolioSummary.totalBookings})
             </Button>
@@ -171,94 +171,94 @@ export default async function DashboardPage(props: DashboardPageProps) {
       </div>
 
       {/* Client Executive Reconciled Ledger Strip */}
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/5 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2">
+      <div className="rounded-xl border border-zinc-300 bg-zinc-50/80 p-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-200 gap-2">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-950">
               Client Portfolio Summary & Financial Reconciliation
             </span>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-zinc-700 font-medium">
               Reporting Period: 01/05/2025 – 30/06/2026 · The Penthouse Living (1 Pass. Landrieu, Paris & London)
             </p>
           </div>
-          <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+          <div className="flex items-center gap-3 text-xs font-mono text-zinc-700 font-semibold">
             <span>585 Nights GBP</span>
             <span>·</span>
             <span>5 Nights EUR</span>
             <span>·</span>
-            <span className="font-semibold text-foreground">590 Total Nights</span>
+            <span className="font-extrabold text-black">590 Total Nights</span>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-3">
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <Receipt className="h-3 w-3 text-emerald-600" /> Gross Revenue
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <Receipt className="h-3 w-3 text-emerald-700" /> Gross Revenue
             </div>
-            <div className="text-lg font-bold text-foreground">
+            <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.grossGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.grossEur.toFixed(2)} EUR</div>
+            <div className="text-[10px] text-zinc-600 font-medium">+ €{portfolioSummary.grossEur.toFixed(2)} EUR</div>
           </div>
 
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <Wallet className="h-3 w-3 text-sky-600" /> Guest Paid
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <Wallet className="h-3 w-3 text-sky-700" /> Guest Paid
             </div>
-            <div className="text-lg font-bold text-emerald-600">
+            <div className="text-lg font-black text-emerald-700">
               £{portfolioSummary.collectedGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.collectedEur.toFixed(2)} EUR</div>
+            <div className="text-[10px] text-zinc-600 font-medium">+ €{portfolioSummary.collectedEur.toFixed(2)} EUR</div>
           </div>
 
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <AlertCircle className="h-3 w-3 text-amber-600" /> Guest Due
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3 text-amber-700" /> Guest Due
             </div>
-            <div className="text-lg font-bold text-amber-600">
+            <div className="text-lg font-black text-amber-700">
               £{portfolioSummary.guestBalanceGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-muted-foreground">Open balances</div>
+            <div className="text-[10px] text-zinc-600 font-medium">Open balances</div>
           </div>
 
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <PiggyBank className="h-3 w-3 text-violet-600" /> Agency Commission
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <PiggyBank className="h-3 w-3 text-zinc-900" /> Agency Commission
             </div>
-            <div className="text-lg font-bold text-violet-600">
+            <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.agencyCommissionGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-muted-foreground">+ €{portfolioSummary.agencyCommissionEur.toFixed(2)} EUR</div>
+            <div className="text-[10px] text-zinc-600 font-medium">+ €{portfolioSummary.agencyCommissionEur.toFixed(2)} EUR</div>
           </div>
 
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <DollarSign className="h-3 w-3 text-primary" /> Owner Balance
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <DollarSign className="h-3 w-3 text-zinc-950" /> Owner Balance
             </div>
-            <div className="text-lg font-bold text-primary">
+            <div className="text-lg font-black text-zinc-950">
               £{portfolioSummary.ownerNetGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-muted-foreground">Net distribution due</div>
+            <div className="text-[10px] text-zinc-600 font-medium">Net distribution due</div>
           </div>
 
           <div className="space-y-0.5">
-            <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-              <Building2 className="h-3 w-3 text-slate-600" /> Portfolio Scope
+            <div className="text-[11px] font-bold text-zinc-700 flex items-center gap-1">
+              <Building2 className="h-3 w-3 text-zinc-700" /> Portfolio Scope
             </div>
-            <div className="text-lg font-bold text-foreground">
+            <div className="text-lg font-black text-zinc-950">
               {portfolioSummary.totalBookings} Bookings
             </div>
-            <div className="text-[10px] text-muted-foreground">{portfolioSummary.totalProperties} properties · 14 suites</div>
+            <div className="text-[10px] text-zinc-600 font-medium">{portfolioSummary.totalProperties} properties · 14 suites</div>
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="text-muted-foreground">
+        <div className="mt-3 pt-2.5 border-t border-zinc-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-zinc-700 font-medium">
             Audited dataset reconciled with 100% accuracy to the client spreadsheet.
           </span>
           <Link
             href="/analytics"
-            className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+            className="inline-flex items-center gap-1 font-bold text-black hover:underline"
           >
             Open Comprehensive Analytics (Amounts, Guests, 12 Properties, Channels)
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -268,65 +268,65 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
       {/* Primary KPI Grid (ADR, RevPAR, Occupancy, Outstanding) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border border-border/80">
+        <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Occupancy Rate</span>
-              <BedDouble className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Occupancy Rate</span>
+              <BedDouble className="h-4 w-4 text-black" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{kpis.occupancyRate}%</span>
-              <span className="text-xs text-muted-foreground">{is30d ? "30-day avg" : "portfolio avg"}</span>
+              <span className="text-3xl font-black tracking-tight text-zinc-950">{kpis.occupancyRate}%</span>
+              <span className="text-xs text-zinc-600 font-bold">{is30d ? "30-day avg" : "portfolio avg"}</span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-zinc-700 font-medium">
               {kpis.roomsSold} room nights sold ({kpis.totalRooms} total units)
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/80">
+        <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ADR (Avg Daily Rate)</span>
-              <DollarSign className="h-4 w-4 text-emerald-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">ADR (Avg Daily Rate)</span>
+              <DollarSign className="h-4 w-4 text-emerald-700" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.adr, "GBP")}</span>
-              <span className="text-xs text-muted-foreground">per sold night</span>
+              <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.adr, "GBP")}</span>
+              <span className="text-xs text-zinc-600 font-bold">per sold night</span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-zinc-700 font-medium">
               Total room rent: {formatMoney(kpis.roomRevenue, "GBP")}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/80">
+        <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">RevPAR</span>
-              <TrendingUp className="h-4 w-4 text-violet-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">RevPAR</span>
+              <TrendingUp className="h-4 w-4 text-zinc-950" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.revpar, "GBP")}</span>
-              <span className="text-xs text-muted-foreground">per available night</span>
+              <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.revpar, "GBP")}</span>
+              <span className="text-xs text-zinc-600 font-bold">per available night</span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-zinc-700 font-medium">
               {kpis.roomsAvailableInPeriod} available room night capacity
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/80">
+        <Card className="border border-zinc-300 bg-white shadow-xs">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Outstanding Balance</span>
-              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Outstanding Balance</span>
+              <AlertCircle className="h-4 w-4 text-amber-700" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatMoney(kpis.outstandingBalance, "GBP")}</span>
-              <span className="text-xs text-muted-foreground">unsettled folios</span>
+              <span className="text-3xl font-black tracking-tight text-zinc-950">{formatMoney(kpis.outstandingBalance, "GBP")}</span>
+              <span className="text-xs text-zinc-600 font-bold">unsettled folios</span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-zinc-700 font-medium">
               Across all open and overdue guest folios
             </p>
           </CardContent>
@@ -335,33 +335,33 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
       {/* Secondary Metrics Bar */}
       <div className="grid gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
+        <div className="rounded-lg border border-zinc-300 bg-white p-3 flex items-center justify-between shadow-xs">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Today&apos;s Arrivals</div>
-            <div className="text-xl font-bold">{todaysArrivals.length}</div>
+            <div className="text-xs text-zinc-700 font-bold">Today&apos;s Arrivals</div>
+            <div className="text-xl font-black text-zinc-950">{todaysArrivals.length}</div>
           </div>
           <ArrowDownRight className="h-4 w-4 text-emerald-600" />
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
+        <div className="rounded-lg border border-zinc-300 bg-white p-3 flex items-center justify-between shadow-xs">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Today&apos;s Departures</div>
-            <div className="text-xl font-bold">{todaysDepartures.length}</div>
+            <div className="text-xs text-zinc-700 font-bold">Today&apos;s Departures</div>
+            <div className="text-xl font-black text-zinc-950">{todaysDepartures.length}</div>
           </div>
           <ArrowUpRight className="h-4 w-4 text-sky-600" />
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
+        <div className="rounded-lg border border-zinc-300 bg-white p-3 flex items-center justify-between shadow-xs">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Total Reservations</div>
-            <div className="text-xl font-bold text-foreground">{portfolioSummary.totalBookings}</div>
+            <div className="text-xs text-zinc-700 font-bold">Total Reservations</div>
+            <div className="text-xl font-black text-zinc-950">{portfolioSummary.totalBookings}</div>
           </div>
-          <Calendar className="h-4 w-4 text-primary" />
+          <Calendar className="h-4 w-4 text-black" />
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-3 flex items-center justify-between">
+        <div className="rounded-lg border border-zinc-300 bg-white p-3 flex items-center justify-between shadow-xs">
           <div className="space-y-0.5">
-            <div className="text-xs text-muted-foreground">Active Units</div>
-            <div className="text-xl font-bold text-foreground">{kpis.totalRooms}</div>
+            <div className="text-xs text-zinc-700 font-bold">Active Units</div>
+            <div className="text-xl font-black text-zinc-950">{kpis.totalRooms}</div>
           </div>
-          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <Building2 className="h-4 w-4 text-zinc-700" />
         </div>
       </div>
 
@@ -377,17 +377,17 @@ export default async function DashboardPage(props: DashboardPageProps) {
               </CardDescription>
             </div>
             <Link href="/frontdesk">
-              <Button variant="ghost" size="sm" className="text-xs h-7">
+              <Button variant="ghost" size="sm" className="text-xs h-7 font-bold hover:bg-zinc-100">
                 Open Front Desk
               </Button>
             </Link>
           </CardHeader>
           <CardContent>
             {todaysArrivals.length === 0 && todaysDepartures.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                <BedDouble className="h-8 w-8 stroke-1 text-muted-foreground/60 mb-2" />
-                <p className="text-sm font-medium">No check-ins or check-outs scheduled for today.</p>
-                <p className="text-xs mt-1">Visit Front Desk or Calendar to view full timeline.</p>
+              <div className="flex flex-col items-center justify-center py-8 text-center text-zinc-600">
+                <BedDouble className="h-8 w-8 stroke-1 text-zinc-400 mb-2" />
+                <p className="text-sm font-bold text-zinc-800">No check-ins or check-outs scheduled for today.</p>
+                <p className="text-xs mt-1 text-zinc-600 font-medium">Visit Front Desk or Calendar to view full timeline.</p>
               </div>
             ) : (
               <div className="space-y-2.5">
@@ -396,18 +396,18 @@ export default async function DashboardPage(props: DashboardPageProps) {
                   return (
                     <div
                       key={r.id}
-                      className="flex items-center justify-between rounded-lg border border-border/60 p-3 text-xs"
+                      className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 text-xs"
                     >
                       <div className="space-y-0.5">
-                        <div className="font-semibold text-foreground flex items-center gap-2">
+                        <div className="font-bold text-zinc-950 flex items-center gap-2">
                           <span>
                             {r.guest ? `${r.guest.firstName} ${r.guest.lastName}` : "Direct Guest"}
                           </span>
-                          <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/30">
+                          <Badge variant="outline" className="text-[10px] text-emerald-800 border-emerald-300 bg-emerald-50 font-bold">
                             Arrival
                           </Badge>
                         </div>
-                        <div className="text-muted-foreground">
+                        <div className="text-zinc-600 font-medium">
                           {r.code} &bull; Room {roomNumber} &bull; {r.property.name}
                         </div>
                       </div>
@@ -423,18 +423,18 @@ export default async function DashboardPage(props: DashboardPageProps) {
                   return (
                     <div
                       key={r.id}
-                      className="flex items-center justify-between rounded-lg border border-border/60 p-3 text-xs"
+                      className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 text-xs"
                     >
                       <div className="space-y-0.5">
-                        <div className="font-semibold text-foreground flex items-center gap-2">
+                        <div className="font-bold text-zinc-950 flex items-center gap-2">
                           <span>
                             {r.guest ? `${r.guest.firstName} ${r.guest.lastName}` : "Direct Guest"}
                           </span>
-                          <Badge variant="outline" className="text-[10px] text-sky-600 border-sky-500/30">
+                          <Badge variant="outline" className="text-[10px] text-sky-800 border-sky-300 bg-sky-50 font-bold">
                             Departure
                           </Badge>
                         </div>
-                        <div className="text-muted-foreground">
+                        <div className="text-zinc-600 font-medium">
                           {r.code} &bull; Room {roomNumber} &bull; {r.property.name}
                         </div>
                       </div>
@@ -451,60 +451,60 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
         {/* Live Room Distribution & Operations Health */}
         <div className="space-y-6">
-          <Card className="border border-border/80">
+          <Card className="border border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Live Unit Inventory</CardTitle>
-              <CardDescription className="text-xs">Real-time status of all {kpis.totalRooms} units.</CardDescription>
+              <CardTitle className="text-base font-bold text-zinc-950">Live Unit Inventory</CardTitle>
+              <CardDescription className="text-xs text-zinc-700 font-medium">Real-time status of all {kpis.totalRooms} units.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between rounded p-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
-                <span className="font-medium">Available</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.available || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-emerald-300 bg-emerald-50 text-emerald-950 font-medium">
+                <span className="font-bold">Available</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.available || 0}</span>
               </div>
-              <div className="flex items-center justify-between rounded p-2 bg-primary/10 text-primary">
-                <span className="font-medium">Occupied</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.occupied || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-zinc-900 bg-black text-white font-medium">
+                <span className="font-bold">Occupied</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.occupied || 0}</span>
               </div>
-              <div className="flex items-center justify-between rounded p-2 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                <span className="font-medium">Turnover / Dirty</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.dirty || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-amber-300 bg-amber-50 text-amber-950 font-medium">
+                <span className="font-bold">Turnover / Dirty</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.dirty || 0}</span>
               </div>
-              <div className="flex items-center justify-between rounded p-2 bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                <span className="font-medium">Clean / Ready</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.clean || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-sky-300 bg-sky-50 text-sky-950 font-medium">
+                <span className="font-bold">Clean / Ready</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.clean || 0}</span>
               </div>
-              <div className="flex items-center justify-between rounded p-2 bg-purple-500/10 text-purple-700 dark:text-purple-400">
-                <span className="font-medium">Inspection Required</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.inspection || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-zinc-300 bg-zinc-100 text-zinc-950 font-medium">
+                <span className="font-bold">Inspection Required</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.inspection || 0}</span>
               </div>
-              <div className="flex items-center justify-between rounded p-2 bg-rose-500/10 text-rose-700 dark:text-rose-400">
-                <span className="font-medium">Out of Order / Maintenance</span>
-                <span className="font-bold">{kpis.roomStatusBreakdown.out_of_order || 0}</span>
+              <div className="flex items-center justify-between rounded p-2.5 border border-rose-300 bg-rose-50 text-rose-950 font-medium">
+                <span className="font-bold">Out of Order / Maintenance</span>
+                <span className="font-black text-sm">{kpis.roomStatusBreakdown.out_of_order || 0}</span>
               </div>
             </CardContent>
           </Card>
 
           {/* Quick Activity Stream */}
-          <Card className="border border-border/80">
+          <Card className="border border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Activity className="h-4 w-4 text-primary" /> Live Activity
+              <CardTitle className="text-sm font-bold text-zinc-950 flex items-center gap-1.5">
+                <Activity className="h-4 w-4 text-black" /> Live Activity
               </CardTitle>
               <Link href="/activity-logs">
-                <span className="text-[11px] text-muted-foreground hover:text-foreground">View all</span>
+                <span className="text-[11px] text-zinc-700 hover:text-black font-semibold">View all</span>
               </Link>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               {recentActivities.length === 0 ? (
-                <p className="text-muted-foreground py-2">No recent events logged.</p>
+                <p className="text-zinc-600 font-medium py-2">No recent events logged.</p>
               ) : (
                 recentActivities.map((act) => {
                   const meta = (act.metadata ?? {}) as Record<string, unknown>;
                   const summaryText = (meta.summary as string) || act.action.replace(/_/g, " ");
                   return (
-                    <div key={act.id} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
-                      <p className="font-medium text-foreground truncate">{summaryText}</p>
-                      <span className="text-[10px] text-muted-foreground font-mono">
+                    <div key={act.id} className="border-b border-zinc-200 pb-1.5 last:border-0 last:pb-0">
+                      <p className="font-bold text-zinc-950 truncate">{summaryText}</p>
+                      <span className="text-[10px] text-zinc-600 font-mono font-medium">
                         {new Date(act.createdAt).toLocaleTimeString()}
                       </span>
                     </div>

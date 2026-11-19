@@ -408,7 +408,7 @@ export default function IntegrationsPage() {
       case "accounting":
         return <FileSpreadsheet className="h-4 w-4 text-amber-600" strokeWidth={1.5} />;
       default:
-        return <Zap className="h-4 w-4 text-violet-600" strokeWidth={1.5} />;
+        return <Zap className="h-4 w-4 text-foreground" strokeWidth={1.5} />;
     }
   }
 
@@ -429,11 +429,11 @@ export default function IntegrationsPage() {
       </div>
 
       {/* Hospitable Two-Way Sync Hub */}
-      <Card className="border-primary/30 bg-gradient-to-br from-violet-50/50 via-background to-background">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black text-white shadow-sm">
                 <Compass className="h-5 w-5" strokeWidth={1.5} />
               </div>
               <div>

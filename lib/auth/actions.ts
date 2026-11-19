@@ -30,22 +30,33 @@ export async function hashSession(user: {
 }
 
 export function isSecureConnection(request?: Request): boolean {
-  // 1. Trust AUTH_URL as the canonical source of truth — most reliable behind a reverse proxy
-  const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
-  if (authUrl?.startsWith("https://")) return true;
-
   if (request) {
     const proto = request.headers.get("x-forwarded-proto");
-    // Only trust x-forwarded-proto when it is explicitly "https"
     if (proto === "https") return true;
     if (proto === "http") return false;
-    // No proto header — fall back to origin/referer (do NOT let http origin override AUTH_URL)
+
+    try {
+      const url = new URL(request.url);
+      if (url.protocol === "http:" && (url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "0.0.0.0")) {
+        return false;
+      }
+      if (url.protocol === "https:") return true;
+    } catch {}
+
     const origin = request.headers.get("origin");
     if (origin?.startsWith("https://")) return true;
+    if (origin?.startsWith("http://localhost") || origin?.startsWith("http://127.0.0.1")) return false;
+
     const referer = request.headers.get("referer");
     if (referer?.startsWith("https://")) return true;
-    return request.url.startsWith("https://");
+    if (referer?.startsWith("http://localhost") || referer?.startsWith("http://127.0.0.1")) return false;
+
+    if (request.url.startsWith("https://")) return true;
+    if (request.url.startsWith("http://localhost") || request.url.startsWith("http://127.0.0.1")) return false;
   }
+
+  const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+  if (authUrl?.startsWith("https://")) return true;
 
   return false;
 }
@@ -118,6 +129,11 @@ export async function createUserWithContext(input: {
     data: {
       name: input.organizationName.trim(),
       slug,
+      primaryColor: "#000000",
+      accentColor: "#ffffff",
+      branding: {
+        tagline: "Pent House PMS",
+      },
     },
   });
 

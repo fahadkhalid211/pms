@@ -24,6 +24,18 @@ export interface ColorPreset {
 
 export const BRANDING_COLOR_PRESETS: ColorPreset[] = [
   {
+    name: "Penthouse Monochrome",
+    primary: "#000000",
+    accent: "#ffffff",
+    description: "Ultra-luxury high-contrast black and crisp pure white",
+  },
+  {
+    name: "Obsidian Slate",
+    primary: "#09090b",
+    accent: "#f4f4f5",
+    description: "Refined minimalist dark obsidian with crisp slate highlights",
+  },
+  {
     name: "Emerald Luxury",
     primary: "#065f46",
     accent: "#10b981",
@@ -34,12 +46,6 @@ export const BRANDING_COLOR_PRESETS: ColorPreset[] = [
     primary: "#0f172a",
     accent: "#3b82f6",
     description: "Timeless navy blue with modern cobalt accents",
-  },
-  {
-    name: "Royal Purple",
-    primary: "#581c87",
-    accent: "#a855f7",
-    description: "Prestigious royal violet with vibrant amethyst",
   },
   {
     name: "Amber & Gold",
@@ -59,12 +65,6 @@ export const BRANDING_COLOR_PRESETS: ColorPreset[] = [
     accent: "#0ea5e9",
     description: "Modern architectural slate with sky accents",
   },
-  {
-    name: "Obsidian Modern",
-    primary: "#18181b",
-    accent: "#6366f1",
-    description: "Sleek monochrome black with electric indigo accents",
-  },
 ];
 
 /**
@@ -72,7 +72,7 @@ export const BRANDING_COLOR_PRESETS: ColorPreset[] = [
  * and calculates high-contrast foreground color.
  */
 export function hexToHsl(hex: string): { hsl: string; foreground: string; isLight: boolean } {
-  let c = (hex || "#0f172a").replace("#", "").trim();
+  let c = (hex || "#000000").replace("#", "").trim();
   if (c.length === 3) {
     c = c
       .split("")
@@ -80,7 +80,7 @@ export function hexToHsl(hex: string): { hsl: string; foreground: string; isLigh
       .join("");
   }
   if (c.length !== 6) {
-    return { hsl: "258 90% 66%", foreground: "0 0% 100%", isLight: false };
+    return { hsl: "0 0% 9%", foreground: "0 0% 100%", isLight: false };
   }
 
   const r = parseInt(c.substring(0, 2), 16) / 255;
@@ -130,16 +130,16 @@ export function hexToHsl(hex: string): { hsl: string; foreground: string; isLigh
  * Builds CSS root variables for injection
  */
 export function buildBrandingCss(primaryHex?: string | null, accentHex?: string | null): string {
-  const p = hexToHsl(primaryHex || "#0f172a");
-  const a = hexToHsl(accentHex || "#3b82f6");
+  const p = hexToHsl(primaryHex || "#000000");
+  const a = hexToHsl(accentHex || "#ffffff");
 
   return `
     :root {
       --primary: ${p.hsl};
       --primary-foreground: ${p.foreground};
       --ring: ${p.hsl};
-      --brand-primary: ${primaryHex || "#0f172a"};
-      --brand-accent: ${accentHex || "#3b82f6"};
+      --brand-primary: ${primaryHex || "#000000"};
+      --brand-accent: ${accentHex || "#ffffff"};
       --accent-hsl: ${a.hsl};
     }
   `.trim();

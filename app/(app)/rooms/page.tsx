@@ -233,8 +233,8 @@ export default function RoomsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/40">
+                  <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 font-bold uppercase text-xs">
+                    <tr>
                       <th className="p-3 text-left">Room / Unit Name</th>
                       <th className="p-3 text-left">Property</th>
                       <th className="p-3 text-left">Room Type</th>
@@ -363,8 +363,8 @@ export default function RoomsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/40">
+                  <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 font-bold uppercase text-xs">
+                    <tr>
                       <th className="p-3 text-left">Category Name</th>
                       <th className="p-3 text-left">Bedding</th>
                       <th className="p-3 text-left">Max Capacity</th>

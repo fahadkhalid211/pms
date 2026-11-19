@@ -45,8 +45,8 @@ export default function SettingsPage() {
   const [brandName, setBrandName] = React.useState("");
   const [tagline, setTagline] = React.useState("");
   const [logoUrl, setLogoUrl] = React.useState("");
-  const [primaryColor, setPrimaryColor] = React.useState("#0f172a");
-  const [accentColor, setAccentColor] = React.useState("#3b82f6");
+  const [primaryColor, setPrimaryColor] = React.useState("#000000");
+  const [accentColor, setAccentColor] = React.useState("#ffffff");
   const [loadingBranding, setLoadingBranding] = React.useState(true);
   const [savingBranding, setSavingBranding] = React.useState(false);
   const [uploadingLogo, setUploadingLogo] = React.useState(false);
@@ -83,8 +83,8 @@ export default function SettingsPage() {
         const b = json.data;
         setBrandName(b.name || "");
         setLogoUrl(b.logoUrl || "");
-        setPrimaryColor(b.primaryColor || "#0f172a");
-        setAccentColor(b.accentColor || "#3b82f6");
+        setPrimaryColor(b.primaryColor || "#000000");
+        setAccentColor(b.accentColor || "#ffffff");
         setTagline(b.branding?.tagline || "");
       }
     } catch {

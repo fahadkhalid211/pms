@@ -111,7 +111,7 @@ export default function ActivityLogsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Stream Events</CardTitle>
-            <Activity className="h-4 w-4 text-violet-500" />
+            <Activity className="h-4 w-4 text-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{logs.length}</div>
@@ -212,7 +212,7 @@ export default function ActivityLogsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
+                <thead className="border-b border-zinc-300 bg-zinc-100 text-xs font-extrabold text-zinc-950 uppercase">
                   <tr>
                     <th className="px-4 py-3">Timestamp</th>
                     <th className="px-4 py-3">Source & Category</th>
@@ -222,12 +222,12 @@ export default function ActivityLogsPage() {
                     <th className="px-4 py-3 text-right">Inspect</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-zinc-200">
                   {logs.map((log) => {
                     const isFrontend = log.source === "frontend";
                     return (
-                      <tr key={log.id} className="hover:bg-muted/40 transition-colors">
-                        <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <tr key={log.id} className="hover:bg-zinc-50 transition-colors">
+                        <td className="px-4 py-3 text-xs text-zinc-700 font-medium whitespace-nowrap">
                           <div>{new Date(log.timestamp).toLocaleTimeString()}</div>
                           <div>{new Date(log.timestamp).toLocaleDateString()}</div>
                         </td>

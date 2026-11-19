@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 export type BadgeVariant = "default" | "secondary" | "destructive" | "muted" | "outline";
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: "border-transparent bg-primary text-primary-foreground",
-  secondary: "border-transparent bg-secondary text-secondary-foreground",
-  destructive: "border-transparent bg-destructive text-destructive-foreground",
-  muted: "border-transparent bg-muted text-muted-foreground",
-  outline: "border-border text-foreground bg-transparent",
+  default: "border-transparent bg-black text-white font-semibold shadow-xs",
+  secondary: "border border-zinc-300 bg-zinc-100 text-zinc-900 font-semibold",
+  destructive: "border border-rose-200 bg-rose-50 text-rose-800 font-semibold",
+  muted: "border border-zinc-300 bg-zinc-100 text-zinc-900 font-semibold",
+  outline: "border border-zinc-400 text-zinc-950 font-semibold bg-white",
 };
 
 export function Badge({ className, variant = "default", ...props }: React.HTMLAttributes<HTMLDivElement> & { variant?: BadgeVariant }) {

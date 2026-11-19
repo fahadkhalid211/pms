@@ -195,7 +195,7 @@ export default function AiOperationsPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Operations Hub</h1>
-            <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-400">
+            <Badge variant="outline" className="border-border bg-muted/50 text-foreground">
               <Sparkles className="mr-1 h-3 w-3" /> Autonomous PMS
             </Badge>
           </div>
@@ -299,30 +299,30 @@ export default function AiOperationsPage() {
               <button
                 type="button"
                 onClick={() => void send("Check room availability for the next 3 days")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-violet-500 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-foreground hover:text-foreground"
               >
-                <Clock className="h-3 w-3 text-violet-400" /> Availability Check
+                <Clock className="h-3 w-3 text-foreground" /> Availability Check
               </button>
               <button
                 type="button"
                 onClick={() => void send("Search for reservations under the name Smith")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-violet-500 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-foreground hover:text-foreground"
               >
-                <User className="h-3 w-3 text-violet-400" /> Search Reservations
+                <User className="h-3 w-3 text-foreground" /> Search Reservations
               </button>
               <button
                 type="button"
                 onClick={() => void send("Generate an operational summary report with ADR and RevPAR")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-violet-500 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-foreground hover:text-foreground"
               >
-                <Sparkles className="h-3 w-3 text-violet-400" /> Operational Report
+                <Sparkles className="h-3 w-3 text-foreground" /> Operational Report
               </button>
               <button
                 type="button"
                 onClick={() => void send("List outstanding invoices and payment totals")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-violet-500 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition hover:border-foreground hover:text-foreground"
               >
-                <CheckCircle2 className="h-3 w-3 text-violet-400" /> Invoices Summary
+                <CheckCircle2 className="h-3 w-3 text-foreground" /> Invoices Summary
               </button>
             </div>
 
@@ -333,24 +333,24 @@ export default function AiOperationsPage() {
                   key={idx}
                   className={`flex gap-3 rounded-lg p-3 text-sm ${
                     m.role === "user"
-                      ? "ml-8 border border-violet-500/20 bg-violet-500/10 text-foreground"
+                      ? "ml-8 border border-border bg-muted/60 text-foreground"
                       : "mr-8 border border-border bg-card text-foreground"
                   }`}
                 >
                   <div className="shrink-0">
                     {m.role === "user" ? (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black">
                         <User className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-violet-400">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-foreground">
                         <Bot className="h-4 w-4" />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{m.role === "user" ? "You" : "Lumina Agent"}</span>
+                      <span className="font-semibold text-foreground">{m.role === "user" ? "You" : "Pent House Agent"}</span>
                       {m.approvalId && (
                         <Badge variant="outline" className="border-amber-500/30 text-amber-400">
                           Awaiting Approval
@@ -363,7 +363,7 @@ export default function AiOperationsPage() {
               ))}
               {pending && (
                 <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
-                  <RefreshCw className="h-4 w-4 animate-spin text-violet-400" />
+                  <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
                   <span>Agent analyzing request and coordinating tools...</span>
                 </div>
               )}
@@ -380,13 +380,13 @@ export default function AiOperationsPage() {
                     void send();
                   }
                 }}
-                placeholder="Ask Lumina Agent (e.g. 'Check availability for tomorrow', 'Clean room 102', 'Cancel reservation RES-123')..."
+                placeholder="Ask Pent House Agent (e.g. 'Check availability for tomorrow', 'Clean room 102', 'Cancel reservation RES-123')..."
                 className="min-h-[64px]"
               />
               <Button
                 onClick={() => void send()}
                 disabled={pending || !input.trim()}
-                className="h-auto bg-violet-600 px-6 hover:bg-violet-700"
+                className="h-auto bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 px-6"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -399,7 +399,7 @@ export default function AiOperationsPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Audit & Activity Log</CardTitle>
-              <Link href="/activity-logs" className="text-xs text-violet-400 hover:underline">
+              <Link href="/activity-logs" className="text-xs text-muted-foreground hover:underline">
                 View All
               </Link>
             </div>

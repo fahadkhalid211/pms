@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -342,74 +342,74 @@ export default function AnalyticsPage() {
       {/* Executive Investor KPI Strip                                  */}
       {/* ------------------------------------------------------------- */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Card className="p-3.5 border-black/15 bg-card shadow-xs">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
+          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
             <Receipt className="h-3.5 w-3.5 text-black" /> Y1 Base Revenue
           </div>
-          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
             {fmtGbp(pHighlights.baseYearRevenueGbp)}
           </div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">
+          <div className="text-[10px] text-zinc-600 font-medium mt-0.5">
             Academic 2025/26 @ 95% Occ
           </div>
         </Card>
 
-        <Card className="p-3.5 border-black/15 bg-card shadow-xs">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-            <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" /> Y5 Target Revenue
+        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
+          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
+            <ArrowUpRight className="h-3.5 w-3.5 text-emerald-700" /> Y5 Target Revenue
           </div>
-          <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+          <div className="text-xl md:text-2xl font-black text-emerald-700 mt-1">
             {fmtGbp(pHighlights.yearFiveRevenueGbp)}
           </div>
-          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-0.5">
+          <div className="text-[10px] text-emerald-800 font-bold mt-0.5">
             +{pHighlights.fiveYearRevenueCagrPct}% Annualized CAGR
           </div>
         </Card>
 
-        <Card className="p-3.5 border-black/15 bg-card shadow-xs">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
+          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
             <TrendingUp className="h-3.5 w-3.5 text-black" /> Y1 EBITDA (NOI)
           </div>
-          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
             {fmtGbp(pHighlights.baseYearEbitdaGbp)}
           </div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">
+          <div className="text-[10px] text-zinc-600 font-medium mt-0.5">
             68.8% Base Operating Margin
           </div>
         </Card>
 
-        <Card className="p-3.5 border-emerald-500/30 bg-emerald-500/5 shadow-xs">
-          <div className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
-            <Flame className="h-3.5 w-3.5 text-emerald-600" /> Y5 EBITDA (NOI)
+        <Card className="p-3.5 border-emerald-300 bg-emerald-50 shadow-xs">
+          <div className="text-[11px] font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1">
+            <Flame className="h-3.5 w-3.5 text-emerald-700" /> Y5 EBITDA (NOI)
           </div>
-          <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+          <div className="text-xl md:text-2xl font-black text-emerald-800 mt-1">
             {fmtGbp(pHighlights.yearFiveEbitdaGbp)}
           </div>
-          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">
+          <div className="text-[10px] text-emerald-950 font-black mt-0.5">
             73.4% Target Margin (+4.6%)
           </div>
         </Card>
 
-        <Card className="p-3.5 border-black/15 bg-card shadow-xs">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        <Card className="p-3.5 border-zinc-300 bg-white shadow-xs">
+          <div className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1">
             <PiggyBank className="h-3.5 w-3.5 text-black" /> 5-Yr Asset Equity
           </div>
-          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+          <div className="text-xl md:text-2xl font-black text-zinc-950 mt-1">
             {fmtGbp(pHighlights.terminalValuationGbp)}
           </div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">
+          <div className="text-[10px] text-zinc-700 font-bold mt-0.5">
             +£{Math.round((pHighlights.equityValueCreatedGbp) / 1000000)}M Equity Value Added
           </div>
         </Card>
 
-        <Card className="p-3.5 border-black/15 bg-zinc-950 text-white shadow-xs">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+        <Card className="p-3.5 border-zinc-900 bg-zinc-950 text-white shadow-xs">
+          <div className="text-[11px] font-extrabold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
             <Crown className="h-3.5 w-3.5 text-amber-400" /> 5-Yr Free Cashflow
           </div>
           <div className="text-xl md:text-2xl font-black text-white mt-1">
             {fmtGbp(pHighlights.totalFiveYearFreeCashflowGbp)}
           </div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">
+          <div className="text-[10px] text-zinc-300 font-semibold mt-0.5">
             Cumulative Operating Cash
           </div>
         </Card>
@@ -424,13 +424,13 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("predictive")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "predictive"
-              ? "border-black text-black dark:border-white dark:text-white"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "border-black text-black "
+              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <LineChartIcon className="h-4 w-4" />
           5-Year Predictive Plan & Profits
-          <Badge className="text-[10px] py-0 px-1.5 bg-black text-white dark:bg-white dark:text-black">
+          <Badge className="text-[10px] py-0 px-1.5 bg-black text-white ">
             Forecast
           </Badge>
         </button>
@@ -440,8 +440,8 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("fifty_one")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "fifty_one"
-              ? "border-black text-black dark:border-white dark:text-white"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "border-black text-black "
+              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Bed className="h-4 w-4" />
@@ -453,8 +453,8 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("services")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "services"
-              ? "border-black text-black dark:border-white dark:text-white"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "border-black text-black "
+              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Sparkles className="h-4 w-4" />
@@ -466,8 +466,8 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("portfolio")}
           className={`px-4 py-2.5 font-bold border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
             activeTab === "portfolio"
-              ? "border-black text-black dark:border-white dark:text-white"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "border-black text-black "
+              : "border-transparent text-zinc-700 hover:text-black hover:bg-zinc-100/70"
           }`}
         >
           <Building2 className="h-4 w-4" />
@@ -483,7 +483,7 @@ export default function AnalyticsPage() {
           {/* Visual Graphs Row: 5-Year Revenue & Profit Trajectory + Equity Growth */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Chart 1: 5-Year Revenue & EBITDA Trajectory */}
-            <Card className="border-black/15">
+            <Card className="border-zinc-300">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -508,16 +508,26 @@ export default function AnalyticsPage() {
                         data={fiveYearTrajectoryData}
                         margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                        <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-                        <YAxis tickFormatter={(v) => `£${v}M`} />
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.25} stroke="#d4d4d8" />
+                        <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#18181b", fontWeight: 600 }} />
+                        <YAxis tickFormatter={(v) => `£${v}M`} tick={{ fontSize: 11, fill: "#18181b", fontWeight: 600 }} />
                         <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#09090b",
+                            border: "1px solid #27272a",
+                            borderRadius: "8px",
+                            color: "#ffffff",
+                            fontSize: "12px",
+                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+                          }}
+                          itemStyle={{ color: "#ffffff", fontWeight: 700 }}
+                          labelStyle={{ color: "#e4e4e7", fontWeight: 700 }}
                           formatter={(value: any, name: any) => [
                             `£${Number(value).toFixed(2)}M`,
                             name === "grossRevenueM" ? "Gross Invoiced Revenue" : "EBITDA Net Operating Income",
                           ]}
                         />
-                        <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                        <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px", color: "#18181b", fontWeight: 600 }} />
                         <Bar
                           dataKey="grossRevenueM"
                           name="Gross Revenue (£M)"
@@ -533,7 +543,7 @@ export default function AnalyticsPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                    <div className="h-full flex items-center justify-center text-xs text-zinc-600 font-medium">
                       Rendering forecast chart...
                     </div>
                   )}
@@ -542,19 +552,19 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Chart 2: Asset Equity Valuation Trajectory */}
-            <Card className="border-black/15">
+            <Card className="border-zinc-300">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Landmark className="h-4 w-4 text-black dark:text-white" />
+                      <Landmark className="h-4 w-4 text-black " />
                       Asset Valuation Progression (£M @ 5.25% Cap)
                     </CardTitle>
                     <CardDescription>
                       Implied institutional gross asset value increasing from £78.0M to £108.0M
                     </CardDescription>
                   </div>
-                  <Badge className="bg-black text-white dark:bg-white dark:text-black text-xs font-mono font-bold">
+                  <Badge className="bg-black text-white  text-xs font-mono font-bold">
                     +£30.0M Equity
                   </Badge>
                 </div>
@@ -573,11 +583,23 @@ export default function AnalyticsPage() {
                             <stop offset="95%" stopColor="#18181b" stopOpacity={0.05} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                        <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-                        <YAxis domain={['dataMin - 10', 'dataMax + 10']} tickFormatter={(v) => `£${v}M`} />
-                        <Tooltip formatter={(value: any) => [`£${value}M`, "Asset Capital Value"]} />
-                        <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.25} stroke="#d4d4d8" />
+                        <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#18181b", fontWeight: 600 }} />
+                        <YAxis domain={['dataMin - 10', 'dataMax + 10']} tickFormatter={(v) => `£${v}M`} tick={{ fontSize: 11, fill: "#18181b", fontWeight: 600 }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#09090b",
+                            border: "1px solid #27272a",
+                            borderRadius: "8px",
+                            color: "#ffffff",
+                            fontSize: "12px",
+                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+                          }}
+                          itemStyle={{ color: "#ffffff", fontWeight: 700 }}
+                          labelStyle={{ color: "#e4e4e7", fontWeight: 700 }}
+                          formatter={(value: any) => [`£${value}M`, "Asset Capital Value"]}
+                        />
+                        <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px", color: "#18181b", fontWeight: 600 }} />
                         <Area
                           type="monotone"
                           dataKey="valuationM"
@@ -600,7 +622,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Comprehensive 5-Year Financial Forecast Table */}
-          <Card className="border-black/15">
+          <Card className="border-zinc-300">
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
@@ -622,154 +644,154 @@ export default function AnalyticsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-2.5 px-3">Financial Metric (£ GBP)</th>
+                      <th className="py-3 px-3">Financial Metric (£ GBP)</th>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <th key={y.year} className="py-2.5 px-3 text-right">
+                        <th key={y.year} className="py-3 px-3 text-right">
                           {y.academicYear}
                         </th>
                       ))}
-                      <th className="py-2.5 px-3 text-right">5-Year Growth</th>
+                      <th className="py-3 px-3 text-right">5-Year Growth</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {/* Operating Metrics */}
-                    <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 font-semibold">
-                      <td className="py-2 px-3 text-foreground" colSpan={7}>
+                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
                         1. Operating Metrics & Keys
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Portfolio Keys</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Portfolio Keys</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {y.totalKeys} keys
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-medium">120 Units</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-zinc-900">120 Units</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Occupancy Rate</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Occupancy Rate</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-medium text-foreground">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-zinc-950">
                           {y.occupancyPct.toFixed(1)}%
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-600 font-bold">+3.5%</td>
+                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-bold">+3.5%</td>
                     </tr>
 
                     {/* Revenue Breakdown */}
-                    <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 font-semibold">
-                      <td className="py-2 px-3 text-foreground" colSpan={7}>
+                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
                         2. Revenue Streams Breakdown
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Core Academic Contract Rent</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Core Academic Contract Rent</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {fmtGbp(y.baseRentRevenue)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-600">+18.7%</td>
+                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-bold">+18.7%</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground flex items-center gap-1.5">
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
                         Superior Studios Activation (2 Keys)
-                        <Badge variant="outline" className="text-[9px] py-0 px-1">Value-Add</Badge>
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Value-Add</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {y.superiorStudioRevenue > 0 ? fmtGbp(y.superiorStudioRevenue) : "£0 (Sold Out)"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">+£145k/yr</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£145k/yr</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground flex items-center gap-1.5">
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
                         Summer Void Monetization (Jul–Aug)
-                        <Badge variant="outline" className="text-[9px] py-0 px-1">Yield Lever</Badge>
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">Yield Lever</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {y.summerVoidMonetization > 0 ? fmtGbp(y.summerVoidMonetization) : "£0 (Unmonetized)"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">+£275k/yr</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£275k/yr</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground flex items-center gap-1.5">
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium flex items-center gap-1.5">
                         Ancillary Services & Upsells
-                        <Badge variant="outline" className="text-[9px] py-0 px-1">High-Margin</Badge>
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-zinc-400 bg-zinc-100 text-zinc-900 font-bold">High-Margin</Badge>
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {y.ancillaryServicesIncome > 0 ? fmtGbp(y.ancillaryServicesIncome) : "£0"}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">+£240k/yr</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+£240k/yr</td>
                     </tr>
-                    <tr className="bg-zinc-100/70 dark:bg-zinc-800/40 font-bold">
-                      <td className="py-2.5 px-3 text-foreground">Total Invoiced Gross Revenue</td>
+                    <tr className="bg-zinc-200/80 font-bold border-y border-zinc-300">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black">Total Invoiced Gross Revenue</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2.5 px-3 text-right font-mono text-black dark:text-white font-extrabold">
+                        <td key={y.year} className="py-2.5 px-3 text-right font-mono text-zinc-950 font-black">
                           {fmtGbp(y.grossRevenue)}
                         </td>
                       ))}
-                      <td className="py-2.5 px-3 text-right font-mono text-emerald-600 font-black">+29.8%</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-emerald-700 font-black">+29.8%</td>
                     </tr>
 
                     {/* Cost Structure */}
-                    <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 font-semibold">
-                      <td className="py-2 px-3 text-foreground" colSpan={7}>
+                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
                         3. Operating Expenses Structure
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Direct Services OpEx (£132/wk base)</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Direct Services OpEx (£132/wk base)</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono text-muted-foreground">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono text-zinc-800 font-medium">
                           {fmtGbp(y.directOperatingCosts)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono">+13.6% (Inflation)</td>
+                      <td className="py-2 px-3 text-right font-mono text-zinc-800 font-semibold">+13.6% (Inflation)</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Revenue-Linked Costs & Agency Fees</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Revenue-Linked Costs & Agency Fees</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono text-muted-foreground">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono text-zinc-800 font-medium">
                           {fmtGbp(y.revenueLinkedCosts)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono text-emerald-600">-3.0% Take Rate</td>
+                      <td className="py-2 px-3 text-right font-mono text-emerald-700 font-semibold">-3.0% Take Rate</td>
                     </tr>
-                    <tr className="font-semibold text-muted-foreground">
+                    <tr className="font-bold text-zinc-900 bg-zinc-50 border-t border-zinc-300">
                       <td className="py-2 px-3">Total Operating Expenses</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-zinc-900">
                           {fmtGbp(y.totalOperatingCosts)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono">+10.7%</td>
+                      <td className="py-2 px-3 text-right font-mono text-zinc-900 font-bold">+10.7%</td>
                     </tr>
 
                     {/* EBITDA / Net Operating Income */}
-                    <tr className="bg-emerald-500/10 font-bold border-t-2 border-emerald-500/20 text-emerald-950 dark:text-emerald-200">
-                      <td className="py-3 px-3 text-emerald-900 dark:text-emerald-300 font-extrabold flex items-center gap-1.5">
-                        <Flame className="h-4 w-4 text-emerald-600" />
+                    <tr className="bg-emerald-100/90 font-black border-y-2 border-emerald-400 text-emerald-950">
+                      <td className="py-3 px-3 text-emerald-950 font-black flex items-center gap-1.5">
+                        <Flame className="h-4 w-4 text-emerald-700" />
                         EBITDA / Net Operating Income (NOI)
                       </td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-3 px-3 text-right font-mono text-emerald-700 dark:text-emerald-400 font-black text-sm">
+                        <td key={y.year} className="py-3 px-3 text-right font-mono text-emerald-950 font-black text-sm">
                           {fmtGbp(y.ebitda)}
                         </td>
                       ))}
-                      <td className="py-3 px-3 text-right font-mono text-emerald-700 dark:text-emerald-400 font-black">
+                      <td className="py-3 px-3 text-right font-mono text-emerald-950 font-black">
                         +{pHighlights.fiveYearEbitdaCagrPct}% CAGR
                       </td>
                     </tr>
-                    <tr className="bg-emerald-500/5 font-semibold text-emerald-800 dark:text-emerald-400">
+                    <tr className="bg-emerald-50 font-bold text-emerald-950 border-b border-emerald-200">
                       <td className="py-2 px-3 pl-6">EBITDA Margin (%)</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
                         <td key={y.year} className="py-2 px-3 text-right font-mono font-bold">
@@ -780,31 +802,31 @@ export default function AnalyticsPage() {
                     </tr>
 
                     {/* Valuation & Capital Performance */}
-                    <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 font-semibold">
-                      <td className="py-2 px-3 text-foreground" colSpan={7}>
+                    <tr className="bg-zinc-100 font-bold border-y border-zinc-200">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black" colSpan={7}>
                         4. Institutional Valuation & Capital Returns
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Annualized Revenue per Key</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Annualized Revenue per Key</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-medium">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-semibold text-zinc-900">
                           {fmtGbp(y.annualizedRevPerKey)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">+22.2%</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+22.2%</td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 pl-6 text-muted-foreground">Annualized EBITDA per Key</td>
+                      <td className="py-2 px-3 pl-6 text-zinc-800 font-medium">Annualized EBITDA per Key</td>
                       {predictiveModel.fiveYearForecast.map((y) => (
-                        <td key={y.year} className="py-2 px-3 text-right font-mono font-medium text-emerald-600">
+                        <td key={y.year} className="py-2 px-3 text-right font-mono font-bold text-emerald-700">
                           {fmtGbp(y.annualizedEbitdaPerKey)}
                         </td>
                       ))}
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">+30.4%</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-700">+30.4%</td>
                     </tr>
-                    <tr className="bg-black text-white font-bold">
-                      <td className="py-3 px-3 text-white font-extrabold flex items-center gap-1.5">
+                    <tr className="bg-black text-white font-black">
+                      <td className="py-3 px-3 text-white font-black flex items-center gap-1.5">
                         <Crown className="h-4 w-4 text-amber-400" />
                         Implied Gross Asset Valuation (@ 5.25% Cap)
                       </td>
@@ -813,7 +835,7 @@ export default function AnalyticsPage() {
                           {fmtGbp(y.assetValuationAt525Cap)}
                         </td>
                       ))}
-                      <td className="py-3 px-3 text-right font-mono text-amber-400 font-black">
+                      <td className="py-3 px-3 text-right font-mono text-amber-300 font-black">
                         +{fmtGbp(pHighlights.equityValueCreatedGbp)} Equity
                       </td>
                     </tr>
@@ -828,28 +850,28 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-black dark:text-white" />
+                  <Zap className="h-4 w-4 text-black " />
                   Strategic Value-Add Levers & Profit Catalysts
                 </h3>
                 <p className="text-xs text-muted-foreground">
                   Concrete operational actions that drive the predictive margin expansion from 68.8% to 73.4%
                 </p>
               </div>
-              <Badge className="bg-black text-white dark:bg-white dark:text-black text-xs font-mono">
+              <Badge className="bg-black text-white  text-xs font-mono">
                 +£943,000 Total Annual EBITDA Uplift
               </Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {predictiveModel.valueAddLevers.map((lever) => (
-                <Card key={lever.title} className="p-4 border-black/15 flex flex-col justify-between hover:shadow-md transition">
+                <Card key={lever.title} className="p-4 border-zinc-300 flex flex-col justify-between hover:shadow-md transition">
                   <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <Badge variant="outline" className="text-[10px] font-semibold">
                         {lever.category}
                       </Badge>
                       <div className="text-right">
-                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                        <span className="text-sm font-black text-emerald-600 ">
                           +{fmtGbp(lever.annualImpactGbp)}/yr
                         </span>
                         <div className="text-[9px] text-muted-foreground font-mono">
@@ -857,17 +879,17 @@ export default function AnalyticsPage() {
                         </div>
                       </div>
                     </div>
-                    <h4 className="text-xs font-extrabold text-foreground leading-snug">
+                    <h4 className="text-xs font-black text-zinc-950 leading-snug">
                       {lever.title}
                     </h4>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    <p className="text-[11px] text-zinc-700 leading-relaxed font-normal">
                       {lever.description}
                     </p>
                   </div>
 
-                  <div className="pt-3 mt-3 border-t text-[10px] text-muted-foreground flex items-center justify-between font-mono">
-                    <span>Timeline:</span>
-                    <span className="font-semibold text-foreground">{lever.implementationTimeline}</span>
+                  <div className="pt-3 mt-3 border-t border-zinc-200 text-[10px] text-zinc-600 flex items-center justify-between font-mono">
+                    <span className="font-semibold text-zinc-700">Timeline:</span>
+                    <span className="font-black text-zinc-950">{lever.implementationTimeline}</span>
                   </div>
                 </Card>
               ))}
@@ -882,53 +904,53 @@ export default function AnalyticsPage() {
       {activeTab === "fifty_one" && (
         <div className="space-y-6">
           {/* Executive Asset Summary */}
-          <Card className="border-black/15 bg-zinc-50 dark:bg-zinc-900/50">
+          <Card className="border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
+                  <CardTitle className="text-lg font-black text-zinc-950 flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-black" />
                     Fifty One London — 120 Keys Baseline Asset Underwriting
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs text-zinc-700 font-medium">
                     All-inclusive long-let student living asset · 51-55 Cromwell Road, South Kensington SW7
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-black text-white dark:bg-white dark:text-black text-xs font-mono font-bold">
+                  <Badge className="bg-black text-white text-xs font-mono font-bold">
                     120 Keys Portfolio
                   </Badge>
-                  <Badge variant="outline" className="text-xs font-mono font-semibold">
+                  <Badge variant="outline" className="text-xs font-mono font-bold border-zinc-400 bg-zinc-100 text-zinc-900">
                     95% Base Occupancy
                   </Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 border-t text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 border-t border-zinc-200 text-sm">
                 <div>
-                  <span className="text-xs text-muted-foreground">Lettable Priced Keys</span>
-                  <div className="font-extrabold text-foreground text-base">
-                    118 Keys <span className="text-xs text-muted-foreground font-normal">(+2 sold-out)</span>
+                  <span className="text-xs text-zinc-700 font-semibold">Lettable Priced Keys</span>
+                  <div className="font-black text-zinc-950 text-base">
+                    118 Keys <span className="text-xs text-zinc-600 font-medium">(+2 sold-out)</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-muted-foreground">Academic Year Rent</span>
-                  <div className="font-extrabold text-black dark:text-white text-base">
+                  <span className="text-xs text-zinc-700 font-semibold">Academic Year Rent</span>
+                  <div className="font-black text-zinc-950 text-base">
                     {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-muted-foreground">Direct Service OpEx</span>
-                  <div className="font-extrabold text-foreground text-base">
+                  <span className="text-xs text-zinc-700 font-semibold">Direct Service OpEx</span>
+                  <div className="font-black text-zinc-950 text-base">
                     {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-muted-foreground">Net Operating Income (NOI)</span>
-                  <div className="font-extrabold text-emerald-600 text-base">
+                  <span className="text-xs text-zinc-700 font-semibold">Net Operating Income (NOI)</span>
+                  <div className="font-black text-emerald-700 text-base">
                     {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}{" "}
-                    <span className="text-xs font-semibold">({fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%)</span>
+                    <span className="text-xs font-bold">({fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%)</span>
                   </div>
                 </div>
               </div>
@@ -936,15 +958,15 @@ export default function AnalyticsPage() {
           </Card>
 
           {/* Rooms Rates & Inventory Detail Table */}
-          <Card className="border-black/15">
+          <Card className="border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <CardTitle className="text-base flex items-center gap-2">
+                  <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                     <Bed className="h-4 w-4 text-black" />
                     Room Tiers, Dimensions & Contract Pricing
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs text-zinc-700 font-medium">
                     All 8 priced room types and unpriced Superior Studios from source Checklist fifty one.xlsx
                   </CardDescription>
                 </div>
@@ -953,77 +975,77 @@ export default function AnalyticsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
-                      <th className="py-2.5 px-3">Room Type</th>
-                      <th className="py-2.5 px-2 text-center">Keys</th>
-                      <th className="py-2.5 px-3 text-right">44-Wk Rate</th>
-                      <th className="py-2.5 px-3 text-right">51-Wk Rate</th>
-                      <th className="py-2.5 px-3 text-right">Weighted/Key</th>
-                      <th className="py-2.5 px-3 text-right">Full Rev (100%)</th>
-                      <th className="py-2.5 px-3 text-right">Model Rev (95%)</th>
-                      <th className="py-2.5 px-2 text-center">Share</th>
-                      <th className="py-2.5 px-3">Size</th>
-                      <th className="py-2.5 px-3">Highlights</th>
+                      <th className="py-3 px-3">Room Type</th>
+                      <th className="py-3 px-2 text-center">Keys</th>
+                      <th className="py-3 px-3 text-right">44-Wk Rate</th>
+                      <th className="py-3 px-3 text-right">51-Wk Rate</th>
+                      <th className="py-3 px-3 text-right">Weighted/Key</th>
+                      <th className="py-3 px-3 text-right">Full Rev (100%)</th>
+                      <th className="py-3 px-3 text-right">Model Rev (95%)</th>
+                      <th className="py-3 px-2 text-center">Share</th>
+                      <th className="py-3 px-3">Size</th>
+                      <th className="py-3 px-3">Highlights</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {fiftyOneModel.roomTypes.map((rt) => (
-                      <tr key={rt.name} className={`hover:bg-muted/30 ${rt.isSoldOut ? "opacity-60 bg-muted/20" : ""}`}>
-                        <td className="py-2.5 px-3 font-semibold text-foreground flex items-center gap-1.5">
+                      <tr key={rt.name} className={`hover:bg-zinc-50 ${rt.isSoldOut ? "opacity-60 bg-zinc-100/50" : ""}`}>
+                        <td className="py-2.5 px-3 font-bold text-zinc-950 flex items-center gap-1.5">
                           {rt.name}
                           {rt.view && (
-                            <Badge variant="outline" className="text-[9px] py-0 px-1 bg-sky-500/10 text-sky-600 border-sky-500/20">
+                            <Badge variant="outline" className="text-[9px] py-0 px-1 bg-sky-50 text-sky-800 border-sky-300 font-bold">
                               Museum View
                             </Badge>
                           )}
                           {rt.isSoldOut && (
-                            <Badge variant="destructive" className="text-[9px] py-0 px-1">
+                            <Badge variant="destructive" className="text-[9px] py-0 px-1 font-bold">
                               SOLD OUT
                             </Badge>
                           )}
                         </td>
-                        <td className="py-2.5 px-2 text-center font-mono font-bold">{rt.keys}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-zinc-950">{rt.keys}</td>
+                        <td className="py-2.5 px-3 text-right font-mono font-medium text-zinc-800">
                           {rt.rate44Week > 0 ? `£${rt.rate44Week}/wk` : "—"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-zinc-950">
                           {rt.rate51Week > 0 ? `£${rt.rate51Week}/wk` : "—"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-medium">
+                        <td className="py-2.5 px-3 text-right font-mono font-semibold text-zinc-900">
                           {rt.weightedAnnualRentPerKey > 0 ? fmtGbp(rt.weightedAnnualRentPerKey) : "—"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                        <td className="py-2.5 px-3 text-right font-mono text-zinc-700 font-medium">
                           {rt.fullOccupancyRevenue > 0 ? fmtGbp(rt.fullOccupancyRevenue) : "—"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-black text-foreground">
+                        <td className="py-2.5 px-3 text-right font-mono font-black text-zinc-950">
                           {rt.modelOccupancyRevenue > 0 ? fmtGbp(rt.modelOccupancyRevenue) : "£0"}
                         </td>
-                        <td className="py-2.5 px-2 text-center font-mono">
+                        <td className="py-2.5 px-2 text-center font-mono font-semibold text-zinc-800">
                           {rt.shareOfRevenuePct > 0 ? `${rt.shareOfRevenuePct.toFixed(1)}%` : "0%"}
                         </td>
-                        <td className="py-2.5 px-3 text-muted-foreground">{rt.sizeM2}</td>
-                        <td className="py-2.5 px-3 text-muted-foreground max-w-xs truncate" title={rt.description}>
+                        <td className="py-2.5 px-3 text-zinc-800 font-semibold">{rt.sizeM2}</td>
+                        <td className="py-2.5 px-3 text-zinc-700 font-medium max-w-xs truncate" title={rt.description}>
                           {rt.description}
                         </td>
                       </tr>
                     ))}
-                    <tr className="bg-zinc-100 dark:bg-zinc-800 font-bold border-t-2">
-                      <td className="py-3 px-3 text-foreground">Total (120 Keys Portfolio)</td>
+                    <tr className="bg-zinc-200/90 font-black border-t-2 border-zinc-400 text-zinc-950">
+                      <td className="py-3 px-3 text-zinc-950">Total (120 Keys Portfolio)</td>
                       <td className="py-3 px-2 text-center font-mono">{fiftyOneModel.assumptions.totalKeys}</td>
                       <td className="py-3 px-3 text-right font-mono">—</td>
                       <td className="py-3 px-3 text-right font-mono">—</td>
                       <td className="py-3 px-3 text-right font-mono">
                         {fmtGbp(fiftyOneModel.financialSummary.annualisedRevenuePerKey)}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono text-muted-foreground">
+                      <td className="py-3 px-3 text-right font-mono text-zinc-700 font-semibold">
                         {fmtGbp(fiftyOneModel.financialSummary.grossRevenueFullOccupancy)}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono text-black dark:text-white text-sm font-black">
+                      <td className="py-3 px-3 text-right font-mono text-black text-sm font-black">
                         {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
                       </td>
-                      <td className="py-3 px-2 text-center font-mono">100.0%</td>
-                      <td className="py-3 px-3" colSpan={2}>
+                      <td className="py-3 px-2 text-center font-mono font-bold">100.0%</td>
+                      <td className="py-3 px-3 font-semibold text-zinc-800" colSpan={2}>
                         118 priced units · 95% occupancy baseline
                       </td>
                     </tr>
@@ -1035,19 +1057,19 @@ export default function AnalyticsPage() {
 
           {/* Payment Schedule & Cash Inflows Card */}
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-black/15">
+            <Card className="border-zinc-300 bg-white shadow-xs">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-emerald-600" />
+                <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-emerald-700" />
                   Instalment Payment Schedule (Cash Inflows)
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs text-zinc-700 font-medium">
                   Contract collection dates based on source 4-instalment schedule
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-2.5 px-3">Instalment</th>
                       <th className="py-2.5 px-3">Payment Date</th>
@@ -1056,20 +1078,20 @@ export default function AnalyticsPage() {
                       <th className="py-2.5 px-3 text-right">Cumulative</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {fiftyOneModel.paymentSchedule.map((p) => (
-                      <tr key={p.instalment} className="hover:bg-muted/30">
-                        <td className="py-2.5 px-3 font-semibold text-foreground">{p.instalment}</td>
-                        <td className="py-2.5 px-3 font-mono">{p.paymentDate}</td>
-                        <td className="py-2.5 px-2 text-center font-mono font-bold text-black dark:text-white">
+                      <tr key={p.instalment} className="hover:bg-zinc-50">
+                        <td className="py-2.5 px-3 font-bold text-zinc-950">{p.instalment}</td>
+                        <td className="py-2.5 px-3 font-mono font-medium text-zinc-800">{p.paymentDate}</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-black">
                           {(p.share * 100).toFixed(0)}%
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                        <td className="py-2.5 px-3 text-right font-mono font-black text-zinc-950">
                           {fmtGbp(p.totalInflow)}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-emerald-600 font-semibold">
+                        <td className="py-2.5 px-3 text-right font-mono text-emerald-700 font-black">
                           {fmtGbp(p.cumulativeInflow)}{" "}
-                          <span className="text-[10px] text-muted-foreground font-normal">({p.cumulativePct}%)</span>
+                          <span className="text-[10px] text-zinc-600 font-bold">({p.cumulativePct}%)</span>
                         </td>
                       </tr>
                     ))}
@@ -1078,19 +1100,19 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-black/15">
+            <Card className="border-zinc-300 bg-white shadow-xs">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                   <Zap className="h-4 w-4 text-black" />
                   Direct Operating Services (£132 / key / week)
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs text-zinc-700 font-medium">
                   Accrues over 51 weeks on all leased units (£754,657 direct total)
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-2.5 px-3">Cost Line</th>
                       <th className="py-2.5 px-3 text-right">Rate / Key / Wk</th>
@@ -1098,30 +1120,30 @@ export default function AnalyticsPage() {
                       <th className="py-2.5 px-3">Category</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {FIFTY_ONE_DIRECT_COSTS.map((dc) => {
                       const annualCost =
                         dc.costPerKeyWeek * fiftyOneModel.assumptions.leasedKeys * fiftyOneModel.assumptions.contract51Weeks;
                       return (
-                        <tr key={dc.id} className="hover:bg-muted/30">
-                          <td className="py-2 px-3 font-medium text-foreground">{dc.name}</td>
-                          <td className="py-2 px-3 text-right font-mono font-bold">£{dc.costPerKeyWeek}</td>
-                          <td className="py-2 px-3 text-right font-mono font-semibold text-muted-foreground">
+                        <tr key={dc.id} className="hover:bg-zinc-50">
+                          <td className="py-2 px-3 font-bold text-zinc-950">{dc.name}</td>
+                          <td className="py-2 px-3 text-right font-mono font-bold text-zinc-900">£{dc.costPerKeyWeek}</td>
+                          <td className="py-2 px-3 text-right font-mono font-bold text-zinc-800">
                             {fmtGbp(annualCost)}
                           </td>
-                          <td className="py-2 px-3 text-[11px] text-muted-foreground">{dc.notes}</td>
+                          <td className="py-2 px-3 text-[11px] text-zinc-600 font-medium">{dc.notes}</td>
                         </tr>
                       );
                     })}
-                    <tr className="bg-zinc-100 dark:bg-zinc-800 font-bold border-t">
-                      <td className="py-2.5 px-3 text-foreground">Total Direct Services</td>
-                      <td className="py-2.5 px-3 text-right font-mono text-black dark:text-white font-bold">
+                    <tr className="bg-zinc-200/90 font-black border-t-2 border-zinc-400 text-zinc-950">
+                      <td className="py-2.5 px-3 text-zinc-950 font-black">Total Direct Services</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-black font-black">
                         £{fiftyOneModel.assumptions.weeklyDirectCostPerKey} / wk
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-black dark:text-white font-bold">
+                      <td className="py-2.5 px-3 text-right font-mono text-black font-black">
                         {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
                       </td>
-                      <td className="py-2.5 px-3 text-xs text-muted-foreground">9 service lines</td>
+                      <td className="py-2.5 px-3 text-xs text-zinc-800 font-bold">9 service lines</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1136,15 +1158,15 @@ export default function AnalyticsPage() {
       {/* ============================================================= */}
       {activeTab === "services" && (
         <div className="space-y-6">
-          <Card className="border-black/15">
+          <Card className="border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-black dark:text-white" />
+                  <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-black " />
                     30 All-Inclusive Building Services & Cost Mapping
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs text-zinc-700 font-medium">
                     Complete mapping from source Services.pdf to P&L operating cost lines
                   </CardDescription>
                 </div>
@@ -1154,7 +1176,9 @@ export default function AnalyticsPage() {
                     size="sm"
                     variant={serviceFilter === "all" ? "default" : "outline"}
                     onClick={() => setServiceFilter("all")}
-                    className="text-xs h-7"
+                    className={`text-xs h-7 font-bold ${
+                      serviceFilter === "all" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
+                    }`}
                   >
                     All (30)
                   </Button>
@@ -1162,7 +1186,9 @@ export default function AnalyticsPage() {
                     size="sm"
                     variant={serviceFilter === "all_inclusive" ? "default" : "outline"}
                     onClick={() => setServiceFilter("all_inclusive")}
-                    className="text-xs h-7"
+                    className={`text-xs h-7 font-bold ${
+                      serviceFilter === "all_inclusive" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
+                    }`}
                   >
                     Included in OpEx (21)
                   </Button>
@@ -1170,7 +1196,9 @@ export default function AnalyticsPage() {
                     size="sm"
                     variant={serviceFilter === "partner_perk" ? "default" : "outline"}
                     onClick={() => setServiceFilter("partner_perk")}
-                    className="text-xs h-7"
+                    className={`text-xs h-7 font-bold ${
+                      serviceFilter === "partner_perk" ? "bg-black text-white" : "border-zinc-300 text-zinc-800 hover:bg-zinc-100"
+                    }`}
                   >
                     Partner Perks (9)
                   </Button>
@@ -1180,7 +1208,7 @@ export default function AnalyticsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-2.5 px-3 text-center">#</th>
                       <th className="py-2.5 px-4">Service Name</th>
@@ -1189,29 +1217,29 @@ export default function AnalyticsPage() {
                       <th className="py-2.5 px-3 text-center">In OpEx?</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {filteredServices.map((s) => (
-                      <tr key={s.no} className="hover:bg-muted/30">
-                        <td className="py-2.5 px-3 text-center font-mono text-muted-foreground">{s.no}</td>
-                        <td className="py-2.5 px-4 font-semibold text-foreground flex items-center gap-2">
+                      <tr key={s.no} className="hover:bg-zinc-50">
+                        <td className="py-2.5 px-3 text-center font-mono font-bold text-zinc-700">{s.no}</td>
+                        <td className="py-2.5 px-4 font-bold text-zinc-950 flex items-center gap-2">
                           {s.name}
                         </td>
                         <td className="py-2.5 px-3">
                           <Badge
                             variant={s.extraFee.toLowerCase().includes("free") ? "outline" : "secondary"}
-                            className="text-[10px] py-0"
+                            className="text-[10px] py-0 border-zinc-400 font-bold"
                           >
                             {s.extraFee}
                           </Badge>
                         </td>
-                        <td className="py-2.5 px-4 text-muted-foreground font-mono">{s.costLine}</td>
+                        <td className="py-2.5 px-4 text-zinc-800 font-semibold font-mono">{s.costLine}</td>
                         <td className="py-2.5 px-3 text-center">
                           {s.includedInOpEx ? (
-                            <Badge className="bg-black text-white dark:bg-white dark:text-black text-[9px] py-0">
+                            <Badge className="bg-black text-white text-[9px] py-0 font-bold">
                               Yes
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground text-xs">—</span>
+                            <span className="text-zinc-400 text-xs font-bold">—</span>
                           )}
                         </td>
                       </tr>
@@ -1229,20 +1257,20 @@ export default function AnalyticsPage() {
       {/* ============================================================= */}
       {activeTab === "portfolio" && (
         <div className="space-y-6">
-          <Card className="border-black/15">
+          <Card className="border-zinc-300 bg-white shadow-xs">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base font-black text-zinc-950 flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-black" />
                 Audited 12-Property Serviced Apartment Portfolio Performance
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs text-zinc-700 font-medium">
                 Short-stay operating portfolio across London & Europe with detailed property-level revenue, rent, and owner distributions
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-zinc-100 dark:bg-zinc-900 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
+                  <thead className="bg-zinc-100 border-y border-zinc-300 text-zinc-950 uppercase text-[11px] tracking-wider font-black">
                     <tr>
                       <th className="py-2.5 px-4">Property</th>
                       <th className="py-2.5 px-2 text-center">Units</th>
@@ -1256,29 +1284,29 @@ export default function AnalyticsPage() {
                       <th className="py-2.5 px-2 text-center">ALOS</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-zinc-200">
                     {portfolioData?.properties.map((p) => (
-                      <tr key={p.id} className="hover:bg-muted/30">
-                        <td className="py-2.5 px-4 font-semibold text-foreground">
-                          {p.name} <span className="text-[10px] text-muted-foreground font-normal font-mono">({p.code})</span>
+                      <tr key={p.id} className="hover:bg-zinc-50">
+                        <td className="py-2.5 px-4 font-bold text-zinc-950">
+                          {p.name} <span className="text-[10px] text-zinc-600 font-semibold font-mono">({p.code})</span>
                         </td>
-                        <td className="py-2.5 px-2 text-center font-mono">{p.units}</td>
-                        <td className="py-2.5 px-2 text-center font-mono">{p.bookings}</td>
-                        <td className="py-2.5 px-2 text-center font-mono">{p.nights}</td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-zinc-900">{p.units}</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-zinc-900">{p.bookings}</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-zinc-900">{p.nights}</td>
+                        <td className="py-2.5 px-3 text-right font-mono font-black text-zinc-950">
                           £{p.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                        <td className="py-2.5 px-3 text-right font-mono font-medium text-zinc-700">
                           £{p.rent.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-amber-600">
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-amber-700">
                           £{p.agencyCommission.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-600">
+                        <td className="py-2.5 px-3 text-right font-mono font-black text-emerald-700">
                           £{p.ownerBalance.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono">£{p.adr.toFixed(2)}</td>
-                        <td className="py-2.5 px-2 text-center font-mono">{p.alos} n</td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-zinc-900">£{p.adr.toFixed(2)}</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-semibold text-zinc-800">{p.alos} n</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1291,3 +1319,4 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+

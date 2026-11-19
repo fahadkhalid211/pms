@@ -475,9 +475,9 @@ export default function ReportsPage() {
 
               <div className="space-y-0.5">
                 <div className="text-muted-foreground flex items-center gap-1">
-                  <PiggyBank className="h-3 w-3 text-violet-600" /> Agency Commission
+                  <PiggyBank className="h-3 w-3 text-foreground" /> Agency Commission
                 </div>
-                <div className="text-lg font-bold text-violet-600">
+                <div className="text-lg font-bold text-foreground">
                   £153,037.29
                 </div>
                 <div className="text-[10px] text-muted-foreground">+ €952.40 EUR (54.2%)</div>
@@ -543,7 +543,7 @@ export default function ReportsPage() {
               <CardContent className="p-4 space-y-2">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Tourism & Municipal Taxes</span>
-                  <Percent className="h-4 w-4 text-violet-600" />
+                  <Percent className="h-4 w-4 text-foreground" />
                 </div>
                 <div className="text-2xl font-bold text-foreground">
                   £28,996.19
@@ -588,15 +588,15 @@ export default function ReportsPage() {
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-border/60 text-muted-foreground bg-muted/40">
-                      <th className="py-2.5 px-3 font-semibold">Month</th>
-                      <th className="py-2.5 px-3 font-semibold">Bookings</th>
-                      <th className="py-2.5 px-3 font-semibold">Sold Nights</th>
-                      <th className="py-2.5 px-3 font-semibold">Gross Revenue</th>
-                      <th className="py-2.5 px-3 font-semibold">Collections</th>
-                      <th className="py-2.5 px-3 font-semibold">ADR (GBP)</th>
-                      <th className="py-2.5 px-3 font-semibold">Settlement %</th>
+                  <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 uppercase text-[11px] font-black">
+                    <tr>
+                      <th className="py-3 px-3">Month</th>
+                      <th className="py-3 px-3">Bookings</th>
+                      <th className="py-3 px-3">Sold Nights</th>
+                      <th className="py-3 px-3">Gross Revenue</th>
+                      <th className="py-3 px-3">Collections</th>
+                      <th className="py-3 px-3">ADR (GBP)</th>
+                      <th className="py-3 px-3">Settlement %</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40 font-mono">
@@ -653,19 +653,19 @@ export default function ReportsPage() {
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-border/60 text-muted-foreground bg-muted/40">
-                    <th className="py-2.5 px-3 font-semibold">Property</th>
-                    <th className="py-2.5 px-3 font-semibold">City</th>
-                    <th className="py-2.5 px-3 font-semibold">Suites</th>
-                    <th className="py-2.5 px-3 font-semibold">Bookings</th>
-                    <th className="py-2.5 px-3 font-semibold">Sold Nights</th>
-                    <th className="py-2.5 px-3 font-semibold">Gross Total</th>
-                    <th className="py-2.5 px-3 font-semibold">Collected</th>
-                    <th className="py-2.5 px-3 font-semibold">Agency Due</th>
-                    <th className="py-2.5 px-3 font-semibold">Owner Net</th>
-                    <th className="py-2.5 px-3 font-semibold">ADR</th>
-                    <th className="py-2.5 px-3 font-semibold">ALOS</th>
+                <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 uppercase text-[11px] font-black">
+                  <tr>
+                    <th className="py-3 px-3">Property</th>
+                    <th className="py-3 px-3">City</th>
+                    <th className="py-3 px-3">Suites</th>
+                    <th className="py-3 px-3">Bookings</th>
+                    <th className="py-3 px-3">Sold Nights</th>
+                    <th className="py-3 px-3">Gross Total</th>
+                    <th className="py-3 px-3">Collected</th>
+                    <th className="py-3 px-3">Agency Due</th>
+                    <th className="py-3 px-3">Owner Net</th>
+                    <th className="py-3 px-3">ADR</th>
+                    <th className="py-3 px-3">ALOS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40 font-mono">
@@ -683,7 +683,7 @@ export default function ReportsPage() {
                         <td className="py-2.5 px-3 font-semibold">{p.nights}</td>
                         <td className="py-2.5 px-3 font-bold text-foreground">{sym}{p.grossRevenue.toFixed(2)}</td>
                         <td className="py-2.5 px-3 text-emerald-600 font-semibold">{sym}{p.paid.toFixed(2)}</td>
-                        <td className="py-2.5 px-3 text-violet-600 font-semibold">{sym}{p.agencyCommission.toFixed(2)}</td>
+                        <td className="py-2.5 px-3 text-foreground font-semibold">{sym}{p.agencyCommission.toFixed(2)}</td>
                         <td className="py-2.5 px-3 text-primary font-semibold">{sym}{p.ownerBalance.toFixed(2)}</td>
                         <td className="py-2.5 px-3">{sym}{p.adr.toFixed(2)}</td>
                         <td className="py-2.5 px-3">{p.alos}d</td>
@@ -821,14 +821,14 @@ export default function ReportsPage() {
             <CardContent>
               <div className="overflow-x-auto max-h-[500px]">
                 <table className="w-full text-left text-xs">
-                  <thead className="sticky top-0 bg-card z-10">
-                    <tr className="border-b border-border/60 text-muted-foreground bg-muted/40">
-                      <th className="py-2.5 px-3 font-semibold">Date</th>
-                      <th className="py-2.5 px-3 font-semibold">Sold Nights</th>
-                      <th className="py-2.5 px-3 font-semibold">Occupancy %</th>
-                      <th className="py-2.5 px-3 font-semibold">Room Revenue</th>
-                      <th className="py-2.5 px-3 font-semibold">ADR</th>
-                      <th className="py-2.5 px-3 font-semibold">RevPAR</th>
+                  <thead className="sticky top-0 z-10 bg-zinc-100 border-b border-zinc-300 text-zinc-950 uppercase text-[11px] font-black">
+                    <tr>
+                      <th className="py-3 px-3">Date</th>
+                      <th className="py-3 px-3">Sold Nights</th>
+                      <th className="py-3 px-3">Occupancy %</th>
+                      <th className="py-3 px-3">Room Revenue</th>
+                      <th className="py-3 px-3">ADR</th>
+                      <th className="py-3 px-3">RevPAR</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40 font-mono">

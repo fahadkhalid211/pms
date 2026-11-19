@@ -325,10 +325,10 @@ export default function InvoiceFolioPage() {
 
           {/* Itemized Line Items Table */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Charges & Line Items</h3>
-            <div className="overflow-x-auto rounded-md border">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">Charges & Line Items</h3>
+            <div className="overflow-x-auto rounded-md border border-zinc-200">
               <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 font-semibold text-muted-foreground">
+                <thead className="bg-zinc-100 border-b border-zinc-300 font-extrabold text-zinc-950">
                   <tr>
                     <th className="p-3">Description</th>
                     <th className="p-3 text-center">Qty</th>
@@ -336,13 +336,13 @@ export default function InvoiceFolioPage() {
                     <th className="p-3 text-right">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-zinc-200">
                   {folio.lineItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-muted/20">
-                      <td className="p-3 font-medium text-foreground">{item.description}</td>
-                      <td className="p-3 text-center text-muted-foreground">{item.quantity}</td>
-                      <td className="p-3 text-right font-mono text-muted-foreground">${Number(item.unitAmount).toFixed(2)}</td>
-                      <td className="p-3 text-right font-mono font-semibold text-foreground">${Number(item.total).toFixed(2)}</td>
+                    <tr key={item.id} className="hover:bg-zinc-50">
+                      <td className="p-3 font-semibold text-zinc-950">{item.description}</td>
+                      <td className="p-3 text-center text-zinc-700 font-semibold">{item.quantity}</td>
+                      <td className="p-3 text-right font-mono font-semibold text-zinc-800">${Number(item.unitAmount).toFixed(2)}</td>
+                      <td className="p-3 text-right font-mono font-bold text-zinc-950">${Number(item.total).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>

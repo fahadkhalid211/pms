@@ -273,22 +273,22 @@ function GuestPortalContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090D16] text-slate-100">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100">
       {/* Top Navigation */}
-      <header className="border-b border-violet-950/60 bg-[#0C101D]/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-zinc-800 bg-black/90 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-violet-600 flex items-center justify-center font-bold text-white shadow-lg shadow-violet-600/30">
-              L
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center font-bold text-black shadow-md border border-zinc-200">
+              P
             </div>
-            <span className="font-bold text-lg tracking-tight text-white">Lumina Guest Portal</span>
+            <span className="font-bold text-lg tracking-tight text-white">Pent House PMS Guest Portal</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-400 text-xs">
-              <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Verified Secure
+            <Badge variant="outline" className="border-zinc-700 bg-zinc-900 text-zinc-300 text-xs">
+              <ShieldCheck className="mr-1 h-3.5 w-3.5 text-zinc-300" /> Verified Secure
             </Badge>
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+              <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
                 Staff Login
               </Button>
             </Link>
@@ -297,12 +297,12 @@ function GuestPortalContent() {
       </header>
 
       {/* Hero Header */}
-      <div className="border-b border-violet-950/40 bg-gradient-to-b from-[#120B28]/60 to-[#090D16] py-10 px-4">
+      <div className="border-b border-zinc-800/80 bg-gradient-to-b from-zinc-900/60 to-[#09090b] py-10 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
             Guest Reservations & Direct Portal
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
+          <p className="text-zinc-400 text-sm max-w-xl mx-auto">
             Book your stay with zero booking fees, manage your upcoming itinerary, complete seamless online check-in, or message the front desk directly.
           </p>
 
@@ -310,50 +310,50 @@ function GuestPortalContent() {
           <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
             <button
               onClick={() => setActiveTab("book")}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === "book"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
-                  : "bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white"
+                  ? "bg-white text-black shadow-md shadow-white/10"
+                  : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white"
               }`}
             >
               Book a Stay
             </button>
             <button
               onClick={() => setActiveTab("lookup")}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === "lookup"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
-                  : "bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white"
+                  ? "bg-white text-black shadow-md shadow-white/10"
+                  : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white"
               }`}
             >
               Find My Booking
             </button>
             <button
               onClick={() => setActiveTab("checkin")}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === "checkin"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
-                  : "bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white"
+                  ? "bg-white text-black shadow-md shadow-white/10"
+                  : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white"
               }`}
             >
               Online Check-in
             </button>
             <button
               onClick={() => setActiveTab("messages")}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === "messages"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
-                  : "bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white"
+                  ? "bg-white text-black shadow-md shadow-white/10"
+                  : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white"
               }`}
             >
               Front Desk Messages
             </button>
             <button
               onClick={() => setActiveTab("cancel")}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === "cancel"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
-                  : "bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white"
+                  ? "bg-white text-black shadow-md shadow-white/10"
+                  : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white"
               }`}
             >
               Cancellation Request
@@ -367,48 +367,48 @@ function GuestPortalContent() {
         {/* TAB 1: BOOK A STAY */}
         {activeTab === "book" && (
           <div className="space-y-6">
-            <Card className="border-violet-950/60 bg-[#0D1220]">
+            <Card className="border-zinc-800 bg-zinc-950/80">
               <CardHeader>
                 <CardTitle className="text-lg text-white">Search Available Rooms & Best Direct Rates</CardTitle>
-                <CardDescription className="text-slate-400">Guaranteed direct rate with no hidden platform fees.</CardDescription>
+                <CardDescription className="text-zinc-400">Guaranteed direct rate with no hidden platform fees.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSearch} className="grid gap-4 sm:grid-cols-5">
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="orgId" className="text-xs text-slate-300">Hotel / Organization ID</Label>
+                    <Label htmlFor="orgId" className="text-xs text-zinc-300">Hotel / Organization ID</Label>
                     <Input
                       id="orgId"
                       value={orgId}
                       onChange={(e) => setOrgId(e.target.value)}
                       placeholder="e.g. org-..."
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs font-mono"
+                      className="bg-black border-zinc-800 text-white text-xs font-mono"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="checkIn" className="text-xs text-slate-300">Check-In Date</Label>
+                    <Label htmlFor="checkIn" className="text-xs text-zinc-300">Check-In Date</Label>
                     <Input
                       id="checkIn"
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs"
+                      className="bg-black border-zinc-800 text-white text-xs"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="checkOut" className="text-xs text-slate-300">Check-Out Date</Label>
+                    <Label htmlFor="checkOut" className="text-xs text-zinc-300">Check-Out Date</Label>
                     <Input
                       id="checkOut"
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs"
+                      className="bg-black border-zinc-800 text-white text-xs"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="adults" className="text-xs text-slate-300">Guests</Label>
+                    <Label htmlFor="adults" className="text-xs text-zinc-300">Guests</Label>
                     <Input
                       id="adults"
                       type="number"
@@ -417,11 +417,11 @@ function GuestPortalContent() {
                       value={adults}
                       onChange={(e) => setAdults(parseInt(e.target.value, 10) || 1)}
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs"
+                      className="bg-black border-zinc-800 text-white text-xs"
                     />
                   </div>
                   <div className="sm:col-span-5 flex justify-end">
-                    <Button type="submit" disabled={searching} className="bg-violet-600 hover:bg-violet-700 text-white text-xs">
+                    <Button type="submit" disabled={searching} className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs">
                       {searching ? "Checking Availability..." : "Search Available Rooms"}
                     </Button>
                   </div>
@@ -437,8 +437,8 @@ function GuestPortalContent() {
                   {searchResults.map((r, idx) => (
                     <Card
                       key={idx}
-                      className={`border-violet-950/50 bg-[#0D1220] transition cursor-pointer hover:border-violet-600 ${
-                        selectedRoom?.roomTypeId === r.roomTypeId ? "border-violet-500 ring-1 ring-violet-500" : ""
+                      className={`border-zinc-800 bg-zinc-950/70 transition cursor-pointer hover:border-zinc-600 ${
+                        selectedRoom?.roomTypeId === r.roomTypeId ? "border-white ring-1 ring-white" : ""
                       }`}
                       onClick={() => setSelectedRoom(r)}
                     >
@@ -449,28 +449,28 @@ function GuestPortalContent() {
                             {r.availableRoomCount} Available
                           </Badge>
                         </div>
-                        <CardDescription className="text-xs text-slate-400">
+                        <CardDescription className="text-xs text-zinc-400">
                           {r.propertyName} · Capacity: {r.capacity} Guests
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3 pt-2">
-                        <div className="rounded-lg bg-slate-950/60 p-3 text-xs space-y-1 border border-slate-900">
-                          <div className="flex justify-between text-slate-400">
+                        <div className="rounded-lg bg-black p-3 text-xs space-y-1 border border-zinc-800">
+                          <div className="flex justify-between text-zinc-400">
                             <span>Base ({r.priceQuote.nights} nights):</span>
                             <span>{r.currency} {r.priceQuote.basePrice}</span>
                           </div>
-                          <div className="flex justify-between text-slate-400">
+                          <div className="flex justify-between text-zinc-400">
                             <span>Taxes & Cleaning:</span>
                             <span>{r.currency} {(Number(r.priceQuote.taxes) + Number(r.priceQuote.fees)).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-white font-semibold pt-1 border-t border-slate-800">
+                          <div className="flex justify-between text-white font-semibold pt-1 border-t border-zinc-800">
                             <span>Total Due:</span>
-                            <span className="text-violet-400 font-bold">{r.currency} {r.priceQuote.total}</span>
+                            <span className="text-white font-bold">{r.currency} {r.priceQuote.total}</span>
                           </div>
                         </div>
                         <Button
                           size="sm"
-                          className="w-full bg-violet-600/80 hover:bg-violet-600 text-white text-xs"
+                          className="w-full bg-white hover:bg-zinc-200 text-black font-semibold text-xs"
                           onClick={() => setSelectedRoom(r)}
                         >
                           {selectedRoom?.roomTypeId === r.roomTypeId ? "Selected" : "Select Room"}
@@ -484,7 +484,7 @@ function GuestPortalContent() {
 
             {/* Booking Form */}
             {selectedRoom && !confirmedBooking && (
-              <Card className="border-violet-600/50 bg-[#0D1220]">
+              <Card className="border-zinc-700 bg-zinc-950/80">
                 <CardHeader>
                   <CardTitle className="text-base text-white">Complete Your Booking: {selectedRoom.roomTypeName}</CardTitle>
                   <CardDescription className="text-slate-400">
@@ -578,16 +578,16 @@ function GuestPortalContent() {
         {/* TAB 2: FIND MY BOOKING (STRICT IDOR GATE) */}
         {activeTab === "lookup" && (
           <div className="space-y-6">
-            <Card className="border-violet-950/60 bg-[#0D1220]">
+            <Card className="border-zinc-800 bg-zinc-950/80">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base text-white">Verified Itinerary & Folio Lookup</CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardDescription className="text-zinc-400">
                       Identity Verification Gate: Reference Code + Email Address are strictly required.
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className="border-violet-500/30 text-violet-400 text-xs">
+                  <Badge variant="outline" className="border-zinc-700 text-zinc-300 text-xs">
                     <KeyRound className="mr-1 h-3 w-3" /> Anti-IDOR Gate
                   </Badge>
                 </div>
@@ -595,18 +595,18 @@ function GuestPortalContent() {
               <CardContent>
                 <form onSubmit={handleVerify} className="grid gap-3 sm:grid-cols-3">
                   <div className="space-y-1">
-                    <Label htmlFor="code" className="text-xs text-slate-300">Booking Reference</Label>
+                    <Label htmlFor="code" className="text-xs text-zinc-300">Booking Reference</Label>
                     <Input
                       id="code"
                       value={lookupCode}
                       onChange={(e) => setLookupCode(e.target.value)}
                       placeholder="e.g. BK-XXXXXX"
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs font-mono"
+                      className="bg-black border-zinc-800 text-white text-xs font-mono"
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="lemail" className="text-xs text-slate-300">Matching Guest Email</Label>
+                    <Label htmlFor="lemail" className="text-xs text-zinc-300">Matching Guest Email</Label>
                     <Input
                       id="lemail"
                       type="email"
@@ -614,11 +614,11 @@ function GuestPortalContent() {
                       onChange={(e) => setLookupEmail(e.target.value)}
                       placeholder="email@example.com"
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs"
+                      className="bg-black border-zinc-800 text-white text-xs"
                     />
                   </div>
                   <div className="flex items-end">
-                    <Button type="submit" disabled={lookupPending} className="w-full bg-violet-600 hover:bg-violet-700 text-white text-xs">
+                    <Button type="submit" disabled={lookupPending} className="w-full bg-white hover:bg-zinc-200 text-black font-semibold text-xs">
                       {lookupPending ? "Verifying..." : "Verify & Load"}
                     </Button>
                   </div>
@@ -627,7 +627,7 @@ function GuestPortalContent() {
             </Card>
 
             {verifiedReservation && (
-              <Card className="border-emerald-500/30 bg-[#0D1220]">
+              <Card className="border-zinc-700 bg-zinc-950/80">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -635,13 +635,13 @@ function GuestPortalContent() {
                         <CardTitle className="text-lg text-white">Booking #{verifiedReservation.code}</CardTitle>
                         <Badge className="bg-emerald-600 text-white text-[10px] capitalize">{verifiedReservation.status}</Badge>
                       </div>
-                      <CardDescription className="text-xs text-slate-400 pt-1">
+                      <CardDescription className="text-xs text-zinc-400 pt-1">
                         {verifiedReservation.propertyName} · {verifiedReservation.propertyAddress}
                       </CardDescription>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-400">Total Charged</div>
-                      <div className="text-base font-bold text-violet-400">
+                      <div className="text-xs text-zinc-400">Total Charged</div>
+                      <div className="text-base font-bold text-white">
                         {verifiedReservation.currency} {verifiedReservation.totalAmount}
                       </div>
                     </div>
@@ -649,20 +649,20 @@ function GuestPortalContent() {
                 </CardHeader>
                 <CardContent className="space-y-4 pt-2">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div className="rounded-lg bg-slate-950/80 p-2.5 border border-slate-900">
-                      <span className="text-slate-400 block">Check-in</span>
+                    <div className="rounded-lg bg-black p-2.5 border border-zinc-800">
+                      <span className="text-zinc-400 block">Check-in</span>
                       <span className="font-semibold text-white">{verifiedReservation.checkIn} ({verifiedReservation.checkInTime}:00)</span>
                     </div>
-                    <div className="rounded-lg bg-slate-950/80 p-2.5 border border-slate-900">
-                      <span className="text-slate-400 block">Check-out</span>
+                    <div className="rounded-lg bg-black p-2.5 border border-zinc-800">
+                      <span className="text-zinc-400 block">Check-out</span>
                       <span className="font-semibold text-white">{verifiedReservation.checkOut} ({verifiedReservation.checkOutTime}:00)</span>
                     </div>
-                    <div className="rounded-lg bg-slate-950/80 p-2.5 border border-slate-900">
-                      <span className="text-slate-400 block">Guests</span>
+                    <div className="rounded-lg bg-black p-2.5 border border-zinc-800">
+                      <span className="text-zinc-400 block">Guests</span>
                       <span className="font-semibold text-white">{verifiedReservation.adults} Adults, {verifiedReservation.children} Kids</span>
                     </div>
-                    <div className="rounded-lg bg-slate-950/80 p-2.5 border border-slate-900">
-                      <span className="text-slate-400 block">Assigned Rooms</span>
+                    <div className="rounded-lg bg-black p-2.5 border border-zinc-800">
+                      <span className="text-zinc-400 block">Assigned Rooms</span>
                       <span className="font-semibold text-emerald-400">
                         {verifiedReservation.rooms.map((r: any) => formatRoomDisplayName(r)).join(", ") || "Auto-assigned"}
                       </span>
@@ -670,7 +670,7 @@ function GuestPortalContent() {
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button size="sm" onClick={() => setActiveTab("checkin")} className="bg-violet-600 hover:bg-violet-700 text-white text-xs">
+                    <Button size="sm" onClick={() => setActiveTab("checkin")} className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs">
                       Online Check-In
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => setActiveTab("messages")} className="border-slate-800 text-slate-300 text-xs">
@@ -688,7 +688,7 @@ function GuestPortalContent() {
 
         {/* TAB 3: ONLINE CHECK-IN */}
         {activeTab === "checkin" && (
-          <Card className="border-violet-950/60 bg-[#0D1220]">
+          <Card className="border-zinc-800 bg-zinc-950/80">
             <CardHeader>
               <CardTitle className="text-lg text-white">Express Online Check-In</CardTitle>
               <CardDescription className="text-slate-400">
@@ -778,10 +778,10 @@ function GuestPortalContent() {
 
         {/* TAB 4: GUEST MESSAGES */}
         {activeTab === "messages" && (
-          <Card className="border-violet-950/60 bg-[#0D1220]">
+          <Card className="border-zinc-800 bg-zinc-950/80">
             <CardHeader>
               <CardTitle className="text-lg text-white">Direct Message Front Desk</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-zinc-400">
                 Communicate directly with hotel staff regarding your reservation.
               </CardDescription>
             </CardHeader>
@@ -789,18 +789,18 @@ function GuestPortalContent() {
               <form onSubmit={handleSendMessage} className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
-                    <Label htmlFor="mCode" className="text-xs text-slate-300">Booking Reference</Label>
+                    <Label htmlFor="mCode" className="text-xs text-zinc-300">Booking Reference</Label>
                     <Input
                       id="mCode"
                       value={lookupCode}
                       onChange={(e) => setLookupCode(e.target.value)}
                       placeholder="BK-XXXXXX"
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs font-mono"
+                      className="bg-black border-zinc-800 text-white text-xs font-mono"
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="mEmail" className="text-xs text-slate-300">Guest Email</Label>
+                    <Label htmlFor="mEmail" className="text-xs text-zinc-300">Guest Email</Label>
                     <Input
                       id="mEmail"
                       type="email"
@@ -808,23 +808,23 @@ function GuestPortalContent() {
                       onChange={(e) => setLookupEmail(e.target.value)}
                       placeholder="email@example.com"
                       required
-                      className="bg-slate-950/80 border-slate-800 text-white text-xs"
+                      className="bg-black border-zinc-800 text-white text-xs"
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="msg" className="text-xs text-slate-300">Message Content</Label>
+                  <Label htmlFor="msg" className="text-xs text-zinc-300">Message Content</Label>
                   <Textarea
                     id="msg"
                     value={guestMessage}
                     onChange={(e) => setGuestMessage(e.target.value)}
                     placeholder="Type your message, query, or housekeeping request..."
                     required
-                    className="bg-slate-950/80 border-slate-800 text-white text-xs min-h-[80px]"
+                    className="bg-black border-zinc-800 text-white text-xs min-h-[80px]"
                   />
                 </div>
                 <div className="flex justify-end">
-                  <Button type="submit" disabled={messagePending} className="bg-violet-600 hover:bg-violet-700 text-white text-xs">
+                  <Button type="submit" disabled={messagePending} className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs">
                     {messagePending ? "Sending..." : "Send to Front Desk"}
                   </Button>
                 </div>
@@ -835,7 +835,7 @@ function GuestPortalContent() {
 
         {/* TAB 5: CANCELLATION REQUEST */}
         {activeTab === "cancel" && (
-          <Card className="border-rose-950/40 bg-[#0D1220]">
+          <Card className="border-rose-950/40 bg-zinc-950/80">
             <CardHeader>
               <div className="flex items-center gap-2 text-rose-400">
                 <AlertTriangle className="h-5 w-5" />

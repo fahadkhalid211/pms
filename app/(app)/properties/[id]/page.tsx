@@ -498,15 +498,15 @@ export default function PropertyDetailPage() {
             ) : (
               <div className="overflow-x-auto rounded-lg border">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-muted/40 border-b">
+                  <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 uppercase text-[11px] font-black">
                     <tr>
-                      <th className="p-3 font-semibold">Code</th>
-                      <th className="p-3 font-semibold">Guest Details</th>
-                      <th className="p-3 font-semibold">Dates</th>
-                      <th className="p-3 font-semibold">Room(s)</th>
-                      <th className="p-3 font-semibold">Source</th>
-                      <th className="p-3 font-semibold">Total</th>
-                      <th className="p-3 font-semibold">Status</th>
+                      <th className="p-3">Code</th>
+                      <th className="p-3">Guest Details</th>
+                      <th className="p-3">Dates</th>
+                      <th className="p-3">Room(s)</th>
+                      <th className="p-3">Source</th>
+                      <th className="p-3">Total</th>
+                      <th className="p-3">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">

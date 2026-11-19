@@ -6,9 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginAction } from "@/app/actions/auth";
-
-export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   return (
@@ -56,14 +53,13 @@ function SignInForm() {
     rawNext.startsWith("//");
   const targetDestination = isDisallowed ? "/dashboard" : rawNext;
 
-  const [state, formAction, isServerPending] = React.useActionState(loginAction, undefined);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [clientLoading, setClientLoading] = React.useState(false);
   const [clientError, setClientError] = React.useState<string | null>(null);
 
-  const isPending = isServerPending || clientLoading;
-  const displayError = clientError || state?.error;
+  const isPending = clientLoading;
+  const displayError = clientError;
 
   React.useEffect(() => {
     let active = true;

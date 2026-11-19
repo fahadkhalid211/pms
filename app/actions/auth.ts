@@ -50,14 +50,25 @@ export async function loginAction(
   const proto = headerList.get("x-forwarded-proto");
   const referer = headerList.get("referer");
   const origin = headerList.get("origin");
+  const host = headerList.get("host") || headerList.get("x-forwarded-host") || "";
 
-  // Trust AUTH_URL first (canonical production signal), then fall back to headers.
+  const isLocalhost = host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("0.0.0.0");
   const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL || "";
-  const isHttps =
-    authUrl.startsWith("https://") ||
-    proto === "https" ||
-    (!proto && origin?.startsWith("https://") === true) ||
-    (!proto && !origin && referer?.startsWith("https://") === true);
+
+  let isHttps = false;
+  if (proto === "https") {
+    isHttps = true;
+  } else if (proto === "http") {
+    isHttps = false;
+  } else if (isLocalhost) {
+    isHttps = false;
+  } else if (authUrl.startsWith("https://")) {
+    isHttps = true;
+  } else if (origin?.startsWith("https://")) {
+    isHttps = true;
+  } else if (referer?.startsWith("https://")) {
+    isHttps = true;
+  }
 
   const cookieStore = await cookies();
   cookieStore.set("lumina.session", token, {

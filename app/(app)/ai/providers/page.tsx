@@ -168,7 +168,7 @@ export default function AiProvidersPage() {
                 <CardTitle>Configured Providers</CardTitle>
                 <CardDescription>Multi-provider registry with automatic fallback resilience</CardDescription>
               </div>
-              <Badge variant="outline" className="border-violet-500/30 text-violet-400">
+              <Badge variant="outline" className="border-border text-foreground">
                 AES-256-GCM Encrypted
               </Badge>
             </div>
@@ -186,11 +186,11 @@ export default function AiProvidersPage() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Cpu className="h-4 w-4 text-violet-400" />
+                      <Cpu className="h-4 w-4 text-foreground" />
                       <span className="font-semibold text-foreground capitalize">{c.provider}</span>
                       <span className="text-xs text-muted-foreground font-mono">({c.model})</span>
                       {c.isDefault && (
-                        <Badge className="bg-violet-600 text-white text-[10px] px-1.5 py-0">Default</Badge>
+                        <Badge className="bg-black text-white dark:bg-white dark:text-black text-[10px] px-1.5 py-0">Default</Badge>
                       )}
                       {!c.isEnabled && (
                         <Badge variant="secondary" className="text-[10px] px-1.5 py-0 text-muted-foreground">
@@ -312,7 +312,7 @@ export default function AiProvidersPage() {
               <Button
                 type="submit"
                 disabled={pending || (provider !== "mock" && !apiKey)}
-                className="w-full bg-violet-600 hover:bg-violet-700"
+                className="w-full bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 {pending ? "Saving..." : "Save Configuration"}
               </Button>

@@ -122,16 +122,16 @@ export default function ReservationsPage() {
           {error ? <div className="p-4"><Alert variant="destructive">{error}</Alert></div> : null}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-3 text-left font-medium">Booking</th>
-                  <th className="p-3 text-left font-medium">Guest</th>
-                  <th className="p-3 text-left font-medium">Check-in</th>
-                  <th className="p-3 text-left font-medium">Check-out</th>
-                  <th className="p-3 text-left font-medium">Guests</th>
-                  <th className="p-3 text-left font-medium">Source</th>
-                  <th className="p-3 text-left font-medium">Status</th>
-                  <th className="p-3 text-right font-medium">Actions</th>
+              <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 font-bold uppercase text-xs">
+                <tr>
+                  <th className="p-3 text-left font-bold">Booking</th>
+                  <th className="p-3 text-left font-bold">Guest</th>
+                  <th className="p-3 text-left font-bold">Check-in</th>
+                  <th className="p-3 text-left font-bold">Check-out</th>
+                  <th className="p-3 text-left font-bold">Guests</th>
+                  <th className="p-3 text-left font-bold">Source</th>
+                  <th className="p-3 text-left font-bold">Status</th>
+                  <th className="p-3 text-right font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody>

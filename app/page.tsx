@@ -28,6 +28,7 @@ import {
   Sliders,
   Smartphone,
   Layers,
+  Menu,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -47,6 +48,9 @@ export default function LandingPage() {
   // Tabbed Feature Showcase State
   const [activeFeatureTab, setActiveFeatureTab] = React.useState<"inbox" | "channel" | "operations" | "direct" | "smartlocks">("inbox");
 
+  // Mobile Navigation Drawer
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+
   // Calculations for ROI Calculator
   const hoursSavedPerWeek = Math.round(propertyCount * 3.8);
   const hoursSavedPerYear = hoursSavedPerWeek * 52;
@@ -57,7 +61,7 @@ export default function LandingPage() {
       guestName: "Sarah Jenkins",
       channel: "Airbnb",
       time: "10:14 AM",
-      property: "Azure Royal Penthouse Â· Miami, FL",
+      property: "Azure Royal Penthouse · Miami, FL",
       guestMessage: "Hi there! Our flight lands early around 11:30 AM. Is there any chance we can check in a couple of hours early?",
       aiResponse: "Hi Sarah! Welcome to Miami. I checked with our housekeeping team, and the Azure Penthouse is already fully sanitized and inspected. You're all set for early check-in at 11:30 AM! Your smart lock code (last 4 digits of your phone: 4821) has been activated. Enjoy your stay!",
       context: "Housekeeping: Clean & Inspected at 9:45 AM. Smart Lock: Active. Gap: None.",
@@ -67,7 +71,7 @@ export default function LandingPage() {
       guestName: "Marcus Vance",
       channel: "Vrbo",
       time: "3:42 PM",
-      property: "Whispering Pines Chalet Â· Aspen, CO",
+      property: "Whispering Pines Chalet · Aspen, CO",
       guestMessage: "Hey, we just arrived! What's the network name and password for the high-speed Wi-Fi in the main cabin?",
       aiResponse: "Welcome Marcus! The Wi-Fi network is 'Pines-Guest-5G' and the password is 'StayCozy2026!'. The router is located next to the living room media console. Let me know if you need any recommendations for dinner tonight!",
       context: "House Rule Verified: High-speed fiber active. Credentials verified.",
@@ -77,7 +81,7 @@ export default function LandingPage() {
       guestName: "Elena Rostova",
       channel: "Booking.com",
       time: "8:05 PM",
-      property: "Oceanview Sanctuary Â· San Diego, CA",
+      property: "Oceanview Sanctuary · San Diego, CA",
       guestMessage: "Good evening! We have an afternoon conference tomorrow. Would it be possible to extend our checkout from 11 AM to 1:30 PM?",
       aiResponse: "Good evening Elena! We don't have another guest checking in until Wednesday, so we're happy to grant you a complimentary late checkout until 1:30 PM. Take your time packing and safe travels on your conference!",
       context: "Calendar Check: Next check-in is 48h away. Turnover auto-rescheduled to 2:00 PM.",
@@ -87,7 +91,7 @@ export default function LandingPage() {
       guestName: "David Miller",
       channel: "Direct Booking",
       time: "1:22 PM",
-      property: "Cedar Ridge Lodge Â· Lake Tahoe, NV",
+      property: "Cedar Ridge Lodge · Lake Tahoe, NV",
       guestMessage: "Hello! We're looking at booking for 4 nights next month. Do you allow well-behaved Golden Retrievers?",
       aiResponse: "Hi David! Yes, Cedar Ridge Lodge is 100% dog-friendly for up to 2 trained dogs. There is a standard $50 pet sanitation fee per stay, and we even provide water bowls and dog treats upon arrival. Let me know if you'd like me to hold your dates!",
       context: "Pet Policy Rule: Allowed (max 2). Fee: $50 one-time.",
@@ -125,11 +129,11 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-black selection:text-white font-sans antialiased">
       {/* Top Announcement Bar */}
-      <div className="relative z-50 border-b border-zinc-200 bg-gradient-to-r from-zinc-100 via-slate-100 to-neutral-100 px-4 py-2 text-center text-xs font-medium text-black">
+      <div className="relative z-50 border-b border-zinc-300 bg-gradient-to-r from-zinc-100 via-slate-100 to-neutral-100 px-4 py-2 text-center text-xs font-medium text-black">
         <div className="container mx-auto flex items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-zinc-200 px-2.5 py-0.5 text-[11px] font-semibold text-black border border-zinc-300">
             <Sparkles className="h-3 w-3 text-black" strokeWidth={1.5} />
-            Pent House AI 2.0
+            Pent House PMS 2.0
           </span>
           <span>Trusted by 500,000+ short-term rental listings worldwide.</span>
           <Link
@@ -143,45 +147,45 @@ export default function LandingPage() {
       </div>
 
       {/* Main Navigation Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-slate-300 bg-white/85 backdrop-blur-md">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo with Pent House PMS Grape Branding */}
+          {/* Logo with Pent House PMS Monochrome Branding */}
           <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-black via-zinc-800 to-neutral-900 text-white shadow-md shadow-black/10">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-white shadow-md shadow-black/10">
               <Compass className="h-5 w-5" strokeWidth={1.5} />
             </span>
             <span className="text-slate-900 font-extrabold tracking-tight text-xl">
-              Pent House PMS<span className="text-black">.</span>
+              Pent House PMS
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden items-center gap-7 lg:flex">
-            <a href="#features" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+          <nav className="hidden items-center gap-7 md:flex">
+            <a href="#features" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               Features
             </a>
-            <a href="#unified-inbox" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <a href="#unified-inbox" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               Unified Inbox
             </a>
-            <a href="#calculator" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <a href="#calculator" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               ROI Calculator
             </a>
-            <a href="#comparison" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <a href="#comparison" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               Comparison
             </a>
-            <a href="#pricing" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <a href="#pricing" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               Pricing
             </a>
-            <a href="#faq" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <a href="#faq" className="text-sm font-semibold text-zinc-800 transition hover:text-black">
               FAQ
             </a>
           </nav>
 
           {/* Action CTAs */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/login"
-              className="text-sm font-semibold text-slate-700 transition hover:text-slate-900 px-3 py-2"
+              className="text-sm font-bold text-black transition hover:text-zinc-700 px-3 py-2"
             >
               Log In
             </Link>
@@ -191,8 +195,65 @@ export default function LandingPage() {
             >
               Start Free Trial
             </Link>
+            {/* Mobile Menu Hamburger */}
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen((prev) => !prev)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-black md:hidden hover:bg-zinc-100"
+              aria-label="Toggle navigation"
+            >
+              {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileNavOpen && (
+          <div className="border-t border-zinc-200 bg-white px-4 py-4 md:hidden shadow-lg space-y-3">
+            <a
+              href="#features"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              Features
+            </a>
+            <a
+              href="#unified-inbox"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              Unified Inbox
+            </a>
+            <a
+              href="#calculator"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              ROI Calculator
+            </a>
+            <a
+              href="#comparison"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              Comparison
+            </a>
+            <a
+              href="#pricing"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              Pricing
+            </a>
+            <a
+              href="#faq"
+              onClick={() => setMobileNavOpen(false)}
+              className="block text-sm font-semibold text-zinc-900 hover:text-black py-1"
+            >
+              FAQ
+            </a>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -235,7 +296,7 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#unified-inbox"
-                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-base font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900"
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 text-base font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900"
               >
                 <Eye className="h-4 w-4 text-black" strokeWidth={1.5} />
                 Explore Interactive Demo
@@ -261,7 +322,7 @@ export default function LandingPage() {
 
           {/* Master Hero Visual: Interactive Unified Command Center */}
           <div className="container mx-auto mt-16 max-w-6xl px-4 sm:px-6 lg:px-8" id="unified-inbox">
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-2xl shadow-slate-200/60">
+            <div className="rounded-2xl border border-slate-300 bg-white p-4 sm:p-6 shadow-2xl shadow-slate-200/60">
               {/* Top Window Bar */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 mb-6">
                 <div className="flex items-center gap-2">
@@ -270,7 +331,7 @@ export default function LandingPage() {
                     <span className="h-3 w-3 rounded-full bg-amber-400 inline-block" />
                     <span className="h-3 w-3 rounded-full bg-emerald-400 inline-block" />
                   </div>
-                  <span className="ml-2 font-mono text-xs text-slate-500">
+                  <span className="ml-2 font-mono text-xs text-slate-700">
                     penthouse-hub // unified-inbox // live-sync
                   </span>
                 </div>
@@ -285,7 +346,7 @@ export default function LandingPage() {
                     onClick={() => setAutopilotMode((v) => !v)}
                     className="flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-1 text-xs font-semibold text-black transition hover:bg-zinc-200"
                   >
-                    <Zap className={`h-3.5 w-3.5 ${autopilotMode ? "text-black fill-violet-600/20" : "text-slate-400"}`} strokeWidth={1.5} />
+                    <Zap className={`h-3.5 w-3.5 ${autopilotMode ? "text-black fill-black/20" : "text-slate-600"}`} strokeWidth={1.5} />
                     <span>Autopilot: {autopilotMode ? "ON" : "REVIEW"}</span>
                   </button>
                 </div>
@@ -293,7 +354,7 @@ export default function LandingPage() {
 
               {/* Interactive Scenario Selector */}
               <div className="mb-6 flex flex-wrap gap-2">
-                <span className="text-xs text-slate-500 self-center mr-1 font-medium">Select Guest Scenario:</span>
+                <span className="text-xs text-slate-700 self-center mr-1 font-medium">Select Guest Scenario:</span>
                 <button
                   type="button"
                   onClick={() => setActiveScenario("early_checkin")}
@@ -343,8 +404,8 @@ export default function LandingPage() {
               {/* Dual-Pane Interface */}
               <div className="grid gap-6 lg:grid-cols-12">
                 {/* Left: Chat & AI Reply Simulator (8 cols) */}
-                <div className="lg:col-span-8 flex flex-col rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 sm:p-5">
-                  <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-4">
+                <div className="lg:col-span-8 flex flex-col rounded-xl border border-slate-300 bg-slate-50/70 p-4 sm:p-5">
+                  <div className="flex items-center justify-between border-b border-slate-300 pb-3 mb-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 text-black font-bold text-sm border border-zinc-300">
                         {scenarios[activeScenario].guestName.slice(0, 2).toUpperCase()}
@@ -358,12 +419,12 @@ export default function LandingPage() {
                             {scenarios[activeScenario].channel}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-700">
                           {scenarios[activeScenario].property}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-slate-500 font-medium">
+                    <span className="text-xs text-slate-700 font-medium">
                       {scenarios[activeScenario].time}
                     </span>
                   </div>
@@ -375,20 +436,20 @@ export default function LandingPage() {
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs text-slate-700 font-semibold">
                         G
                       </div>
-                      <div className="max-w-xl rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm text-slate-800 border border-slate-200/80 shadow-xs">
+                      <div className="max-w-xl rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm text-slate-800 border border-slate-300 shadow-xs">
                         {scenarios[activeScenario].guestMessage}
                       </div>
                     </div>
 
                     {/* AI Autonomous Answer */}
                     <div className="flex gap-3 justify-end">
-                      <div className="max-w-xl rounded-2xl rounded-tr-sm bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3 text-sm text-slate-900 border border-zinc-300 shadow-xs">
+                      <div className="max-w-xl rounded-2xl rounded-tr-sm bg-gradient-to-r from-zinc-100 to-slate-100 px-4 py-3 text-sm text-slate-900 border border-zinc-300 shadow-xs">
                         <div className="flex items-center gap-1.5 text-xs text-black font-bold mb-1">
                           <Sparkles className="h-3 w-3 text-black" strokeWidth={1.5} />
                           Pent House PMS Autonomous AI Response
                         </div>
                         <p className="leading-relaxed text-slate-800">{scenarios[activeScenario].aiResponse}</p>
-                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-zinc-300/60 pt-1.5">
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 border-t border-zinc-300/60 pt-1.5">
                           <span>Verified against property house rules</span>
                           <span className="text-emerald-700 font-semibold">
                             {scenarios[activeScenario].confidence}
@@ -402,7 +463,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Action Bar */}
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-200/80 pt-3">
+                  <div className="mt-6 flex items-center justify-between border-t border-slate-300 pt-3">
                     <div className="flex items-center gap-2 text-xs text-slate-600">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                       <span>{scenarios[activeScenario].context}</span>
@@ -416,7 +477,7 @@ export default function LandingPage() {
                 {/* Right: Real-time Property & Sync HUD (4 cols) */}
                 <div className="lg:col-span-4 flex flex-col gap-4">
                   {/* Channel Sync Card */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                         Channel Sync Status
@@ -426,15 +487,15 @@ export default function LandingPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Airbnb Calendar</span>
-                        <span className="text-emerald-700 font-semibold">Synced Â· 0.2s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced · 0.2s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Vrbo Calendar</span>
-                        <span className="text-emerald-700 font-semibold">Synced Â· 0.3s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced · 0.3s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Booking.com</span>
-                        <span className="text-emerald-700 font-semibold">Synced Â· 0.4s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced · 0.4s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1">
                         <span className="text-slate-700 font-medium">Direct Booking Engine</span>
@@ -444,7 +505,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Smart Lock Automation Card */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                         Smart Lock Automation
@@ -453,25 +514,25 @@ export default function LandingPage() {
                     </div>
                     <div className="space-y-1.5 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Hardware:</span>
+                        <span className="text-slate-700">Hardware:</span>
                         <span className="text-slate-900 font-semibold">Yale Assure 2 (Z-Wave)</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Assigned PIN:</span>
-                        <span className="font-mono text-emerald-700 font-bold">â€¢â€¢â€¢â€¢ 4821</span>
+                        <span className="text-slate-700">Assigned PIN:</span>
+                        <span className="font-mono text-emerald-700 font-bold">•••• 4821</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Access Window:</span>
-                        <span className="text-slate-700">11:30 AM â€“ 11:00 AM</span>
+                        <span className="text-slate-700">Access Window:</span>
+                        <span className="text-slate-700">11:30 AM – 11:00 AM</span>
                       </div>
-                      <div className="mt-2 text-[11px] text-slate-500 leading-tight">
+                      <div className="mt-2 text-[11px] text-slate-700 leading-tight">
                         Code auto-generated & sent upon confirmed booking. Deactivates strictly at checkout.
                       </div>
                     </div>
                   </div>
 
                   {/* Operations Card */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                         Turnover & Housekeeping
@@ -480,11 +541,11 @@ export default function LandingPage() {
                     </div>
                     <div className="text-xs space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Cleaner Assigned:</span>
+                        <span className="text-slate-700">Cleaner Assigned:</span>
                         <span className="text-slate-900 font-medium">Maria Sanchez (SMS notified)</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Inspection Status:</span>
+                        <span className="text-slate-700">Inspection Status:</span>
                         <span className="text-emerald-700 font-bold">100% Passed</span>
                       </div>
                     </div>
@@ -496,62 +557,62 @@ export default function LandingPage() {
         </section>
 
         {/* Partner Ecosystem & Connectivity Badges */}
-        <section className="border-y border-slate-200/70 bg-slate-50/70 py-14">
+        <section className="border-y border-slate-300/70 bg-slate-50/70 py-14">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-xs font-bold tracking-wider text-slate-500 uppercase mb-8">
+            <p className="text-center text-xs font-bold tracking-wider text-slate-700 uppercase mb-8">
               Official Preferred Software Partner with the World&apos;s Leading Booking Channels
             </p>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 items-center text-center">
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <Globe className="h-6 w-6 text-rose-500 mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Airbnb</span>
-                <span className="text-[10px] text-slate-500">Preferred Partner</span>
+                <span className="text-[10px] text-slate-700">Preferred Partner</span>
               </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <Home className="h-6 w-6 text-blue-600 mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Vrbo</span>
-                <span className="text-[10px] text-slate-500">Elite Connectivity</span>
+                <span className="text-[10px] text-slate-700">Elite Connectivity</span>
               </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <Building2 className="h-6 w-6 text-indigo-600 mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Booking.com</span>
-                <span className="text-[10px] text-slate-500">Premier Partner</span>
+                <span className="text-[10px] text-slate-700">Premier Partner</span>
               </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <Globe className="h-6 w-6 text-emerald-600 mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Google</span>
-                <span className="text-[10px] text-slate-500">Vacation Rentals</span>
+                <span className="text-[10px] text-slate-700">Vacation Rentals</span>
               </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <CreditCard className="h-6 w-6 text-black mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Stripe</span>
-                <span className="text-[10px] text-slate-500">Direct Payments</span>
+                <span className="text-[10px] text-slate-700">Direct Payments</span>
               </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-300 bg-white shadow-xs">
                 <Lock className="h-6 w-6 text-amber-500 mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Smart Locks</span>
-                <span className="text-[10px] text-slate-500">100+ Models</span>
+                <span className="text-[10px] text-slate-700">100+ Models</span>
               </div>
             </div>
 
             {/* Platform Metrics */}
-            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 border-t border-slate-200/70 pt-8 text-center">
+            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 border-t border-slate-300/70 pt-8 text-center">
               <div>
                 <div className="text-3xl font-extrabold text-slate-900">500,000+</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Short-term listings managed</div>
+                <div className="text-xs text-slate-700 mt-1 font-medium">Short-term listings managed</div>
               </div>
               <div>
                 <div className="text-3xl font-extrabold text-black">92%</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Guest questions automated</div>
+                <div className="text-xs text-slate-700 mt-1 font-medium">Guest questions automated</div>
               </div>
               <div>
                 <div className="text-3xl font-extrabold text-slate-900">0</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Double-bookings guarantee</div>
+                <div className="text-xs text-slate-700 mt-1 font-medium">Double-bookings guarantee</div>
               </div>
               <div>
                 <div className="text-3xl font-extrabold text-emerald-600">4.9 / 5</div>
-                <div className="text-xs text-slate-500 mt-1 font-medium">Rating across Capterra & Trustpilot</div>
+                <div className="text-xs text-slate-700 mt-1 font-medium">Rating across Capterra & Trustpilot</div>
               </div>
             </div>
           </div>
@@ -637,7 +698,7 @@ export default function LandingPage() {
             </div>
 
             {/* Tab Content Cards */}
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-8 lg:p-12 shadow-sm">
+            <div className="rounded-2xl border border-slate-300 bg-slate-50/70 p-8 lg:p-12 shadow-sm">
               {activeFeatureTab === "inbox" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
@@ -666,33 +727,33 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs font-sans">
-                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                  <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs font-sans">
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
                       Automated Message Lifecycle
                     </div>
                     <div className="space-y-3">
-                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
+                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-300/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>1. Immediate Confirmation</span>
                           <span className="text-black">Trigger: Booking</span>
                         </div>
                         <p className="text-slate-600 mt-1">Confirms stay, sends house rules, and prompts for ID verification.</p>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
+                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-300/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>2. Pre-Arrival Guide</span>
                           <span className="text-black">Trigger: Check-in - 48h</span>
                         </div>
                         <p className="text-slate-600 mt-1">Provides directions, parking instructions, and early check-in options.</p>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
+                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-300/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>3. Smart Door Access</span>
                           <span className="text-black">Trigger: Check-in Day</span>
                         </div>
                         <p className="text-slate-600 mt-1">Dispatches unique time-sensitive smart lock PIN and Wi-Fi password.</p>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
+                      <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-300/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>4. Checkout & Review Followup</span>
                           <span className="text-black">Trigger: Checkout + 2h</span>
@@ -732,24 +793,24 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs font-mono text-xs text-slate-700 space-y-3">
-                    <div className="flex items-center justify-between text-slate-500 pb-2 border-b border-slate-100 font-sans">
+                  <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs font-mono text-xs text-slate-700 space-y-3">
+                    <div className="flex items-center justify-between text-slate-700 pb-2 border-b border-slate-100 font-sans">
                       <span className="font-semibold text-slate-700">Live Channel Inventory Status</span>
                       <span className="text-emerald-700 font-semibold flex items-center gap-1">
                         <Check className="h-3 w-3" strokeWidth={1.5} />
                         Protected
                       </span>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70">
+                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-300/70">
                       <div className="text-black font-bold mb-1 font-sans">Booking Event Received:</div>
-                      <div className="text-slate-600 font-sans">Channel: Airbnb Â· Guest: Alexander Wright</div>
+                      <div className="text-slate-600 font-sans">Channel: Airbnb &middot; Guest: Alexander Wright</div>
                       <div className="text-slate-600 font-sans">Dates: Nov 12 - Nov 16 (4 nights)</div>
                     </div>
-                    <div className="space-y-1.5 pl-2 border-l-2 border-violet-500 font-sans">
-                      <div className="text-emerald-700 font-medium">âœ“ Atomic RoomNight rows inserted (4 nights locked)</div>
-                      <div className="text-emerald-700 font-medium">âœ“ Vrbo API calendar block pushed (latency: 180ms)</div>
-                      <div className="text-emerald-700 font-medium">âœ“ Booking.com OTA availability updated (latency: 220ms)</div>
-                      <div className="text-emerald-700 font-medium">âœ“ Direct Booking engine date disabled</div>
+                    <div className="space-y-1.5 pl-2 border-l-2 border-black font-sans">
+                      <div className="text-emerald-700 font-medium">Atomic RoomNight rows inserted (4 nights locked)</div>
+                      <div className="text-emerald-700 font-medium">Vrbo API calendar block pushed (latency: 180ms)</div>
+                      <div className="text-emerald-700 font-medium">Booking.com OTA availability updated (latency: 220ms)</div>
+                      <div className="text-emerald-700 font-medium">Direct Booking engine date disabled</div>
                     </div>
                   </div>
                 </div>
@@ -783,34 +844,34 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                  <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
                     <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
                       <span className="text-xs font-bold text-slate-900">Today&apos;s Turnover Schedule</span>
                       <span className="text-xs font-bold text-emerald-700">3 of 3 Completed</span>
                     </div>
                     <div className="space-y-2.5 text-xs">
-                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
+                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-300/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 102 Â· Aspen Pine Chalet</div>
-                          <div className="text-slate-500">Assigned: Elena Rostova Â· Checkout 11:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 102 · Aspen Pine Chalet</div>
+                          <div className="text-slate-700">Assigned: Elena Rostova · Checkout 11:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
                         </span>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
+                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-300/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 304 Â· Azure Penthouse</div>
-                          <div className="text-slate-500">Assigned: Carlos Mendez Â· Checkout 11:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 304 · Azure Penthouse</div>
+                          <div className="text-slate-700">Assigned: Carlos Mendez · Checkout 11:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
                         </span>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
+                      <div className="rounded-lg bg-slate-50 p-3 border border-slate-300/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 208 Â· Coastal Haven</div>
-                          <div className="text-slate-500">Assigned: Sarah Jenkins Â· Checkout 10:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 208 · Coastal Haven</div>
+                          <div className="text-slate-700">Assigned: Sarah Jenkins · Checkout 10:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
@@ -849,9 +910,9 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-                    <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4">
-                      <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 mb-3">
+                  <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
+                    <div className="rounded-lg border border-slate-300 bg-slate-50 p-4">
+                      <div className="flex items-center justify-between border-b border-slate-300/70 pb-2 mb-3">
                         <span className="text-xs font-bold text-slate-900">Direct Booking Savings Example</span>
                         <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">+18.5% Revenue</span>
                       </div>
@@ -864,11 +925,11 @@ export default function LandingPage() {
                           <span>OTA Platform Commissions (18%):</span>
                           <span>-$288.00</span>
                         </div>
-                        <div className="flex justify-between text-slate-600 border-t border-slate-200/70 pt-2">
+                        <div className="flex justify-between text-slate-600 border-t border-slate-300/70 pt-2">
                           <span>Pent House PMS Direct Booking Fee:</span>
                           <span className="text-emerald-700 font-mono font-bold">$0.00 (0%)</span>
                         </div>
-                        <div className="flex justify-between text-emerald-700 font-bold border-t border-slate-200/70 pt-2 text-sm">
+                        <div className="flex justify-between text-emerald-700 font-bold border-t border-slate-300/70 pt-2 text-sm">
                           <span>You Keep:</span>
                           <span>$1,600.00</span>
                         </div>
@@ -906,22 +967,22 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                  <div className="rounded-xl border border-slate-300 bg-white p-5 shadow-xs">
                     <div className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-wider">Compatible Smart Hardware</div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-300/70 flex items-center gap-2 font-medium text-slate-800">
                         <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>Schlage Encode</span>
                       </div>
-                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-300/70 flex items-center gap-2 font-medium text-slate-800">
                         <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>Yale Assure 2</span>
                       </div>
-                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-300/70 flex items-center gap-2 font-medium text-slate-800">
                         <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>August Wi-Fi Lock</span>
                       </div>
-                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-300/70 flex items-center gap-2 font-medium text-slate-800">
                         <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>RemoteLock Enterprise</span>
                       </div>
@@ -934,7 +995,7 @@ export default function LandingPage() {
         </section>
 
         {/* Interactive ROI & Time Saved Calculator */}
-        <section className="border-t border-slate-200/70 bg-slate-50/70 py-20" id="calculator">
+        <section className="border-t border-slate-300/70 bg-slate-50/70 py-20" id="calculator">
           <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <span className="text-xs font-bold tracking-wider text-black uppercase">
@@ -948,7 +1009,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-10 shadow-xl shadow-slate-200/60">
+            <div className="rounded-2xl border border-slate-300 bg-white p-6 sm:p-10 shadow-xl shadow-slate-200/60">
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-3">
                   <label htmlFor="property-slider" className="text-sm font-bold text-slate-900">
@@ -965,9 +1026,9 @@ export default function LandingPage() {
                   max="50"
                   value={propertyCount}
                   onChange={(e) => setPropertyCount(parseInt(e.target.value, 10))}
-                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-600"
+                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-black"
                 />
-                <div className="flex justify-between text-xs text-slate-500 font-medium mt-2">
+                <div className="flex justify-between text-xs text-slate-700 font-medium mt-2">
                   <span>1 property</span>
                   <span>15 properties</span>
                   <span>30 properties</span>
@@ -977,19 +1038,19 @@ export default function LandingPage() {
 
               {/* Dynamic Metrics Output */}
               <div className="grid gap-6 sm:grid-cols-3 border-t border-slate-100 pt-8 text-center">
-                <div className="rounded-xl bg-slate-50 p-5 border border-slate-200/70">
+                <div className="rounded-xl bg-slate-50 p-5 border border-slate-300/70">
                   <Clock className="h-6 w-6 text-black mx-auto mb-2" strokeWidth={1.5} />
                   <div className="text-3xl font-black text-slate-900">{hoursSavedPerWeek} hrs</div>
                   <div className="text-xs text-slate-600 mt-1 font-medium">Saved per week on messaging</div>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-5 border border-slate-200/70">
-                  <Calendar className="h-6 w-6 text-purple-600 mx-auto mb-2" strokeWidth={1.5} />
+                <div className="rounded-xl bg-slate-50 p-5 border border-slate-300/70">
+                  <Calendar className="h-6 w-6 text-black mx-auto mb-2" strokeWidth={1.5} />
                   <div className="text-3xl font-black text-slate-900">{hoursSavedPerYear.toLocaleString()} hrs</div>
                   <div className="text-xs text-slate-600 mt-1 font-medium">Saved every single year</div>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-5 border border-slate-200/70">
+                <div className="rounded-xl bg-slate-50 p-5 border border-slate-300/70">
                   <CreditCard className="h-6 w-6 text-emerald-600 mx-auto mb-2" strokeWidth={1.5} />
                   <div className="text-3xl font-black text-emerald-700">${directBookingSavings.toLocaleString()}</div>
                   <div className="text-xs text-slate-600 mt-1 font-medium">Est. commission savings / mo</div>
@@ -1001,7 +1062,7 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black hover:bg-zinc-900 px-8 text-sm font-semibold text-white shadow-md shadow-black/15 transition-all"
                 >
-                  Get Your Time Back â€” Try Free
+                  Get Your Time Back — Try Free
                   <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                 </Link>
               </div>
@@ -1024,12 +1085,12 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 shadow-md">
+            <div className="overflow-x-auto rounded-2xl border border-slate-300 shadow-md">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
+                  <tr className="border-b border-slate-300 bg-slate-50">
                     <th className="p-4 sm:p-5 font-bold text-slate-900 w-1/3">Capability</th>
-                    <th className="p-4 sm:p-5 font-bold text-black bg-zinc-100/70 border-x border-zinc-200 w-1/4">
+                    <th className="p-4 sm:p-5 font-bold text-black bg-zinc-100/70 border-x border-zinc-300 w-1/4">
                       Pent House AI
                     </th>
                     <th className="p-4 sm:p-5 font-bold text-slate-700 w-1/5">Manual Hosting</th>
@@ -1041,26 +1102,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       AI Guest Messaging Autopilot
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Autonomous 24/7 AI</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Sounds human & trained on rules</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">Sounds human & trained on rules</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>Manual typing</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">15+ hours lost weekly</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">15+ hours lost weekly</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-amber-600 font-medium">
                         <Check className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={2} />
                         <span>Robotic templates</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Static merge tags only</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Static merge tags only</div>
                     </td>
                   </tr>
 
@@ -1068,26 +1129,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Channel Calendar Sync
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Sub-second Direct API</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">&lt;300ms atomic sync</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">&lt;300ms atomic sync</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>Manual calendar blocks</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Frequent double bookings</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Frequent double bookings</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-amber-600 font-medium">
                         <Check className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={2} />
                         <span>iCal / Slow Webhooks</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">30-60 min lag latency</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">30-60 min lag latency</div>
                     </td>
                   </tr>
 
@@ -1095,26 +1156,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Direct Booking Engine
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>0% Commission + Stripe</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Turnkey branded sites</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">Turnkey branded sites</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>None</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">100% dependent on OTAs</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">100% dependent on OTAs</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-amber-600 font-medium">
                         <Check className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={2} />
                         <span>3% - 5% Cut per booking</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Expensive transaction fees</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Expensive transaction fees</div>
                     </td>
                   </tr>
 
@@ -1122,26 +1183,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Smart Lock PIN Automation
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>100+ Locks Supported</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Phone PIN auto-timed</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">Phone PIN auto-timed</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>Manual key handover</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Lockbox code never changed</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Lockbox code never changed</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-amber-600 font-medium">
                         <Check className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={2} />
                         <span>Paid Add-on ($15/mo)</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Third-party bridge required</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Third-party bridge required</div>
                     </td>
                   </tr>
 
@@ -1149,26 +1210,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Cleaner Schedules & Web Portal
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Free SMS & Web Links</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">No login or app required</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">No login or app required</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>WhatsApp / SMS chaos</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Missed turnover windows</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Missed turnover windows</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-amber-600 font-medium">
                         <Check className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={2} />
                         <span>Paid cleaner seat</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Must download heavy app</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Must download heavy app</div>
                     </td>
                   </tr>
 
@@ -1176,26 +1237,26 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Time to Setup & Launch
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-300">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>7 Minutes Self-Serve</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Zero sales call needed</div>
+                      <div className="text-[11px] text-slate-700 font-normal mt-0.5">Zero sales call needed</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>Never-ending work</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Constantly on call</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Constantly on call</div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-600">
                       <div className="flex items-center gap-1.5 text-rose-600 font-medium">
                         <X className="h-4 w-4 shrink-0 text-rose-500" strokeWidth={2} />
                         <span>3 - 6 Weeks</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Mandatory onboarding fee</div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">Mandatory onboarding fee</div>
                     </td>
                   </tr>
                 </tbody>
@@ -1205,7 +1266,7 @@ export default function LandingPage() {
         </section>
 
         {/* Verified Host Testimonials */}
-        <section className="py-24 bg-slate-50/70 border-t border-slate-200/70">
+        <section className="py-24 bg-slate-50/70 border-t border-slate-300/70">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <span className="text-xs font-bold tracking-wider text-black uppercase">
@@ -1217,7 +1278,7 @@ export default function LandingPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+              <div className="rounded-2xl border border-slate-300 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
                 <div>
                   <div className="flex gap-1 text-amber-400 mb-4">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
@@ -1233,7 +1294,7 @@ export default function LandingPage() {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">David K.</div>
-                    <div className="text-slate-500">Superhost Â· 4 Listings</div>
+                    <div className="text-slate-700">Superhost · 4 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1241,7 +1302,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+              <div className="rounded-2xl border border-slate-300 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
                 <div>
                   <div className="flex gap-1 text-amber-400 mb-4">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
@@ -1257,7 +1318,7 @@ export default function LandingPage() {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">Claire &amp; Marc V.</div>
-                    <div className="text-slate-500">Property Managers Â· 18 Listings</div>
+                    <div className="text-slate-700">Property Managers · 18 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1265,7 +1326,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+              <div className="rounded-2xl border border-slate-300 bg-white p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
                 <div>
                   <div className="flex gap-1 text-amber-400 mb-4">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
@@ -1281,7 +1342,7 @@ export default function LandingPage() {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">Jason R.</div>
-                    <div className="text-slate-500">Boutique Stays Â· 12 Listings</div>
+                    <div className="text-slate-700">Boutique Stays · 12 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1293,7 +1354,7 @@ export default function LandingPage() {
         </section>
 
         {/* Transparent Pent House PMS Pricing Matrix */}
-        <section className="border-t border-slate-200/70 bg-white py-24" id="pricing">
+        <section className="border-t border-slate-300/70 bg-white py-24" id="pricing">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <span className="text-xs font-bold tracking-wider text-black uppercase">
@@ -1307,7 +1368,7 @@ export default function LandingPage() {
               </p>
 
               {/* Annual / Monthly Toggle */}
-              <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-slate-100 p-1.5">
+              <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-slate-300 bg-slate-100 p-1.5">
                 <button
                   type="button"
                   onClick={() => setAnnualBilling(false)}
@@ -1334,21 +1395,21 @@ export default function LandingPage() {
 
             <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto items-stretch">
               {/* Plan 1: Host */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-8 flex flex-col justify-between shadow-xs">
+              <div className="rounded-2xl border border-slate-300 bg-slate-50/50 p-8 flex flex-col justify-between shadow-xs">
                 <div>
                   <div className="text-lg font-bold text-slate-900">Host</div>
-                  <p className="text-xs text-slate-500 mt-1">For hosts with 1 to 2 properties starting automation.</p>
+                  <p className="text-xs text-slate-700 mt-1">For hosts with 1 to 2 properties starting automation.</p>
                   <div className="mt-6 flex items-baseline gap-1">
                     <span className="text-4xl font-extrabold text-slate-950">
                       ${annualBilling ? "32" : "40"}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/ month</span>
+                    <span className="text-xs text-slate-700 font-medium">/ month</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-[11px] text-slate-700 mt-1">
                     {annualBilling ? "Billed annually ($384/yr)" : "Billed monthly"}
                   </div>
 
-                  <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-200/70 pt-6">
+                  <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-300/70 pt-6">
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Up to 2 properties included</span>
@@ -1381,25 +1442,25 @@ export default function LandingPage() {
               </div>
 
               {/* Plan 2: Professional (Featured) */}
-              <div className="relative rounded-2xl border-2 border-violet-600 bg-white p-8 flex flex-col justify-between shadow-xl shadow-black/10 ring-4 ring-violet-50">
+              <div className="relative rounded-2xl border-2 border-black bg-white p-8 flex flex-col justify-between shadow-xl shadow-black/10 ring-4 ring-zinc-100">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-black px-3 py-1 text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">
                   Most Popular
                 </div>
 
                 <div>
                   <div className="text-lg font-bold text-slate-900">Professional</div>
-                  <p className="text-xs text-slate-500 mt-1">For growing hosts & co-hosts with 3 to 19 properties.</p>
+                  <p className="text-xs text-slate-700 mt-1">For growing hosts & co-hosts with 3 to 19 properties.</p>
                   <div className="mt-6 flex items-baseline gap-1">
                     <span className="text-4xl font-extrabold text-slate-950">
                       ${annualBilling ? "64" : "80"}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/ month</span>
+                    <span className="text-xs text-slate-700 font-medium">/ month</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-[11px] text-slate-700 mt-1">
                     Base includes 2 listings + $15/mo per extra listing
                   </div>
 
-                  <ul className="mt-8 space-y-3 text-xs text-slate-800 border-t border-slate-200/80 pt-6">
+                  <ul className="mt-8 space-y-3 text-xs text-slate-800 border-t border-slate-300 pt-6">
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span><strong>Everything in Host, plus:</strong></span>
@@ -1436,21 +1497,21 @@ export default function LandingPage() {
               </div>
 
               {/* Plan 3: Mogul / Enterprise */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-8 flex flex-col justify-between shadow-xs">
+              <div className="rounded-2xl border border-slate-300 bg-slate-50/50 p-8 flex flex-col justify-between shadow-xs">
                 <div>
                   <div className="text-lg font-bold text-slate-900">Mogul & Enterprise</div>
-                  <p className="text-xs text-slate-500 mt-1">For property management companies with 20+ properties.</p>
+                  <p className="text-xs text-slate-700 mt-1">For property management companies with 20+ properties.</p>
                   <div className="mt-6 flex items-baseline gap-1">
                     <span className="text-4xl font-extrabold text-slate-950">
                       ${annualBilling ? "120" : "150"}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/ month</span>
+                    <span className="text-xs text-slate-700 font-medium">/ month</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-[11px] text-slate-700 mt-1">
                     Includes dedicated account manager & onboarding
                   </div>
 
-                  <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-200/70 pt-6">
+                  <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-300/70 pt-6">
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span><strong>Everything in Professional, plus:</strong></span>
@@ -1486,7 +1547,7 @@ export default function LandingPage() {
         </section>
 
         {/* Frequently Asked Questions */}
-        <section className="py-24 bg-slate-50/70 border-t border-slate-200/70" id="faq">
+        <section className="py-24 bg-slate-50/70 border-t border-slate-300/70" id="faq">
           <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <span className="text-xs font-bold tracking-wider text-black uppercase">
@@ -1506,7 +1567,7 @@ export default function LandingPage() {
                 return (
                   <div
                     key={faq.q}
-                    className="rounded-xl border border-slate-200/80 bg-white overflow-hidden shadow-xs hover:border-slate-300 transition-colors"
+                    className="rounded-xl border border-slate-300 bg-white overflow-hidden shadow-xs hover:border-slate-300 transition-colors"
                   >
                     <button
                       type="button"
@@ -1536,11 +1597,11 @@ export default function LandingPage() {
         {/* High-Impact Bottom Call to Action */}
         <section className="py-20 bg-white">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-800 p-10 sm:p-16 text-center text-white shadow-2xl shadow-black/10">
-              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-zinc-900 to-neutral-950 p-10 sm:p-16 text-center text-white shadow-2xl shadow-black/25 border border-zinc-800">
+              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none" />
 
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/20 mb-6 backdrop-blur-xs">
-                <Sparkles className="h-3.5 w-3.5 text-violet-200" strokeWidth={1.5} />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1 text-xs font-bold text-black border border-zinc-200 mb-6 shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-black" strokeWidth={1.5} />
                 Setup Takes Less Than 7 Minutes
               </span>
 
@@ -1548,7 +1609,7 @@ export default function LandingPage() {
                 Ready to run your properties on autopilot?
               </h2>
 
-              <p className="mx-auto mt-4 max-w-2xl text-base text-violet-100">
+              <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-100">
                 Join 500,000+ short-term rental listings worldwide who save 15+ hours every week with Pent House PMS.
               </p>
 
@@ -1568,7 +1629,7 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-violet-200">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-100">
                 <span className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-white" strokeWidth={1.5} />
                   No credit card required
@@ -1588,7 +1649,7 @@ export default function LandingPage() {
       </main>
 
       {/* Pent House PMS Brand Footer */}
-      <footer className="border-t border-slate-200/80 bg-slate-50 py-16 text-xs text-slate-600">
+      <footer className="border-t border-slate-300 bg-slate-50 py-16 text-xs text-slate-600">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 grid-cols-2 md:grid-cols-5 mb-12">
             {/* Brand Column */}
@@ -1651,9 +1712,9 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-200/80 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+          <div className="border-t border-slate-300 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-700">
             <div>
-              Â© 2026 Pent House PMS. All rights reserved. Built for professional vacation rental hosts.
+              &copy; 2026 Pent House PMS. All rights reserved. Built for professional vacation rental hosts.
             </div>
             <div className="flex gap-6 font-medium">
               <span>Zero-Emoji Clean Line Design</span>
@@ -1666,4 +1727,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
 

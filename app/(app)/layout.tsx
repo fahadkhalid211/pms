@@ -33,8 +33,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         name: org.name,
         slug: org.slug,
         logoUrl: org.logoUrl,
-        primaryColor: org.primaryColor || "#0f172a",
-        accentColor: org.accentColor || "#3b82f6",
+        primaryColor: org.primaryColor || "#000000",
+        accentColor: org.accentColor || "#ffffff",
         branding: (org.branding as any) || undefined,
       };
     }

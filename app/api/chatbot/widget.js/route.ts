@@ -29,11 +29,11 @@ export async function GET(request: Request) {
   button.style.width = '56px';
   button.style.height = '56px';
   button.style.borderRadius = '50%';
-  button.style.background = '#6D28D9';
+  button.style.background = '#000000';
   button.style.color = '#FFFFFF';
-  button.style.border = 'none';
+  button.style.border = '1px solid #27272a';
   button.style.cursor = 'pointer';
-  button.style.boxShadow = '0 10px 25px -5px rgba(109, 40, 217, 0.5)';
+  button.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.5)';
   button.style.display = 'flex';
   button.style.alignItems = 'center';
   button.style.justifyContent = 'center';
@@ -43,24 +43,24 @@ export async function GET(request: Request) {
   panel.style.width = '360px';
   panel.style.height = '500px';
   panel.style.borderRadius = '16px';
-  panel.style.background = '#090D16';
-  panel.style.border = '1px solid #2E1065';
+  panel.style.background = '#09090b';
+  panel.style.border = '1px solid #27272a';
   panel.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.6)';
   panel.style.flexDirection = 'column';
   panel.style.overflow = 'hidden';
   panel.style.marginBottom = '12px';
 
   panel.innerHTML = [
-    '<div style="padding: 16px; background: #130E26; border-bottom: 1px solid #2E1065; display: flex; align-items: center; justify-content: space-between;">',
-    '  <div><div style="font-weight: 600; color: #FFFFFF; font-size: 14px;">Hotel Assistant</div><div style="font-size: 12px; color: #A78BFA;">Always here to help</div></div>',
+    '<div style="padding: 16px; background: #18181b; border-bottom: 1px solid #27272a; display: flex; align-items: center; justify-content: space-between;">',
+    '  <div><div style="font-weight: 600; color: #FFFFFF; font-size: 14px;">Hotel Assistant</div><div style="font-size: 12px; color: #a1a1aa;">Always here to help</div></div>',
     '  <button id="lumina-close" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 18px;">&times;</button>',
     '</div>',
     '<div id="lumina-msgs" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px;">',
-    '  <div style="background: #1C1538; color: #EDE9FE; padding: 10px 14px; border-radius: 12px; max-width: 85%;">Hello! How can I assist you with your stay, availability, or policies today?</div>',
+    '  <div style="background: #27272a; color: #f4f4f5; padding: 10px 14px; border-radius: 12px; max-width: 85%;">Hello! How can I assist you with your stay, availability, or policies today?</div>',
     '</div>',
-    '<div style="padding: 12px; border-top: 1px solid #2E1065; display: flex; gap: 8px;">',
-    '  <input id="lumina-input" type="text" placeholder="Type your question..." style="flex: 1; background: #130E26; border: 1px solid #3B1C78; border-radius: 8px; padding: 8px 12px; color: #FFFFFF; font-size: 13px; outline: none;" />',
-    '  <button id="lumina-send" style="background: #6D28D9; border: none; border-radius: 8px; color: #FFFFFF; padding: 8px 14px; cursor: pointer; font-size: 13px;">Send</button>',
+    '<div style="padding: 12px; border-top: 1px solid #27272a; display: flex; gap: 8px;">',
+    '  <input id="lumina-input" type="text" placeholder="Type your question..." style="flex: 1; background: #18181b; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px 12px; color: #FFFFFF; font-size: 13px; outline: none;" />',
+    '  <button id="lumina-send" style="background: #000000; border: 1px solid #3f3f46; border-radius: 8px; color: #FFFFFF; padding: 8px 14px; cursor: pointer; font-size: 13px;">Send</button>',
     '</div>'
   ].join('');
 
@@ -90,7 +90,8 @@ export async function GET(request: Request) {
     input.value = '';
 
     var userDiv = document.createElement('div');
-    userDiv.style.background = '#6D28D9';
+    userDiv.style.background = '#000000';
+    userDiv.style.border = '1px solid #27272a';
     userDiv.style.color = '#FFFFFF';
     userDiv.style.padding = '10px 14px';
     userDiv.style.borderRadius = '12px';

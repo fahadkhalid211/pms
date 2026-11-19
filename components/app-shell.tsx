@@ -177,16 +177,16 @@ export function AppShell({
                 </div>
               )}
               <div className="flex flex-col truncate">
-                <span className="text-sm font-bold tracking-tight truncate text-foreground">
+                <span className="text-sm font-bold tracking-tight truncate text-zinc-950">
                   {branding?.name || "Pent House PMS"}
                 </span>
                 {branding?.branding?.tagline ? (
-                  <span className="text-[10px] text-muted-foreground truncate font-normal">
+                  <span className="text-[10px] text-zinc-600 truncate font-medium">
                     {branding.branding.tagline}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    Luxury PMS Hospitality
+                  <span className="text-[10px] font-mono text-zinc-600 font-medium">
+                    Pent House PMS
                   </span>
                 )}
               </div>
@@ -220,7 +220,7 @@ export function AppShell({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="hidden lg:inline-flex h-7 w-7 items-center justify-center rounded-md border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            className="hidden lg:inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-300 text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -239,14 +239,14 @@ export function AppShell({
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
                 className={cn(
-                  "flex items-center rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg text-sm font-semibold transition-colors",
                   collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2",
                   isActive
-                    ? "bg-accent text-accent-foreground font-semibold shadow-xs"
-                    : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground",
+                    ? "bg-black text-white font-bold shadow-sm"
+                    : "text-zinc-700 hover:bg-zinc-100 hover:text-black",
                 )}
               >
-                <item.icon className={cn("h-4 w-4 shrink-0", isActive && "text-primary")} />
+                <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-zinc-600")} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
@@ -254,13 +254,13 @@ export function AppShell({
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="border-t p-2">
+        <div className="border-t border-zinc-200 p-2">
           <button
             type="button"
             onClick={handleLogout}
             title={collapsed ? "Sign Out" : undefined}
             className={cn(
-              "flex w-full items-center rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive",
+              "flex w-full items-center rounded-lg text-sm font-semibold text-zinc-700 transition-colors hover:bg-rose-50 hover:text-rose-900",
               collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2",
             )}
           >
@@ -321,39 +321,39 @@ export function AppShell({
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden text-left md:block">
-                  <div className="text-xs font-semibold leading-tight text-foreground">{userName}</div>
-                  <div className="text-[11px] text-muted-foreground leading-tight">Property Manager</div>
+                  <div className="text-xs font-bold leading-tight text-zinc-950">{userName}</div>
+                  <div className="text-[11px] text-zinc-600 leading-tight font-medium">Property Manager</div>
                 </div>
               </button>
 
               {userMenuOpen && (
                 <div
-                  className="absolute right-0 z-50 mt-1.5 w-52 rounded-xl border bg-popover p-1.5 text-popover-foreground shadow-xl"
+                  className="absolute right-0 z-50 mt-1.5 w-52 rounded-xl border border-zinc-200 bg-white p-1.5 text-zinc-950 shadow-xl"
                   onClick={() => setUserMenuOpen(false)}
                 >
-                  <div className="border-b px-3 py-2 text-xs">
-                    <p className="font-semibold text-foreground">{userName}</p>
-                    <p className="text-muted-foreground">Manager</p>
+                  <div className="border-b border-zinc-200 px-3 py-2 text-xs">
+                    <p className="font-bold text-zinc-950">{userName}</p>
+                    <p className="text-zinc-600 font-medium">Manager</p>
                   </div>
                   <div className="p-1 space-y-0.5">
                     <Link
                       href="/settings"
-                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-accent"
+                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 hover:text-black"
                     >
-                      <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Settings className="h-3.5 w-3.5 text-zinc-600" />
                       Settings & Policies
                     </Link>
                     <Link
                       href="/staff"
-                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-accent"
+                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 hover:text-black"
                     >
-                      <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                      <UserIcon className="h-3.5 w-3.5 text-zinc-600" />
                       Staff Accounts
                     </Link>
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       Sign Out

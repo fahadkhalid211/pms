@@ -123,7 +123,7 @@ function bookingBarStyles(status: string): string {
     case "no_show":
       return "bg-rose-100 text-rose-800 border-rose-300 line-through opacity-75";
     default:
-      return "bg-violet-600 text-white border-violet-700 hover:bg-violet-700";
+      return "bg-black text-white border-zinc-800 hover:bg-zinc-900";
   }
 }
 

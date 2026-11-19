@@ -502,7 +502,7 @@ export default function NotificationsPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
+                  <thead className="border-b border-zinc-300 bg-zinc-100 text-xs font-extrabold text-zinc-950 uppercase">
                     <tr>
                       <th className="px-4 py-3">Recipient</th>
                       <th className="px-4 py-3">Type & Subject</th>
@@ -513,7 +513,7 @@ export default function NotificationsPage() {
                       <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-zinc-200">
                     {filteredNotifications.map((notif) => {
                       const isFailed = notif.status === "failed";
                       const isSent = notif.status === "sent";
@@ -607,7 +607,7 @@ export default function NotificationsPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
+                  <thead className="border-b border-zinc-300 bg-zinc-100 text-xs font-extrabold text-zinc-950 uppercase">
                     <tr>
                       <th className="px-4 py-3">Log ID / Ref</th>
                       <th className="px-4 py-3">Provider</th>
@@ -617,7 +617,7 @@ export default function NotificationsPage() {
                       <th className="px-4 py-3 text-right">Timestamp</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-zinc-200">
                     {logs.map((log) => (
                       <tr key={log.id} className="hover:bg-muted/40 transition-colors">
                         <td className="px-4 py-3 font-mono text-xs">

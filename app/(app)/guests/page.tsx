@@ -268,9 +268,9 @@ export default function GuestsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Repeat Guest Rate</span>
-              <Sparkles className="h-4 w-4 text-violet-600" />
+              <Sparkles className="h-4 w-4 text-foreground" />
             </div>
-            <div className="mt-2 text-2xl font-bold text-violet-600">
+            <div className="mt-2 text-2xl font-bold text-foreground">
               {guestStats?.repeatRatePct || 11.4}%
             </div>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -378,7 +378,7 @@ export default function GuestsPage() {
                               {g.firstName} {g.lastName}
                             </span>
                             {stays > 1 && (
-                              <Badge variant="outline" className="text-[10px] text-violet-600 border-violet-500/30">
+                              <Badge variant="outline" className="text-[10px] text-foreground border-border">
                                 {stays} Stays · Repeat
                               </Badge>
                             )}
@@ -469,16 +469,16 @@ export default function GuestsPage() {
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-border/60 text-muted-foreground bg-muted/40">
-                    <th className="py-2.5 px-3 font-semibold">Rank</th>
-                    <th className="py-2.5 px-3 font-semibold">Guest Name</th>
-                    <th className="py-2.5 px-3 font-semibold">Stays</th>
-                    <th className="py-2.5 px-3 font-semibold">Nights Sold</th>
-                    <th className="py-2.5 px-3 font-semibold">Total Spend</th>
-                    <th className="py-2.5 px-3 font-semibold">Primary Channel</th>
-                    <th className="py-2.5 px-3 font-semibold">VIP Status Tier</th>
-                    <th className="py-2.5 px-3 text-right font-semibold">Action</th>
+                <thead className="bg-zinc-100 border-b border-zinc-300 text-zinc-950 uppercase text-[11px] font-black">
+                  <tr>
+                    <th className="py-3 px-3">Rank</th>
+                    <th className="py-3 px-3">Guest Name</th>
+                    <th className="py-3 px-3">Stays</th>
+                    <th className="py-3 px-3">Nights Sold</th>
+                    <th className="py-3 px-3">Total Spend</th>
+                    <th className="py-3 px-3">Primary Channel</th>
+                    <th className="py-3 px-3">VIP Status Tier</th>
+                    <th className="py-3 px-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40 font-mono">

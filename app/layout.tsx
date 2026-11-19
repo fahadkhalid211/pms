@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Pent House PMS — Luxury Hospitality & Property Management",
+    default: "Pent House PMS",
     template: "%s | Pent House PMS",
   },
   description:
