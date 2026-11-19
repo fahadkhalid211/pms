@@ -8,6 +8,8 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginAction } from "@/app/actions/auth";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">

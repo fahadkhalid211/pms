@@ -44,25 +44,54 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // ---------------------------------------------------------------
+      // Auth & protected pages — NEVER cache on CDN or browser.
+      // Hostinger hcdn respects Cache-Control and CDN-Cache-Control.
+      // ---------------------------------------------------------------
+      {
+        source: "/login",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, max-age=0" },
+          { key: "CDN-Cache-Control", value: "no-store" },
+          { key: "Surrogate-Control", value: "no-store" },
+        ],
+      },
+      {
+        source: "/register",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, max-age=0" },
+          { key: "CDN-Cache-Control", value: "no-store" },
+          { key: "Surrogate-Control", value: "no-store" },
+        ],
+      },
+      {
+        source: "/(dashboard|analytics|reservations|frontdesk|calendar|rooms|properties|billing|housekeeping|maintenance|reports|staff|settings|ai|guests|integrations|support|notifications|activity-logs)(.*)",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, max-age=0" },
+          { key: "CDN-Cache-Control", value: "no-store" },
+          { key: "Surrogate-Control", value: "no-store" },
+        ],
+      },
+      // ---------------------------------------------------------------
+      // API routes — always dynamic, never cached
+      // ---------------------------------------------------------------
+      {
+        source: "/api/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, max-age=0" },
+          { key: "CDN-Cache-Control", value: "no-store" },
+        ],
+      },
+      // ---------------------------------------------------------------
+      // Global security headers for all other routes
+      // ---------------------------------------------------------------
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
     ];

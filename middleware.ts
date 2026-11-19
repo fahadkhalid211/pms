@@ -24,6 +24,8 @@ function getSafeOrigin(request: NextRequest): string {
   return `${proto}://${safeHost}`;
 }
 
+const NO_STORE = "no-store, no-cache, must-revalidate, max-age=0";
+
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -33,6 +35,10 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     "Content-Security-Policy",
     "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none';",
   );
+  // Prevent Hostinger CDN and any proxy from caching auth-aware responses
+  response.headers.set("Cache-Control", NO_STORE);
+  response.headers.set("Surrogate-Control", "no-store");
+  response.headers.set("CDN-Cache-Control", "no-store");
   return response;
 }
 
