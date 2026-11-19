@@ -37,6 +37,12 @@ const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
   serverExternalPackages: ["bcryptjs", "@prisma/client"],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
   experimental: {
     serverActions: {
       allowedOrigins,

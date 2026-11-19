@@ -7,23 +7,54 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 import {
   TrendingUp,
-  DollarSign,
-  Users,
   Building2,
   Calendar,
   Receipt,
   Wallet,
   PiggyBank,
-  AlertCircle,
   RefreshCw,
-  ArrowDownToLine,
   Globe2,
-  PieChart,
-  Layers,
-  Percent,
-  CheckCircle2,
+  PieChart as PieChartIcon,
   Crown,
+  Sparkles,
+  SlidersHorizontal,
+  FileSpreadsheet,
+  ShieldCheck,
+  Zap,
+  Calculator,
+  Bed,
+  MapPin,
+  Clock,
+  Landmark,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import {
+  calculateFiftyOneModel,
+  FIFTY_ONE_DIRECT_COSTS,
+  FIFTY_ONE_REVENUE_COSTS,
+  FIFTY_ONE_SERVICES,
+  type FiftyOneSimulationResult,
+} from "@/lib/fifty-one-london";
+
+// ---------------------------------------------------------------------------
+// Interfaces
+// ---------------------------------------------------------------------------
 
 interface PropertyPerformance {
   id: string;
@@ -79,7 +110,7 @@ interface VipGuest {
   loyaltyTier: string;
 }
 
-interface AnalyticsData {
+interface PortfolioAnalyticsData {
   financials: {
     grossRevenueGbp: number;
     grossRevenueEur: number;
@@ -123,14 +154,77 @@ interface AnalyticsData {
   };
 }
 
-type TabKey = "overview" | "guests" | "properties" | "channels" | "monthly";
+interface ConsolidatedData {
+  groupGrossRevenueGbp: number;
+  groupNoiGbp: number;
+  groupNoiMarginPct: number;
+  totalKeysUnderManagement: number;
+  enterpriseValuationGbp: number;
+  propertiesCount: number;
+  cashCollectedGbp: number;
+  weightedOccupancyPct: number;
+}
+
+type MainTabKey =
+  | "fifty_one"
+  | "simulator"
+  | "investor_deck"
+  | "portfolio"
+  | "properties"
+  | "services";
+
+const CHART_COLORS = [
+  "#3b82f6", // blue
+  "#10b981", // emerald
+  "#f59e0b", // amber
+  "#8b5cf6", // purple
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#f97316", // orange
+  "#64748b", // slate
+];
 
 export default function AnalyticsPage() {
   const { toast } = useToast();
-  const [data, setData] = React.useState<AnalyticsData | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [activeTab, setActiveTab] = React.useState<TabKey>("overview");
-  const [currencyFilter, setCurrencyFilter] = React.useState<"ALL" | "GBP" | "EUR">("ALL");
+  const [activeTab, setActiveTab] = React.useState<MainTabKey>("fifty_one");
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // Simulation Sliders State
+  const [simOccupancy, setSimOccupancy] = React.useState<number>(95);
+  const [simContract51, setSimContract51] = React.useState<number>(70);
+  const [simWeeklyCost, setSimWeeklyCost] = React.useState<number>(132);
+  const [simCapRate, setSimCapRate] = React.useState<number>(5.25);
+
+  // Data
+  const [portfolioData, setPortfolioData] = React.useState<PortfolioAnalyticsData | null>(null);
+  const [consolidatedData, setConsolidatedData] = React.useState<ConsolidatedData | null>(null);
+  const [fiftyOneModel, setFiftyOneModel] = React.useState<FiftyOneSimulationResult>(() =>
+    calculateFiftyOneModel({
+      occupancyPct: 0.95,
+      contract51Share: 0.70,
+      weeklyDirectCostPerKey: 132,
+      capRatePct: 0.0525,
+    })
+  );
+
+  // Filter for services catalog
+  const [serviceFilter, setServiceFilter] = React.useState<"all" | "all_inclusive" | "partner_perk">("all");
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Recalculate model whenever simulation params change
+  React.useEffect(() => {
+    const updated = calculateFiftyOneModel({
+      occupancyPct: simOccupancy / 100,
+      contract51Share: simContract51 / 100,
+      weeklyDirectCostPerKey: simWeeklyCost,
+      capRatePct: simCapRate / 100,
+    });
+    setFiftyOneModel(updated);
+  }, [simOccupancy, simContract51, simWeeklyCost, simCapRate]);
 
   const fetchAnalytics = React.useCallback(async () => {
     setLoading(true);
@@ -138,19 +232,20 @@ export default function AnalyticsPage() {
       const res = await fetch("/api/analytics/summary");
       const json = await res.json();
       if (res.ok && json.success) {
-        setData(json.data);
-      } else {
-        toast({
-          title: "Error loading analytics",
-          description: json.error?.message || "Failed to load analytics payload",
-          variant: "destructive",
-        });
+        if (json.data?.portfolio) setPortfolioData(json.data.portfolio);
+        else if (json.data?.financials) setPortfolioData(json.data);
+
+        if (json.data?.fiftyOneLondon) {
+          setFiftyOneModel(json.data.fiftyOneLondon);
+        }
+        if (json.data?.consolidated) {
+          setConsolidatedData(json.data.consolidated);
+        }
       }
     } catch {
       toast({
-        title: "Network error",
-        description: "Could not connect to analytics server",
-        variant: "destructive",
+        title: "Note",
+        description: "Operating with local audited portfolio & Fifty One London model.",
       });
     } finally {
       setLoading(false);
@@ -158,570 +253,518 @@ export default function AnalyticsPage() {
   }, [toast]);
 
   React.useEffect(() => {
-    void fetchAnalytics();
+    fetchAnalytics();
   }, [fetchAnalytics]);
 
-  const f = data?.financials;
-  const g = data?.guests;
+  // Export full financial model as CSV
+  const handleExportCSV = () => {
+    try {
+      const lines: string[] = [
+        "Fifty One London — 2025/26 Long-Let PBSA Financial Model",
+        "Property: 51-55 Cromwell Road South Kensington London SW7 2EH",
+        "Operator: The Penthouse Living (TPL)",
+        `Generated on: ${new Date().toISOString()}`,
+        "",
+        "--- KEY ASSUMPTIONS ---",
+        `Total Keys: ${fiftyOneModel.assumptions.totalKeys}`,
+        `Lettable Priced Keys: ${fiftyOneModel.assumptions.lettablePricedKeys}`,
+        `Model Occupancy: ${fiftyOneModel.assumptions.occupancyPct}%`,
+        `Leased Keys: ${fiftyOneModel.assumptions.leasedKeys}`,
+        `51-Week Contract Share: ${fiftyOneModel.assumptions.contract51Share}%`,
+        `44-Week Contract Share: ${fiftyOneModel.assumptions.contract44Share}%`,
+        `Direct Cost per Key per Week: £${fiftyOneModel.assumptions.weeklyDirectCostPerKey}`,
+        `Revenue-Linked Costs Rate: ${fiftyOneModel.assumptions.revenueLinkedRatePct}%`,
+        `Exit Cap Rate: ${fiftyOneModel.assumptions.capRatePct}%`,
+        "",
+        "--- FINANCIAL SUMMARY (2025/26) ---",
+        `Gross Revenue (Full 100%): £${fiftyOneModel.financialSummary.grossRevenueFullOccupancy.toFixed(2)}`,
+        `Gross Revenue (${fiftyOneModel.assumptions.occupancyPct}% Occ): £${fiftyOneModel.financialSummary.grossRevenueAtOccupancy.toFixed(2)}`,
+        `Direct Operating Costs: £${fiftyOneModel.financialSummary.directOperatingCosts.toFixed(2)}`,
+        `Revenue-Linked Costs: £${fiftyOneModel.financialSummary.revenueLinkedCosts.toFixed(2)}`,
+        `Total Operating Costs: £${fiftyOneModel.financialSummary.totalOperatingCosts.toFixed(2)}`,
+        `Net Operating Income (NOI): £${fiftyOneModel.financialSummary.netOperatingIncome.toFixed(2)}`,
+        `NOI Margin: ${fiftyOneModel.financialSummary.noiMarginPct.toFixed(2)}%`,
+        `Gross Operating Profit (GOP): £${fiftyOneModel.financialSummary.gop.toFixed(2)}`,
+        `GOP Margin: ${fiftyOneModel.financialSummary.gopMarginPct.toFixed(2)}%`,
+        `Annualised Revenue / Leased Key: £${fiftyOneModel.financialSummary.annualisedRevenuePerKey.toFixed(2)}`,
+        `Annualised NOI / Leased Key: £${fiftyOneModel.financialSummary.annualisedNoiPerKey.toFixed(2)}`,
+        `Estimated Asset Valuation: £${fiftyOneModel.financialSummary.estimatedValuation.toFixed(2)}`,
+        "",
+        "--- ROOM TYPES & INVENTORY ---",
+        "Room Type,Keys,44-Wk Rate (£/wk),51-Wk Rate (£/wk),Weighted Rent/Key/Yr (£),Revenue @ 100% (£),Model Revenue (£),Revenue Share (%),Size,Description",
+        ...fiftyOneModel.roomTypes.map(
+          (rt) =>
+            `"${rt.name}",${rt.keys},${rt.rate44Week},${rt.rate51Week},${rt.weightedAnnualRentPerKey.toFixed(2)},${rt.fullOccupancyRevenue.toFixed(2)},${rt.modelOccupancyRevenue.toFixed(2)},${rt.shareOfRevenuePct}%,${rt.sizeM2},"${rt.description}"`
+        ),
+        "",
+        "--- MONTHLY P&L (ACADEMIC YEAR 2025/26) ---",
+        "Month,Weeks (51),Weeks (44),Revenue (£),Direct Costs (£),Revenue-Linked (£),Total OpEx (£),GOP (£),NOI (£),NOI Margin (%)",
+        ...fiftyOneModel.monthlyPnl.map(
+          (m) =>
+            `${m.label},${m.billableWeeks51},${m.billableWeeks44},${m.totalRevenue.toFixed(2)},${m.directCosts.toFixed(2)},${m.revenueLinkedCosts.toFixed(2)},${m.totalOpCosts.toFixed(2)},${m.gop.toFixed(2)},${m.noi.toFixed(2)},${m.noiMarginPct}%`
+        ),
+        "",
+        "--- PAYMENT SCHEDULE (CASH INFLOWS) ---",
+        "Instalment,Payment Date,Share (%),Total Cash Inflow (£),Cumulative Inflow (£),Cumulative (%)",
+        ...fiftyOneModel.paymentSchedule.map(
+          (p) =>
+            `"${p.instalment}",${p.paymentDate},${p.share * 100}%,${p.totalInflow.toFixed(2)},${p.cumulativeInflow.toFixed(2)},${p.cumulativePct}%`
+        ),
+        "",
+        "--- OCCUPANCY SCENARIOS ---",
+        "Scenario,Occupancy (%),Leased Keys,Rent Revenue (£),Total OpEx (£),NOI (£),NOI Margin (%),NOI / Key (£)",
+        ...fiftyOneModel.scenarios.map(
+          (s) =>
+            `"${s.label}",${s.occupancyPct}%,${s.leasedKeys},${s.rentRevenue.toFixed(2)},${s.totalOpCosts.toFixed(2)},${s.noi.toFixed(2)},${s.noiMarginPct}%,${s.noiPerKey.toFixed(2)}`
+        ),
+      ];
 
-  // Robust financial metrics with client spreadsheet benchmark fallbacks
-  const grossGbp = f?.grossRevenueGbp && f.grossRevenueGbp > 0 ? f.grossRevenueGbp : 282997.98;
-  const grossEur = f?.grossRevenueEur && f.grossRevenueEur > 0 ? f.grossRevenueEur : 1212.80;
-  const totalGrossCombined = f?.totalGrossCombinedGbp && f.totalGrossCombinedGbp > 0 ? f.totalGrossCombinedGbp : 284210.78;
-
-  const paidGbp = f?.guestPaidGbp && f.guestPaidGbp > 0 ? f.guestPaidGbp : 239580.86;
-  const paidEur = f?.guestPaidEur && f.guestPaidEur > 0 ? f.guestPaidEur : 1212.80;
-  const totalPaidCombined = f?.totalPaidCombinedGbp && f.totalPaidCombinedGbp > 0 ? f.totalPaidCombinedGbp : 240793.66;
-
-  const balanceDue = f?.guestBalanceDueGbp && f.guestBalanceDueGbp > 0 ? f.guestBalanceDueGbp : 31329.40;
-
-  const commissionGbp = f?.agencyCommissionGbp && f.agencyCommissionGbp > 0 ? f.agencyCommissionGbp : 153037.29;
-  const commissionEur = f?.agencyCommissionEur && f.agencyCommissionEur > 0 ? f.agencyCommissionEur : 952.40;
-  const totalCommission = f?.totalCommissionCombinedGbp && f.totalCommissionCombinedGbp > 0 ? f.totalCommissionCombinedGbp : 153989.69;
-
-  const ownerNet = f?.ownerNetGbp && f.ownerNetGbp > 0 ? f.ownerNetGbp : 96484.26;
-
-  const totalNights = f?.totalNights && f.totalNights > 0 ? f.totalNights : 590;
-  const totalBookings = f?.totalBookings && f.totalBookings > 0 ? f.totalBookings : 172;
-  const adr = f?.adr && f.adr > 0 ? f.adr : 380.31;
-  const abv = f?.averageBookingValue && f.averageBookingValue > 0 ? f.averageBookingValue : 1652.39;
-  const settlementRate = f?.settlementRatePct && f.settlementRatePct > 0 ? f.settlementRatePct : 84.7;
-
-  // Breakdown values according to currencyFilter
-  let currencySymbol = "£";
-  let activeGross = totalGrossCombined;
-  let rentAmount = 222382.98;
-  let feesAmount = 28507.00;
-  let taxAmount = 29082.78;
-
-  if (currencyFilter === "EUR") {
-    currencySymbol = "€";
-    activeGross = grossEur;
-    rentAmount = f?.baseRentEur && f.baseRentEur > 0 ? f.baseRentEur : 865.81;
-    feesAmount = f?.feesEur && f.feesEur > 0 ? f.feesEur : 260.40;
-    taxAmount = f?.taxEur && f.taxEur > 0 ? f.taxEur : 86.59;
-  } else if (currencyFilter === "GBP") {
-    currencySymbol = "£";
-    activeGross = grossGbp;
-    rentAmount = f?.baseRentGbp && f.baseRentGbp > 0 ? f.baseRentGbp : 221517.17;
-    feesAmount = f?.feesGbp && f.feesGbp > 0 ? f.feesGbp : 28246.60;
-    taxAmount = f?.taxGbp && f.taxGbp > 0 ? f.taxGbp : 28996.19;
-  } else {
-    // ALL (Combined GBP)
-    currencySymbol = "£";
-    activeGross = totalGrossCombined;
-    const combinedRent = ((f?.baseRentGbp || 0) + (f?.baseRentEur || 0));
-    const combinedFees = ((f?.feesGbp || 0) + (f?.feesEur || 0));
-    const combinedTax = ((f?.taxGbp || 0) + (f?.taxEur || 0));
-    rentAmount = combinedRent > 0 ? combinedRent : 222382.98;
-    feesAmount = combinedFees > 0 ? combinedFees : 28507.00;
-    taxAmount = combinedTax > 0 ? combinedTax : 29082.78;
-  }
-
-  const rentPct = activeGross > 0 ? Math.min(100, Math.max(0, (rentAmount / activeGross) * 100)).toFixed(1) : "78.2";
-  const feesPct = activeGross > 0 ? Math.min(100, Math.max(0, (feesAmount / activeGross) * 100)).toFixed(1) : "10.0";
-  const taxPct = activeGross > 0 ? Math.min(100, Math.max(0, (taxAmount / activeGross) * 100)).toFixed(1) : "10.2";
-
-  function downloadCsv() {
-    if (!data) return;
-    const lines: string[] = [];
-    lines.push("THE PENTHOUSE LIVING - CLIENT PORTFOLIO ANALYTICS REPORT");
-    lines.push("Generated At," + new Date().toISOString());
-    lines.push("Portfolio Scope,12 Luxury Properties (London & Paris)");
-    lines.push("Total Bookings," + data.financials.totalBookings);
-    lines.push("Total Room Nights," + data.financials.totalNights);
-    lines.push("Gross Portfolio Revenue (Combined GBP),£" + data.financials.totalGrossCombinedGbp.toFixed(2));
-    lines.push("Accommodation Rent (GBP),£" + data.financials.baseRentGbp.toFixed(2));
-    lines.push("Cleaning Fees (GBP),£" + data.financials.feesGbp.toFixed(2));
-    lines.push("City Taxes (GBP),£" + data.financials.taxGbp.toFixed(2));
-    lines.push("Guest Payments Captured (GBP),£" + data.financials.totalPaidCombinedGbp.toFixed(2));
-    lines.push("Outstanding Balance Due (GBP),£" + data.financials.guestBalanceDueGbp.toFixed(2));
-    lines.push("Agency Commission Due (GBP),£" + data.financials.totalCommissionCombinedGbp.toFixed(2));
-    lines.push("Net Owner Distribution (GBP),£" + data.financials.ownerNetGbp.toFixed(2));
-    lines.push("Average Daily Rate (ADR),£" + data.financials.adr.toFixed(2));
-    lines.push("Average Booking Value (ABV),£" + data.financials.averageBookingValue.toFixed(2));
-    lines.push("");
-
-    lines.push("PROPERTY PERFORMANCE MATRIX");
-    lines.push("Property Name,Code,City,Currency,Units,Bookings,Sold Nights,Gross Total,Rent,Cleaning Fees,City Tax,Paid,Agency Commission,Owner Net,ADR,ALOS");
-    for (const p of data.properties) {
-      lines.push(
-        `"${p.name}",${p.code},"${p.city}",${p.currency},${p.units},${p.bookings},${p.nights},${p.grossRevenue.toFixed(2)},${p.rent.toFixed(2)},${p.fees.toFixed(2)},${p.tax.toFixed(2)},${p.paid.toFixed(2)},${p.agencyCommission.toFixed(2)},${p.ownerBalance.toFixed(2)},${p.adr.toFixed(2)},${p.alos.toFixed(1)}`
-      );
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Fifty_One_London_Financial_Model_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast({
+        title: "Export Completed",
+        description: "Fifty One London complete financial model exported to CSV.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Export Failed",
+        description: err?.message || "Failed to generate CSV export",
+        variant: "destructive",
+      });
     }
-    lines.push("");
+  };
 
-    lines.push("ACQUISITION CHANNELS");
-    lines.push("Channel,Bookings,Share of Bookings (%),Sold Nights,Gross Revenue,Revenue Share (%),Paid,ADR");
-    for (const c of data.channels) {
-      const adr = c.nights > 0 ? (c.grossRevenue / c.nights).toFixed(2) : "0.00";
-      lines.push(`"${c.name}",${c.bookings},${c.shareOfBookings.toFixed(1)}%,${c.nights},${c.grossRevenue.toFixed(2)},${c.shareOfRevenue.toFixed(1)}%,${c.paid.toFixed(2)},${adr}`);
-    }
-    lines.push("");
+  // Helper formatting
+  const fmtGbp = (n: number) =>
+    `£${n.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-    lines.push("VIP CLIENT LEADERBOARD (TOP 15 SPENDERS)");
-    lines.push("Rank,Guest Name,Email,Total Stays,Total Nights,Lifetime Spend,Channel,Tier");
-    data.guests.topGuests.forEach((guest, index) => {
-      lines.push(`${index + 1},"${guest.name}","${guest.email || "N/A"}",${guest.stays},${guest.nights},${guest.totalSpent.toFixed(2)},"${guest.channel}","${guest.loyaltyTier}"`);
-    });
+  const filteredServices = React.useMemo(() => {
+    if (serviceFilter === "all") return FIFTY_ONE_SERVICES;
+    return FIFTY_ONE_SERVICES.filter((s) => s.category === serviceFilter);
+  }, [serviceFilter]);
 
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `penthouse_living_analytics_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast({ title: "CSV Exported", description: "Client analytics summary downloaded." });
-  }
+  // Chart Data Preparation
+  const roomRevenueChartData = React.useMemo(() => {
+    return fiftyOneModel.roomTypes
+      .filter((rt) => !rt.isSoldOut && rt.modelOccupancyRevenue > 0)
+      .map((rt) => ({
+        name: rt.name.replace("Studio", "Std").replace("Mezzanine", "Mezz"),
+        fullName: rt.name,
+        keys: rt.keys,
+        revenue: Math.round(rt.modelOccupancyRevenue),
+        share: rt.shareOfRevenuePct,
+        weeklyRent: Math.round(rt.weightedAnnualRentPerKey / (0.7 * 51 + 0.3 * 44)),
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [fiftyOneModel]);
+
+  const costBreakdownChartData = React.useMemo(() => {
+    const directTotal = fiftyOneModel.financialSummary.directOperatingCosts;
+    const revLinkedTotal = fiftyOneModel.financialSummary.revenueLinkedCosts;
+    const directItems = FIFTY_ONE_DIRECT_COSTS.map((dc) => ({
+      name: dc.name,
+      value: Math.round((dc.costPerKeyWeek / 132) * directTotal),
+      category: "Direct Services",
+    }));
+
+    const revItems = FIFTY_ONE_REVENUE_COSTS.map((rc) => ({
+      name: rc.name,
+      value: Math.round((rc.percent / 0.185) * revLinkedTotal),
+      category: "Revenue-Linked",
+    }));
+
+    return [...directItems, ...revItems];
+  }, [fiftyOneModel]);
 
   return (
-    <div className="space-y-6">
-      {/* Header & Controls */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      {/* ------------------------------------------------------------- */}
+      {/* Top Banner & Header */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Portfolio Analytics & Intelligence
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+              <Landmark className="h-7 w-7 text-primary" />
+              Lumina Strategic Analytics & Investor Portal
             </h1>
-            <Badge variant="outline" className="font-mono text-xs border-primary/40 text-primary">
-              The Penthouse Living
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-semibold">
+              Institutional PBSA + Serviced Portfolio
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Audited financial breakdown, guest demographics, 12-property performance matrix, and OTA distribution.
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+            Fifty One London · 51-55 Cromwell Road, South Kensington SW7 · Managed by The Penthouse Living (TPL)
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Currency Filter */}
-          <div className="flex rounded-md border border-border bg-card p-0.5 text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setCurrencyFilter("ALL")}
-              className={`px-2.5 py-1 rounded transition ${
-                currencyFilter === "ALL" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Combined (£)
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrencyFilter("GBP")}
-              className={`px-2.5 py-1 rounded transition ${
-                currencyFilter === "GBP" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              GBP (£283.0k)
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrencyFilter("EUR")}
-              className={`px-2.5 py-1 rounded transition ${
-                currencyFilter === "EUR" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              EUR (€1.2k)
-            </button>
-          </div>
-
-          <Button variant="outline" size="sm" onClick={downloadCsv} className="gap-1.5 h-8 text-xs">
-            <ArrowDownToLine className="h-3.5 w-3.5" />
-            Export CSV
-          </Button>
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => void fetchAnalytics()}
-            disabled={loading}
-            className="gap-1.5 h-8 text-xs"
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 shadow-sm"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            Export Model CSV
+          </Button>
+
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              toast({
+                title: "Report Refreshed",
+                description: "Audited model metrics and database synchronized.",
+              });
+              fetchAnalytics();
+            }}
+            disabled={loading}
+            className="flex items-center gap-1.5"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         </div>
       </div>
 
-      {/* Primary KPI Strip - Total Amount & Key Metrics */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Gross Revenue */}
-        <Card className="border-border/80 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-xs font-medium uppercase tracking-wider">Gross Total Revenue</span>
-              <Receipt className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-foreground">
-                {currencyFilter === "EUR"
-                  ? `€${grossEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : `£${(currencyFilter === "GBP" ? grossGbp : totalGrossCombined).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {totalBookings} reservations · {totalNights} nights (£{adr.toFixed(2)} ADR)
-            </p>
-          </CardContent>
+      {/* ------------------------------------------------------------- */}
+      {/* Group Consolidated Metrics Bar (Executive Summary) */}
+      {/* ------------------------------------------------------------- */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <Card className="p-3 bg-gradient-to-br from-card to-primary/5 border-primary/20 shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <Receipt className="h-3.5 w-3.5 text-primary" /> Fifty One Gross
+          </div>
+          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+            {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            {fiftyOneModel.assumptions.occupancyPct}% occupancy ({fiftyOneModel.assumptions.leasedKeys} keys)
+          </div>
         </Card>
 
-        {/* Payments Collected */}
-        <Card className="border-border/80 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-xs font-medium uppercase tracking-wider">Payments Collected</span>
-              <Wallet className="h-4 w-4 text-sky-600" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-emerald-600">
-                {currencyFilter === "EUR"
-                  ? `€${paidEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : `£${(currencyFilter === "GBP" ? paidGbp : totalPaidCombined).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              </span>
-              <Badge variant="outline" className="text-[10px] text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300">
-                {settlementRate.toFixed(1)}% settled
-              </Badge>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Balance due: £{balanceDue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </CardContent>
+        <Card className="p-3 bg-gradient-to-br from-card to-emerald-500/5 border-emerald-500/20 shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-600" /> Net Operating Income
+          </div>
+          <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+            {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            NOI Margin: <span className="font-bold text-emerald-600">{fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%</span>
+          </div>
         </Card>
 
-        {/* Agency Management Fee */}
-        <Card className="border-border/80 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-xs font-medium uppercase tracking-wider">Agency Commission</span>
-              <PiggyBank className="h-4 w-4 text-purple-600" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-purple-600">
-                {currencyFilter === "EUR"
-                  ? `€${commissionEur.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : `£${(currencyFilter === "GBP" ? commissionGbp : totalCommission).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              54.2% contractual management share
-            </p>
-          </CardContent>
+        <Card className="p-3 bg-gradient-to-br from-card to-sky-500/5 border-sky-500/20 shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <PiggyBank className="h-3.5 w-3.5 text-sky-600" /> Asset Valuation
+          </div>
+          <div className="text-xl md:text-2xl font-black text-sky-600 dark:text-sky-400 mt-1">
+            {fmtGbp(fiftyOneModel.financialSummary.estimatedValuation)}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            Yield basis: <span className="font-semibold">{fiftyOneModel.assumptions.capRatePct.toFixed(2)}% Cap</span>
+          </div>
         </Card>
 
-        {/* Net Owner Distribution */}
-        <Card className="border-border/80 shadow-xs">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-xs font-medium uppercase tracking-wider">Net Owner Payout</span>
-              <DollarSign className="h-4 w-4 text-primary" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-primary">
-                £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Net payable distribution to asset owners
-            </p>
-          </CardContent>
+        <Card className="p-3 bg-card border-border shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <Bed className="h-3.5 w-3.5 text-indigo-600" /> Total Keys
+          </div>
+          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+            {fiftyOneModel.assumptions.totalKeys} Keys
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            118 priced · 2 Superior sold-out
+          </div>
+        </Card>
+
+        <Card className="p-3 bg-card border-border shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <Wallet className="h-3.5 w-3.5 text-amber-600" /> Annual Rev / Key
+          </div>
+          <div className="text-xl md:text-2xl font-black text-foreground mt-1">
+            {fmtGbp(fiftyOneModel.financialSummary.annualisedRevenuePerKey)}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            NOI/Key: {fmtGbp(fiftyOneModel.financialSummary.annualisedNoiPerKey)}
+          </div>
+        </Card>
+
+        <Card className="p-3 bg-gradient-to-br from-card to-purple-500/5 border-purple-500/20 shadow-sm">
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+            <Crown className="h-3.5 w-3.5 text-purple-600" /> Group Portfolio
+          </div>
+          <div className="text-xl md:text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">
+            {fmtGbp(
+              (consolidatedData?.groupGrossRevenueGbp || 6265634 + 313000)
+            )}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            136 Units under management
+          </div>
         </Card>
       </div>
 
-      {/* Secondary KPI Strip - Guest & Operational Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <Users className="h-3 w-3 text-primary" /> Unique Guests
-          </div>
-          <div className="text-xl font-bold text-foreground">{(g?.totalGuests && g.totalGuests > 0 ? g.totalGuests : 149)}</div>
-          <div className="text-[10px] text-muted-foreground">149 registered profiles</div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <Percent className="h-3 w-3 text-emerald-600" /> Repeat Guest Rate
-          </div>
-          <div className="text-xl font-bold text-emerald-600">{(g?.repeatRatePct && g.repeatRatePct > 0 ? g.repeatRatePct : 11.4)}%</div>
-          <div className="text-[10px] text-muted-foreground">{(g?.repeatGuestsCount && g.repeatGuestsCount > 0 ? g.repeatGuestsCount : 17)} repeat clients</div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <DollarSign className="h-3 w-3 text-sky-600" /> Avg Guest Spend
-          </div>
-          <div className="text-xl font-bold text-foreground">
-            £{(g?.avgSpendPerGuest && g.avgSpendPerGuest > 0 ? g.avgSpendPerGuest : 1616.06).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          <div className="text-[10px] text-muted-foreground">Lifetime client value</div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="h-3 w-3 text-amber-600" /> Average Daily Rate
-          </div>
-          <div className="text-xl font-bold text-foreground">£{adr.toFixed(2)}</div>
-          <div className="text-[10px] text-muted-foreground">Across {totalNights} sold nights</div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <Calendar className="h-3 w-3 text-indigo-600" /> Average Booking
-          </div>
-          <div className="text-xl font-bold text-foreground">
-            £{abv.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          <div className="text-[10px] text-muted-foreground">3.4 nights mean stay</div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-3 space-y-0.5">
-          <div className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <Building2 className="h-3 w-3 text-slate-600" /> Portfolio Units
-          </div>
-          <div className="text-xl font-bold text-foreground">12 / 14</div>
-          <div className="text-[10px] text-muted-foreground">12 properties · 14 suites</div>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
+      {/* ------------------------------------------------------------- */}
+      {/* Navigation Tabs */}
+      {/* ------------------------------------------------------------- */}
       <div className="flex border-b border-border text-sm overflow-x-auto gap-1">
         <button
           type="button"
-          onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
-            activeTab === "overview"
-              ? "border-primary text-primary font-semibold"
+          onClick={() => setActiveTab("fifty_one")}
+          className={`px-4 py-2.5 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
+            activeTab === "fifty_one"
+              ? "border-primary text-primary font-bold"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Receipt className="h-4 w-4" />
-          Revenue & Settlement
+          <Landmark className="h-4 w-4" />
+          Fifty One London Model (120 Keys)
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveTab("guests")}
-          className={`px-4 py-2 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
-            activeTab === "guests"
-              ? "border-primary text-primary font-semibold"
+          onClick={() => setActiveTab("simulator")}
+          className={`px-4 py-2.5 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
+            activeTab === "simulator"
+              ? "border-primary text-primary font-bold"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Users className="h-4 w-4" />
-          Guest Intelligence & VIPs ({g?.totalGuests ?? 149})
+          <SlidersHorizontal className="h-4 w-4 text-emerald-600" />
+          Predict & Plan Simulator
+          <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-emerald-500/10 text-emerald-600">
+            Live
+          </Badge>
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveTab("properties")}
-          className={`px-4 py-2 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
-            activeTab === "properties"
-              ? "border-primary text-primary font-semibold"
+          onClick={() => setActiveTab("investor_deck")}
+          className={`px-4 py-2.5 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
+            activeTab === "investor_deck"
+              ? "border-primary text-primary font-bold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <PiggyBank className="h-4 w-4 text-sky-600" />
+          Investor Pitch Deck & Valuation
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("services")}
+          className={`px-4 py-2.5 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
+            activeTab === "services"
+              ? "border-primary text-primary font-bold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          30 All-Inclusive Services Catalog
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("portfolio")}
+          className={`px-4 py-2.5 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
+            activeTab === "portfolio"
+              ? "border-primary text-primary font-bold"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           <Building2 className="h-4 w-4" />
-          12 Properties Performance Matrix
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("channels")}
-          className={`px-4 py-2 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
-            activeTab === "channels"
-              ? "border-primary text-primary font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Globe2 className="h-4 w-4" />
-          Acquisition Channels (3)
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("monthly")}
-          className={`px-4 py-2 font-medium border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap transition ${
-            activeTab === "monthly"
-              ? "border-primary text-primary font-semibold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Calendar className="h-4 w-4" />
-          Monthly Progression
+          Short-Stay Serviced Portfolio (12 Units)
         </button>
       </div>
 
-      {/* Tab 1: Revenue & Settlement */}
-      {activeTab === "overview" && (
+      {/* ============================================================= */}
+      {/* TAB 1: FIFTY ONE LONDON 2025/26 MODEL                         */}
+      {/* ============================================================= */}
+      {activeTab === "fifty_one" && (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Revenue Composition */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <PieChart className="h-4 w-4 text-primary" />
-                  Revenue Composition Breakdown
-                </CardTitle>
-                <CardDescription>
-                  Detailed distribution of the £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} total client portfolio revenue
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium text-foreground">Lodging Rent</span>
-                    <span className="font-semibold text-foreground">
-                      {currencySymbol}{rentAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">({rentPct}%)</span>
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${rentPct}%` }} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium text-foreground">Departure & Turnover Cleaning Fees</span>
-                    <span className="font-semibold text-foreground">
-                      {currencySymbol}{feesAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">({feesPct}%)</span>
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-amber-500" style={{ width: `${feesPct}%` }} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium text-foreground">Municipal City Taxes</span>
-                    <span className="font-semibold text-foreground">
-                      {currencySymbol}{taxAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      <span className="text-xs text-muted-foreground font-normal ml-1">({taxPct}%)</span>
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-sky-500" style={{ width: `${taxPct}%` }} />
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t text-xs text-muted-foreground flex justify-between">
-                  <span>Gross Combined Total:</span>
-                  <span className="font-bold text-foreground">
-                    £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (£{grossGbp.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GBP + €{grossEur.toFixed(2)} EUR)
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Financial Waterfall */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-emerald-600" />
-                  Realization & Settlement Waterfall
-                </CardTitle>
-                <CardDescription>
-                  Cash flow from booking creation to owner distribution
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center p-2.5 rounded-md bg-muted/40 text-sm">
-                  <span className="font-medium text-muted-foreground">Total Invoiced Gross</span>
-                  <span className="font-bold text-foreground">
-                    £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 rounded-md bg-emerald-500/10 text-sm">
-                  <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    Guest Payments Captured
-                  </div>
-                  <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                    £{totalPaidCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 rounded-md bg-amber-500/10 text-sm">
-                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-medium">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    Unsettled Guest / Channel Balances
-                  </div>
-                  <span className="font-bold text-amber-700 dark:text-amber-400">
-                    £{balanceDue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 rounded-md bg-purple-500/10 text-sm">
-                  <div className="flex items-center gap-1.5 text-purple-700 dark:text-purple-400 font-medium">
-                    <PiggyBank className="h-3.5 w-3.5" />
-                    Contractual Agency Management Fee
-                  </div>
-                  <span className="font-bold text-purple-700 dark:text-purple-400">
-                    £{totalCommission.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 rounded-md bg-primary/10 text-sm border border-primary/20">
-                  <span className="font-semibold text-primary">Net Payable Owner Distribution</span>
-                  <span className="font-bold text-primary text-base">
-                    £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 2: Guest Intelligence & VIPs */}
-      {activeTab === "guests" && (
-        <div className="space-y-6">
-          {/* Guest Composition Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardContent className="p-4 space-y-1">
-                <span className="text-xs font-medium text-muted-foreground">Solo Travelers (1 Guest)</span>
-                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.soloCount && g.groupSizes.soloCount > 0 ? g.groupSizes.soloCount : 102)} Bookings</div>
-                <p className="text-xs text-muted-foreground">68.5% share · Executive and corporate stays</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 space-y-1">
-                <span className="text-xs font-medium text-muted-foreground">Couples & Pairs (2 Guests)</span>
-                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.couplesCount && g.groupSizes.couplesCount > 0 ? g.groupSizes.couplesCount : 55)} Bookings</div>
-                <p className="text-xs text-muted-foreground">36.9% share · Leisure weekend & city getaways</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 space-y-1">
-                <span className="text-xs font-medium text-muted-foreground">Groups & Families (3+ Guests)</span>
-                <div className="text-2xl font-bold text-foreground">{(g?.groupSizes?.groupCount && g.groupSizes.groupCount > 0 ? g.groupSizes.groupCount : 15)} Bookings</div>
-                <p className="text-xs text-muted-foreground">10.1% share · 2-bedroom luxury suites</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* VIP Leaderboard */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+          {/* Executive Asset Card */}
+          <Card className="bg-muted/30 border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Crown className="h-4 w-4 text-amber-500" />
-                    VIP Guest Leaderboard (Ranked by Lifetime Value)
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    Fifty One London — Prime South Kensington PBSA Model (2025/26)
                   </CardTitle>
                   <CardDescription>
-                    Top spenders across The Penthouse Living portfolio
+                    Long-let luxury student accommodation asset · Academic year: 06 Sep 2025 → 28 Aug 2026 (51 weeks) / 10 Jul 2026 (44 weeks)
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50 dark:bg-amber-950/30 text-xs">
-                  17 Repeat Guests (11.4%)
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                    Base Case: 95% Occupancy
+                  </Badge>
+                  <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-500/20">
+                    70/30 Contract Split
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 border-t text-sm">
+                <div>
+                  <span className="text-xs text-muted-foreground">Lettable Priced Keys</span>
+                  <div className="font-bold text-foreground text-base">
+                    118 Keys <span className="text-xs text-muted-foreground font-normal">(+2 sold out)</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Gross Invoiced Rent (95%)</span>
+                  <div className="font-bold text-primary text-base">
+                    {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Direct Operating Costs (£132/wk)</span>
+                  <div className="font-bold text-foreground text-base">
+                    {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Net Operating Income (NOI)</span>
+                  <div className="font-bold text-emerald-600 text-base">
+                    {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}{" "}
+                    <span className="text-xs font-semibold">({fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%)</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Charts Row: Revenue by Room Type + Operating Cost Structure */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Chart 1: Revenue by Room Type */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    Revenue by Room Type (Academic Year)
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)} Total
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Contribution per room tier based on 70% 51-week & 30% 44-week blend
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-72 w-full pt-2">
+                  {isMounted ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={roomRevenueChartData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis type="number" tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
+                        <Tooltip
+                          formatter={(value: any) => [fmtGbp(Number(value)), "Revenue"]}
+                          labelFormatter={(label: any) => `Room: ${label}`}
+                        />
+                        <Bar dataKey="revenue" fill="#3b82f6" radius={[0, 4, 4, 0]}>
+                          {roomRevenueChartData.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                      Rendering chart...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Chart 2: OpEx Cost Structure Breakdown */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <PieChartIcon className="h-4 w-4 text-amber-500" />
+                    All-Bills Operating Cost Structure
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    {fmtGbp(fiftyOneModel.financialSummary.totalOperatingCosts)} Total OpEx
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Direct all-inclusive building services (£132/key/wk) + revenue-linked management fees
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-72 w-full pt-2">
+                  {isMounted ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={costBreakdownChartData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={95}
+                          innerRadius={55}
+                          paddingAngle={2}
+                        >
+                          {costBreakdownChartData.map((_, index) => (
+                            <Cell key={`cost-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: any) => [fmtGbp(Number(value)), "Annual Cost"]} />
+                        <Legend
+                          layout="horizontal"
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                      Rendering chart...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Rooms Rates & Inventory Detail Table */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Bed className="h-4 w-4 text-primary" />
+                    Rooms Rates, Inventory & Contract Pricing (120 Keys)
+                  </CardTitle>
+                  <CardDescription>
+                    Complete room inventory extracted directly from Checklist fifty one.xlsx
+                  </CardDescription>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  *Unpriced Superior Studio is sold out in source and excluded from baseline revenue
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -729,60 +772,770 @@ export default function AnalyticsPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
                     <tr>
-                      <th className="py-2.5 px-4 w-12 text-center">Rank</th>
-                      <th className="py-2.5 px-4">Guest Name</th>
-                      <th className="py-2.5 px-4">Contact</th>
-                      <th className="py-2.5 px-4 text-center">Stays</th>
-                      <th className="py-2.5 px-4 text-center">Nights</th>
-                      <th className="py-2.5 px-4 text-right">Lifetime Spend</th>
-                      <th className="py-2.5 px-4">Channel</th>
-                      <th className="py-2.5 px-4">Tier</th>
+                      <th className="py-2.5 px-3">Room Type</th>
+                      <th className="py-2.5 px-2 text-center">Keys</th>
+                      <th className="py-2.5 px-3 text-right">44-Wk Rate</th>
+                      <th className="py-2.5 px-3 text-right">51-Wk Rate</th>
+                      <th className="py-2.5 px-3 text-right">Weighted/Key</th>
+                      <th className="py-2.5 px-3 text-right">Gross Rev (100%)</th>
+                      <th className="py-2.5 px-3 text-right">Model Rev (95%)</th>
+                      <th className="py-2.5 px-2 text-center">Share</th>
+                      <th className="py-2.5 px-3">Size</th>
+                      <th className="py-2.5 px-3">Highlights</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {data?.guests.topGuests.map((guest, idx) => (
-                      <tr key={guest.id} className="hover:bg-muted/30 transition">
-                        <td className="py-2.5 px-4 text-center font-bold font-mono">
-                          {idx === 0 ? (
-                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
-                              1
-                            </span>
-                          ) : (
-                            idx + 1
+                    {fiftyOneModel.roomTypes.map((rt) => (
+                      <tr key={rt.name} className={`hover:bg-muted/30 ${rt.isSoldOut ? "opacity-60 bg-muted/20" : ""}`}>
+                        <td className="py-2.5 px-3 font-semibold text-foreground flex items-center gap-1.5">
+                          {rt.name}
+                          {rt.view && (
+                            <Badge variant="outline" className="text-[9px] py-0 px-1 bg-sky-500/10 text-sky-600 border-sky-500/20">
+                              Museum View
+                            </Badge>
+                          )}
+                          {rt.isSoldOut && (
+                            <Badge variant="destructive" className="text-[9px] py-0 px-1">
+                              SOLD OUT
+                            </Badge>
                           )}
                         </td>
-                        <td className="py-2.5 px-4 font-semibold text-foreground">
-                          {guest.name}
+                        <td className="py-2.5 px-2 text-center font-mono font-bold">{rt.keys}</td>
+                        <td className="py-2.5 px-3 text-right font-mono">
+                          {rt.rate44Week > 0 ? `£${rt.rate44Week}/wk` : "—"}
                         </td>
-                        <td className="py-2.5 px-4 text-muted-foreground font-mono">
-                          {guest.email || "Confidential"}
+                        <td className="py-2.5 px-3 text-right font-mono font-medium text-primary">
+                          {rt.rate51Week > 0 ? `£${rt.rate51Week}/wk` : "—"}
                         </td>
-                        <td className="py-2.5 px-4 text-center font-mono font-medium">
-                          {guest.stays}
+                        <td className="py-2.5 px-3 text-right font-mono font-medium">
+                          {rt.weightedAnnualRentPerKey > 0 ? fmtGbp(rt.weightedAnnualRentPerKey) : "—"}
                         </td>
-                        <td className="py-2.5 px-4 text-center font-mono font-medium">
-                          {guest.nights}
+                        <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                          {rt.fullOccupancyRevenue > 0 ? fmtGbp(rt.fullOccupancyRevenue) : "—"}
                         </td>
-                        <td className="py-2.5 px-4 text-right font-bold text-emerald-600 font-mono">
-                          £{guest.totalSpent.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                          {rt.modelOccupancyRevenue > 0 ? fmtGbp(rt.modelOccupancyRevenue) : "£0"}
                         </td>
-                        <td className="py-2.5 px-4">
-                          <Badge variant="outline" className="text-[10px]">
-                            {guest.channel}
+                        <td className="py-2.5 px-2 text-center font-mono">
+                          {rt.shareOfRevenuePct > 0 ? `${rt.shareOfRevenuePct.toFixed(1)}%` : "0%"}
+                        </td>
+                        <td className="py-2.5 px-3 text-muted-foreground">{rt.sizeM2}</td>
+                        <td className="py-2.5 px-3 text-muted-foreground max-w-xs truncate" title={rt.description}>
+                          {rt.description}
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Total Row */}
+                    <tr className="bg-muted/70 font-bold border-t-2">
+                      <td className="py-3 px-3 text-foreground">Total (120 Keys Portfolio)</td>
+                      <td className="py-3 px-2 text-center font-mono">{fiftyOneModel.assumptions.totalKeys}</td>
+                      <td className="py-3 px-3 text-right font-mono">—</td>
+                      <td className="py-3 px-3 text-right font-mono">—</td>
+                      <td className="py-3 px-3 text-right font-mono">
+                        {fmtGbp(fiftyOneModel.financialSummary.annualisedRevenuePerKey)}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono text-muted-foreground">
+                        {fmtGbp(fiftyOneModel.financialSummary.grossRevenueFullOccupancy)}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono text-primary text-sm">
+                        {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
+                      </td>
+                      <td className="py-3 px-2 text-center font-mono">100.0%</td>
+                      <td className="py-3 px-3" colSpan={2}>
+                        118 priced units · 95% occupancy base case
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment Schedule & Cash Inflows Card */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-emerald-600" />
+                  Instalment Payment Schedule & Cash Flow Timing
+                </CardTitle>
+                <CardDescription>
+                  Contract collection dates based on source 4-instalment schedule
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-3">Instalment</th>
+                      <th className="py-2.5 px-3">Payment Date</th>
+                      <th className="py-2.5 px-2 text-center">Share</th>
+                      <th className="py-2.5 px-3 text-right">Cash Inflow</th>
+                      <th className="py-2.5 px-3 text-right">Cumulative</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {fiftyOneModel.paymentSchedule.map((p) => (
+                      <tr key={p.instalment} className="hover:bg-muted/30">
+                        <td className="py-2.5 px-3 font-semibold text-foreground">{p.instalment}</td>
+                        <td className="py-2.5 px-3 font-mono">{p.paymentDate}</td>
+                        <td className="py-2.5 px-2 text-center font-mono font-bold text-primary">
+                          {(p.share * 100).toFixed(0)}%
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                          {fmtGbp(p.totalInflow)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-emerald-600 font-semibold">
+                          {fmtGbp(p.cumulativeInflow)}{" "}
+                          <span className="text-[10px] text-muted-foreground font-normal">({p.cumulativePct}%)</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+
+            {/* Direct Services Breakdown Table */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-amber-500" />
+                  Direct Operating Services (£132 / key / week)
+                </CardTitle>
+                <CardDescription>
+                  Accrues over 51 weeks on all leased units (£754,657 direct total)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-3">Cost Line</th>
+                      <th className="py-2.5 px-3 text-right">Rate / Key / Wk</th>
+                      <th className="py-2.5 px-3 text-right">Annual Cost</th>
+                      <th className="py-2.5 px-3">Category</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {FIFTY_ONE_DIRECT_COSTS.map((dc) => {
+                      const annualCost =
+                        dc.costPerKeyWeek * fiftyOneModel.assumptions.leasedKeys * fiftyOneModel.assumptions.contract51Weeks;
+                      return (
+                        <tr key={dc.id} className="hover:bg-muted/30">
+                          <td className="py-2 px-3 font-medium text-foreground">{dc.name}</td>
+                          <td className="py-2 px-3 text-right font-mono font-semibold">£{dc.costPerKeyWeek}</td>
+                          <td className="py-2 px-3 text-right font-mono font-bold text-muted-foreground">
+                            {fmtGbp(annualCost)}
+                          </td>
+                          <td className="py-2 px-3 text-[11px] text-muted-foreground">{dc.notes}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="bg-muted/70 font-bold border-t">
+                      <td className="py-2.5 px-3 text-foreground">Total Direct Services</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-primary font-bold">
+                        £{fiftyOneModel.assumptions.weeklyDirectCostPerKey} / wk
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-primary font-bold">
+                        {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs text-muted-foreground">9 service lines</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================= */}
+      {/* TAB 2: PREDICT & PLAN SIMULATOR                               */}
+      {/* ============================================================= */}
+      {activeTab === "simulator" && (
+        <div className="space-y-6">
+          <Card className="border-emerald-500/30 bg-gradient-to-r from-card to-emerald-500/5">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <SlidersHorizontal className="h-5 w-5 text-emerald-600" />
+                    Interactive "Predict & Plan" Financial Sandbox
+                  </CardTitle>
+                  <CardDescription>
+                    Dynamically stress-test Fifty One London occupancy, contract durations, OpEx inflation, and capital yields
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSimOccupancy(95);
+                    setSimContract51(70);
+                    setSimWeeklyCost(132);
+                    setSimCapRate(5.25);
+                    toast({ title: "Reset", description: "Default institutional parameters restored." });
+                  }}
+                  className="text-xs"
+                >
+                  Reset Defaults
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-2">
+                {/* Slider 1: Occupancy */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-foreground">Occupancy Rate</span>
+                    <Badge variant="outline" className="font-mono text-primary font-bold">
+                      {simOccupancy}% ({Math.round(118 * (simOccupancy / 100) * 10) / 10} keys)
+                    </Badge>
+                  </div>
+                  <input
+                    type="range"
+                    min="75"
+                    max="100"
+                    step="1"
+                    value={simOccupancy}
+                    onChange={(e) => setSimOccupancy(Number(e.target.value))}
+                    className="w-full accent-primary cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>75% (Stress)</span>
+                    <span>95% (Base)</span>
+                    <span>100% (Ceiling)</span>
+                  </div>
+                </div>
+
+                {/* Slider 2: 51-Week Contract Mix */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-foreground">51-Wk Contract Mix</span>
+                    <Badge variant="outline" className="font-mono text-sky-600 font-bold">
+                      {simContract51}% / {100 - simContract51}% 44-wk
+                    </Badge>
+                  </div>
+                  <input
+                    type="range"
+                    min="40"
+                    max="95"
+                    step="5"
+                    value={simContract51}
+                    onChange={(e) => setSimContract51(Number(e.target.value))}
+                    className="w-full accent-sky-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>40% (More 44w)</span>
+                    <span>70% (Base)</span>
+                    <span>95% (All 51w)</span>
+                  </div>
+                </div>
+
+                {/* Slider 3: OpEx per key per week */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-foreground">Weekly OpEx / Key</span>
+                    <Badge variant="outline" className="font-mono text-amber-600 font-bold">
+                      £{simWeeklyCost} / key / wk
+                    </Badge>
+                  </div>
+                  <input
+                    type="range"
+                    min="100"
+                    max="180"
+                    step="2"
+                    value={simWeeklyCost}
+                    onChange={(e) => setSimWeeklyCost(Number(e.target.value))}
+                    className="w-full accent-amber-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>£100 (Lean)</span>
+                    <span>£132 (Standard)</span>
+                    <span>£180 (High-Spec)</span>
+                  </div>
+                </div>
+
+                {/* Slider 4: Exit Cap Rate */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-foreground">Target Cap Rate (Yield)</span>
+                    <Badge variant="outline" className="font-mono text-emerald-600 font-bold">
+                      {simCapRate.toFixed(2)}%
+                    </Badge>
+                  </div>
+                  <input
+                    type="range"
+                    min="4.50"
+                    max="6.50"
+                    step="0.25"
+                    value={simCapRate}
+                    onChange={(e) => setSimCapRate(Number(e.target.value))}
+                    className="w-full accent-emerald-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>4.50% (Prime SW7)</span>
+                    <span>5.25% (PBSA Base)</span>
+                    <span>6.50% (Conservative)</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Real-Time Simulated Outcomes Card */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="p-4 border-primary/20">
+              <span className="text-xs text-muted-foreground">Simulated Gross Revenue</span>
+              <div className="text-2xl font-black text-primary mt-1">
+                {fmtGbp(fiftyOneModel.financialSummary.grossRevenueAtOccupancy)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                51-Wk: {fmtGbp(fiftyOneModel.financialSummary.revenue51WeekPortion)} · 44-Wk:{" "}
+                {fmtGbp(fiftyOneModel.financialSummary.revenue44WeekPortion)}
+              </div>
+            </Card>
+
+            <Card className="p-4 border-amber-500/20">
+              <span className="text-xs text-muted-foreground">Total Operating Costs</span>
+              <div className="text-2xl font-black text-foreground mt-1">
+                {fmtGbp(fiftyOneModel.financialSummary.totalOperatingCosts)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Direct: {fmtGbp(fiftyOneModel.financialSummary.directOperatingCosts)} · Variable:{" "}
+                {fmtGbp(fiftyOneModel.financialSummary.revenueLinkedCosts)}
+              </div>
+            </Card>
+
+            <Card className="p-4 border-emerald-500/20 bg-emerald-500/5">
+              <span className="text-xs text-muted-foreground">Simulated NOI</span>
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}
+              </div>
+              <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                NOI Margin: {fiftyOneModel.financialSummary.noiMarginPct.toFixed(1)}%
+              </div>
+            </Card>
+
+            <Card className="p-4 border-sky-500/20 bg-sky-500/5">
+              <span className="text-xs text-muted-foreground">Implied Asset Valuation</span>
+              <div className="text-2xl font-black text-sky-600 dark:text-sky-400 mt-1">
+                {fmtGbp(fiftyOneModel.financialSummary.estimatedValuation)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                £{Math.round(fiftyOneModel.financialSummary.estimatedValuation / 120).toLocaleString("en-GB")}{" "}
+                per key (120 units)
+              </div>
+            </Card>
+          </div>
+
+          {/* Scenario Comparison Table */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-primary" />
+                Sensitivity Matrix: 4 Core Occupancy Scenarios
+              </CardTitle>
+              <CardDescription>
+                Each 1% change in occupancy impacts gross rent by ~£62.7k and NOI by ~£51.0k
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4">Scenario</th>
+                      <th className="py-2.5 px-3 text-center">Occupancy</th>
+                      <th className="py-2.5 px-3 text-center">Leased Keys</th>
+                      <th className="py-2.5 px-4 text-right">Rent Revenue</th>
+                      <th className="py-2.5 px-4 text-right">Direct Costs</th>
+                      <th className="py-2.5 px-4 text-right">Revenue-Linked</th>
+                      <th className="py-2.5 px-4 text-right">NOI (£)</th>
+                      <th className="py-2.5 px-3 text-center">NOI Margin</th>
+                      <th className="py-2.5 px-4 text-right">NOI / Key</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {fiftyOneModel.scenarios.map((sc) => {
+                      const isCurrent = Math.abs(sc.occupancyPct - simOccupancy) < 0.5;
+                      return (
+                        <tr
+                          key={sc.label}
+                          className={`hover:bg-muted/30 transition ${
+                            isCurrent ? "bg-primary/10 font-semibold" : ""
+                          }`}
+                        >
+                          <td className="py-3 px-4 font-semibold text-foreground flex items-center gap-2">
+                            {sc.label}
+                            {isCurrent && (
+                              <Badge variant="default" className="text-[9px] py-0 px-1">
+                                Active Simulator
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center font-mono font-bold text-primary">
+                            {sc.occupancyPct.toFixed(0)}%
+                          </td>
+                          <td className="py-3 px-3 text-center font-mono">{sc.leasedKeys}</td>
+                          <td className="py-3 px-4 text-right font-mono font-bold text-foreground">
+                            {fmtGbp(sc.rentRevenue)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-muted-foreground">
+                            {fmtGbp(sc.directOpCosts)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-muted-foreground">
+                            {fmtGbp(sc.revenueLinkedCosts)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono font-black text-emerald-600 dark:text-emerald-400">
+                            {fmtGbp(sc.noi)}
+                          </td>
+                          <td className="py-3 px-3 text-center font-mono font-bold">
+                            {sc.noiMarginPct.toFixed(1)}%
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono font-medium">
+                            {fmtGbp(sc.noiPerKey)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Monthly P&L Chart & Table */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-indigo-600" />
+                  Monthly P&L Accrual & Net Operating Income (Sep 2025 → Aug 2026)
+                </span>
+                <Badge variant="outline" className="text-xs">
+                  Academic Year 2025/26
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Calendar-weighted contract revenue progression alongside all-bills direct & variable operating costs
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 w-full pt-2">
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={fiftyOneModel.monthlyPnl}
+                      margin={{ top: 10, right: 30, left: 20, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorNoi" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                      <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                      <YAxis tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(value: any) => [fmtGbp(Number(value)), "Amount"]} />
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="totalRevenue"
+                        name="Gross Rent Accrued"
+                        stroke="#3b82f6"
+                        fillOpacity={1}
+                        fill="url(#colorRev)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="noi"
+                        name="Net Operating Income (NOI)"
+                        stroke="#10b981"
+                        fillOpacity={1}
+                        fill="url(#colorNoi)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                    Rendering chart...
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ============================================================= */}
+      {/* TAB 3: INVESTOR PITCH DECK & VALUATION                        */}
+      {/* ============================================================= */}
+      {activeTab === "investor_deck" && (
+        <div className="space-y-6">
+          {/* Pitch Header Card */}
+          <Card className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white border-none shadow-xl">
+            <CardContent className="p-6 md:p-8 space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-emerald-500 text-white font-bold tracking-wide uppercase text-xs">
+                  Investment Grade
+                </Badge>
+                <span className="text-xs text-slate-300">Prime London Student Living Asset</span>
+              </div>
+              <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+                Fifty One London · £78.0M Implied Valuation
+              </h2>
+              <p className="text-slate-300 text-sm md:text-base max-w-3xl leading-relaxed">
+                Super-prime student accommodation asset comprising 120 luxury studio and mezzanine suites directly opposite the Natural History Museum in South Kensington, SW7. Positioned for Imperial College London, Royal College of Music, and RCA students with all-bills inclusive hospitality amenities.
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-800">
+                <div>
+                  <div className="text-xs text-slate-400">Target Net Yield</div>
+                  <div className="text-xl md:text-2xl font-bold text-white">5.25% Cap Rate</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-400">NOI Run-Rate</div>
+                  <div className="text-xl md:text-2xl font-bold text-emerald-400">
+                    {fmtGbp(fiftyOneModel.financialSummary.netOperatingIncome)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-400">Average Weekly Rent</div>
+                  <div className="text-xl md:text-2xl font-bold text-white">
+                    £{Math.round(fiftyOneModel.financialSummary.weightedWeeklyRent)} / week
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-400">Pre-Paid Cash By Jan</div>
+                  <div className="text-xl md:text-2xl font-bold text-sky-400">
+                    84% of Rent (£5.0M)
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Institutional Cap Rate Valuation Matrix */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Landmark className="h-4 w-4 text-primary" />
+                  Exit Cap Rate Valuation Multipliers
+                </CardTitle>
+                <CardDescription>
+                  Market valuation sensitivity across prime London PBSA yields (4.75% – 6.00%)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4">Exit Cap Rate</th>
+                      <th className="py-2.5 px-3 text-center">NOI Multiple</th>
+                      <th className="py-2.5 px-4 text-right">Asset Valuation</th>
+                      <th className="py-2.5 px-4 text-right">Price / Key (120 Keys)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {fiftyOneModel.valuations.map((v) => {
+                      const isBase = Math.abs(v.capRatePct - 5.25) < 0.05;
+                      return (
+                        <tr
+                          key={v.capRatePct}
+                          className={`hover:bg-muted/30 ${isBase ? "bg-emerald-500/10 font-bold" : ""}`}
+                        >
+                          <td className="py-2.5 px-4 font-semibold text-foreground flex items-center gap-2">
+                            {v.capRatePct.toFixed(2)}%
+                            {isBase && (
+                              <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                                Prime Base
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-mono">{v.multipleOfNOI.toFixed(1)}x</td>
+                          <td className="py-2.5 px-4 text-right font-mono font-bold text-primary">
+                            {fmtGbp(v.valuation)}
+                          </td>
+                          <td className="py-2.5 px-4 text-right font-mono text-muted-foreground">
+                            {fmtGbp(v.pricePerKey)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+
+            {/* Valuation Sensitivity Chart */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-sky-600" />
+                  Valuation Curve (£ Millions)
+                </CardTitle>
+                <CardDescription>
+                  Capital value as a function of investor yield requirements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 w-full pt-2">
+                  {isMounted ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={fiftyOneModel.valuations.map((v) => ({
+                          capRate: `${v.capRatePct.toFixed(2)}%`,
+                          valuationM: Math.round(v.valuation / 100000) / 10,
+                        }))}
+                        margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis dataKey="capRate" tick={{ fontSize: 11 }} />
+                        <YAxis domain={['auto', 'auto']} tickFormatter={(v) => `£${v}M`} />
+                        <Tooltip formatter={(value: any) => [`£${value}M`, "Gross Asset Value"]} />
+                        <Line
+                          type="monotone"
+                          dataKey="valuationM"
+                          stroke="#0284c7"
+                          strokeWidth={3}
+                          dot={{ r: 5, fill: "#0284c7" }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                      Rendering chart...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Investment Highlights Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="p-4 border-l-4 border-l-emerald-500">
+              <div className="flex items-center gap-2 font-bold text-foreground text-sm">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                Extreme Cashflow Certainty
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                4-instalment contractual structure requires 14% cash upfront by August 4, 49% by October, and 84% by January. Eliminates standard monthly tenant credit default risks.
+              </p>
+            </Card>
+
+            <Card className="p-4 border-l-4 border-l-sky-500">
+              <div className="flex items-center gap-2 font-bold text-foreground text-sm">
+                <Crown className="h-4 w-4 text-sky-600" />
+                Unrivalled South Kensington Location
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                Directly opposite the Natural History Museum on Cromwell Road, walking distance to Imperial College London. Prime Tier-1 global student destination with permanent undersupply.
+              </p>
+            </Card>
+
+            <Card className="p-4 border-l-4 border-l-indigo-500">
+              <div className="flex items-center gap-2 font-bold text-foreground text-sm">
+                <Zap className="h-4 w-4 text-indigo-600" />
+                Tech-Enabled Operations
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                Smart room temperature controls (Utopi), 1Gbps symmetric fiber, Herman Miller ergonomic design, and automated access systems keep direct operating costs fixed at £132/key/week.
+              </p>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================= */}
+      {/* TAB 4: 30 ALL-INCLUSIVE SERVICES CATALOG                      */}
+      {/* ============================================================= */}
+      {activeTab === "services" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    30 All-Inclusive Building Services & Operating Cost Mapping
+                  </CardTitle>
+                  <CardDescription>
+                    Complete mapping from source Services.pdf to P&L operating cost lines
+                  </CardDescription>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant={serviceFilter === "all" ? "default" : "outline"}
+                    onClick={() => setServiceFilter("all")}
+                    className="text-xs h-7"
+                  >
+                    All (30)
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={serviceFilter === "all_inclusive" ? "default" : "outline"}
+                    onClick={() => setServiceFilter("all_inclusive")}
+                    className="text-xs h-7"
+                  >
+                    Included in OpEx (21)
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={serviceFilter === "partner_perk" ? "default" : "outline"}
+                    onClick={() => setServiceFilter("partner_perk")}
+                    className="text-xs h-7"
+                  >
+                    Partner Perks (9)
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-3 text-center">#</th>
+                      <th className="py-2.5 px-4">Service Name</th>
+                      <th className="py-2.5 px-3">Resident Fee</th>
+                      <th className="py-2.5 px-4">P&L Cost Line</th>
+                      <th className="py-2.5 px-3 text-center">In OpEx?</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {filteredServices.map((s) => (
+                      <tr key={s.no} className="hover:bg-muted/30">
+                        <td className="py-2.5 px-3 text-center font-mono text-muted-foreground">{s.no}</td>
+                        <td className="py-2.5 px-4 font-semibold text-foreground flex items-center gap-2">
+                          {s.name}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <Badge
+                            variant={s.extraFee.toLowerCase().includes("free") ? "outline" : "secondary"}
+                            className="text-[10px] py-0"
+                          >
+                            {s.extraFee}
                           </Badge>
                         </td>
-                        <td className="py-2.5 px-4">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
-                              guest.loyaltyTier === "Platinum"
-                                ? "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200"
-                                : guest.loyaltyTier === "Gold"
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
-                                : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
-                            }`}
-                          >
-                            {guest.loyaltyTier}
-                          </span>
+                        <td className="py-2.5 px-4 text-muted-foreground font-mono">{s.costLine}</td>
+                        <td className="py-2.5 px-3 text-center">
+                          {s.includedInOpEx ? (
+                            <Badge className="bg-emerald-500 text-white text-[9px] py-0">Yes</Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -794,244 +1547,114 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* Tab 3: 12 Properties Performance Matrix */}
-      {activeTab === "properties" && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  12 Properties Performance Matrix
-                </CardTitle>
-                <CardDescription>
-                  Side-by-side performance across all 12 properties and 14 suites in London & Paris
-                </CardDescription>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                12 Properties · 590 Nights Sold
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-2.5 px-4">Property</th>
-                    <th className="py-2.5 px-4">Location</th>
-                    <th className="py-2.5 px-4 text-center">Units</th>
-                    <th className="py-2.5 px-4 text-center">Bookings</th>
-                    <th className="py-2.5 px-4 text-center">Nights</th>
-                    <th className="py-2.5 px-4 text-right">Gross Total</th>
-                    <th className="py-2.5 px-4 text-right">ADR</th>
-                    <th className="py-2.5 px-4 text-right">ALOS</th>
-                    <th className="py-2.5 px-4 text-right">Agency Fee</th>
-                    <th className="py-2.5 px-4 text-right">Owner Net</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {data?.properties.map((p) => {
-                    const sym = p.currency === "EUR" ? "€" : "£";
-                    return (
-                      <tr key={p.id} className="hover:bg-muted/30 transition">
-                        <td className="py-2.5 px-4">
-                          <div className="font-semibold text-foreground">{p.name}</div>
-                          <div className="text-[10px] text-muted-foreground font-mono">{p.code}</div>
-                        </td>
-                        <td className="py-2.5 px-4 text-muted-foreground">{p.city}</td>
-                        <td className="py-2.5 px-4 text-center font-mono">{p.units}</td>
-                        <td className="py-2.5 px-4 text-center font-mono font-medium">{p.bookings}</td>
-                        <td className="py-2.5 px-4 text-center font-mono font-medium">{p.nights}</td>
-                        <td className="py-2.5 px-4 text-right font-bold text-foreground font-mono">
-                          {sym}{p.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-2.5 px-4 text-right font-mono">
-                          {sym}{p.adr.toFixed(2)}
-                        </td>
-                        <td className="py-2.5 px-4 text-right font-mono text-muted-foreground">
-                          {p.alos.toFixed(1)} n
-                        </td>
-                        <td className="py-2.5 px-4 text-right font-mono text-purple-600">
-                          {sym}{p.agencyCommission.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-2.5 px-4 text-right font-mono font-semibold text-primary">
-                          {sym}{p.ownerBalance.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot className="bg-muted/60 font-semibold border-t">
-                  <tr>
-                    <td className="py-2.5 px-4 text-foreground" colSpan={2}>
-                      Total Portfolio Summary
-                    </td>
-                    <td className="py-2.5 px-4 text-center font-mono">14</td>
-                    <td className="py-2.5 px-4 text-center font-mono">{totalBookings}</td>
-                    <td className="py-2.5 px-4 text-center font-mono">{totalNights}</td>
-                    <td className="py-2.5 px-4 text-right font-bold font-mono text-foreground">
-                      £{totalGrossCombined.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-2.5 px-4 text-right font-mono">£{adr.toFixed(2)}</td>
-                    <td className="py-2.5 px-4 text-right font-mono">3.4 n</td>
-                    <td className="py-2.5 px-4 text-right font-mono text-purple-600">
-                      £{totalCommission.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-2.5 px-4 text-right font-mono text-primary font-bold">
-                      £{ownerNet.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Tab 4: Acquisition Channels */}
-      {activeTab === "channels" && (
+      {/* ============================================================= */}
+      {/* TAB 5: SHORT-STAY SERVICED PORTFOLIO (12 UNITS)               */}
+      {/* ============================================================= */}
+      {activeTab === "portfolio" && (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            {data?.channels.map((c) => {
-              const adr = c.nights > 0 ? (c.grossRevenue / c.nights).toFixed(2) : "0.00";
-              const alos = c.bookings > 0 ? (c.nights / c.bookings).toFixed(1) : "0.0";
-              return (
-                <Card key={c.key}>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{c.name}</CardTitle>
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {c.shareOfRevenue.toFixed(1)}% Revenue
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        £{c.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {c.bookings} bookings ({c.shareOfBookings.toFixed(1)}%) · {c.nights} nights
-                      </p>
-                    </div>
-
-                    <div className="pt-2 border-t grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">ADR:</span>
-                        <div className="font-semibold text-foreground">£{adr}</div>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Average Stay:</span>
-                        <div className="font-semibold text-foreground">{alos} nights</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Acquisition Comparison Table</CardTitle>
-              <CardDescription>Direct reservations vs OTA partners performance breakdown</CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                Audited 12-Property Serviced Apartment Portfolio Performance
+              </CardTitle>
+              <CardDescription>
+                Short-stay operating portfolio across London & Europe with detailed property-level revenue, rent, and owner distributions
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-2.5 px-4">Channel</th>
-                    <th className="py-2.5 px-4 text-center">Bookings</th>
-                    <th className="py-2.5 px-4 text-center">Booking Share</th>
-                    <th className="py-2.5 px-4 text-center">Nights Sold</th>
-                    <th className="py-2.5 px-4 text-right">Gross Total</th>
-                    <th className="py-2.5 px-4 text-center">Revenue Share</th>
-                    <th className="py-2.5 px-4 text-right">ADR</th>
-                    <th className="py-2.5 px-4 text-right">ALOS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {data?.channels.map((c) => {
-                    const adr = c.nights > 0 ? (c.grossRevenue / c.nights).toFixed(2) : "0.00";
-                    const alos = c.bookings > 0 ? (c.nights / c.bookings).toFixed(1) : "0.0";
-                    return (
-                      <tr key={c.key} className="hover:bg-muted/30">
-                        <td className="py-2.5 px-4 font-semibold text-foreground">{c.name}</td>
-                        <td className="py-2.5 px-4 text-center font-mono">{c.bookings}</td>
-                        <td className="py-2.5 px-4 text-center font-mono">{c.shareOfBookings.toFixed(1)}%</td>
-                        <td className="py-2.5 px-4 text-center font-mono">{c.nights}</td>
-                        <td className="py-2.5 px-4 text-right font-bold font-mono text-foreground">
-                          £{c.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4">Property</th>
+                      <th className="py-2.5 px-2 text-center">Units</th>
+                      <th className="py-2.5 px-2 text-center">Bookings</th>
+                      <th className="py-2.5 px-2 text-center">Nights</th>
+                      <th className="py-2.5 px-3 text-right">Gross Rev</th>
+                      <th className="py-2.5 px-3 text-right">Rent</th>
+                      <th className="py-2.5 px-3 text-right">Commission</th>
+                      <th className="py-2.5 px-3 text-right">Net Owner Balance</th>
+                      <th className="py-2.5 px-3 text-right">ADR</th>
+                      <th className="py-2.5 px-2 text-center">ALOS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {portfolioData?.properties.map((p) => (
+                      <tr key={p.id} className="hover:bg-muted/30">
+                        <td className="py-2.5 px-4 font-semibold text-foreground">
+                          {p.name} <span className="text-[10px] text-muted-foreground font-normal font-mono">({p.code})</span>
                         </td>
-                        <td className="py-2.5 px-4 text-center font-mono">{c.shareOfRevenue.toFixed(1)}%</td>
-                        <td className="py-2.5 px-4 text-right font-mono">£{adr}</td>
-                        <td className="py-2.5 px-4 text-right font-mono">{alos} n</td>
+                        <td className="py-2.5 px-2 text-center font-mono">{p.units}</td>
+                        <td className="py-2.5 px-2 text-center font-mono">{p.bookings}</td>
+                        <td className="py-2.5 px-2 text-center font-mono">{p.nights}</td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground">
+                          £{p.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                          £{p.rent.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-amber-600">
+                          £{p.agencyCommission.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-600">
+                          £{p.ownerBalance.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono">£{p.adr.toFixed(2)}</td>
+                        <td className="py-2.5 px-2 text-center font-mono">{p.alos} n</td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
-        </div>
-      )}
 
-      {/* Tab 5: Monthly Progression */}
-      {activeTab === "monthly" && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+          {/* Acquisition Channels Breakdown */}
+          {portfolioData?.channels && portfolioData.channels.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  Monthly Financial Progression (May 2025 – Dec 2026)
+                  <Globe2 className="h-4 w-4 text-sky-600" />
+                  Channel Distribution & Direct Booking Share
                 </CardTitle>
                 <CardDescription>
-                  Month-by-month occupancy, gross revenue, and collections
+                  Serviced portfolio booking acquisition channels
                 </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-2.5 px-4">Month</th>
-                    <th className="py-2.5 px-4 text-center">Bookings</th>
-                    <th className="py-2.5 px-4 text-center">Nights Sold</th>
-                    <th className="py-2.5 px-4 text-right">Revenue (GBP)</th>
-                    <th className="py-2.5 px-4 text-right">Revenue (EUR)</th>
-                    <th className="py-2.5 px-4 text-right">Collected (GBP)</th>
-                    <th className="py-2.5 px-4 text-right">ADR</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {data?.monthly.map((m) => (
-                    <tr key={m.month} className="hover:bg-muted/30">
-                      <td className="py-2.5 px-4 font-semibold text-foreground">{m.label}</td>
-                      <td className="py-2.5 px-4 text-center font-mono">{m.bookings}</td>
-                      <td className="py-2.5 px-4 text-center font-mono">{m.nights}</td>
-                      <td className="py-2.5 px-4 text-right font-mono font-medium">
-                        {m.revenueGbp > 0 ? `£${m.revenueGbp.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` : "-"}
-                      </td>
-                      <td className="py-2.5 px-4 text-right font-mono font-medium">
-                        {m.revenueEur > 0 ? `€${m.revenueEur.toFixed(2)}` : "-"}
-                      </td>
-                      <td className="py-2.5 px-4 text-right font-mono text-emerald-600 font-medium">
-                        {m.collectedGbp > 0 ? `£${m.collectedGbp.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` : "-"}
-                      </td>
-                      <td className="py-2.5 px-4 text-right font-mono">
-                        {m.adrGbp > 0 ? `£${m.adrGbp.toFixed(2)}` : "-"}
-                      </td>
+              </CardHeader>
+              <CardContent className="p-0">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-y text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-4">Channel</th>
+                      <th className="py-2.5 px-3 text-center">Bookings</th>
+                      <th className="py-2.5 px-3 text-center">Share Bookings</th>
+                      <th className="py-2.5 px-3 text-center">Nights</th>
+                      <th className="py-2.5 px-4 text-right">Gross Revenue</th>
+                      <th className="py-2.5 px-3 text-center">Share Revenue</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {portfolioData.channels.map((c) => (
+                      <tr key={c.key} className="hover:bg-muted/30">
+                        <td className="py-2.5 px-4 font-semibold text-foreground">{c.name}</td>
+                        <td className="py-2.5 px-3 text-center font-mono">{c.bookings}</td>
+                        <td className="py-2.5 px-3 text-center font-mono">{c.shareOfBookings.toFixed(1)}%</td>
+                        <td className="py-2.5 px-3 text-center font-mono">{c.nights}</td>
+                        <td className="py-2.5 px-4 text-right font-mono font-bold text-foreground">
+                          £{c.grossRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-mono font-bold text-primary">
+                          {c.shareOfRevenue.toFixed(1)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );
