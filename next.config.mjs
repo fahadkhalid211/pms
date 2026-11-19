@@ -5,6 +5,9 @@ const allowedOrigins = [
   "localhost",
   "127.0.0.1",
   "0.0.0.0",
+  "penthousepms.com",
+  "www.penthousepms.com",
+  "olive-pigeon-172996.hostingersite.com",
 ];
 
 const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;

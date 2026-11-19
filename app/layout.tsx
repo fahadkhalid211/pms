@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Lumina PMS — AI-powered hospitality management",
-    template: "%s | Lumina PMS",
+    default: "Pent House PMS — Luxury Hospitality & Property Management",
+    template: "%s | Pent House PMS",
   },
   description:
-    "Lumina PMS is an AI-powered property management system for hotels, resorts, guesthouses, and serviced apartments.",
+    "Pent House PMS is an institutional-grade, AI-powered property management system for luxury penthouses, long-let student accommodations, and premium serviced residences.",
 };
 
 export default function RootLayout({

@@ -110,6 +110,11 @@ function isOriginAllowed(request: NextRequest): boolean {
     } catch {}
   }
 
+  // 5. Canonical production domains
+  validHosts.add("penthousepms.com");
+  validHosts.add("www.penthousepms.com");
+  validHosts.add("olive-pigeon-172996.hostingersite.com");
+
   const isLocalHost = (h: string) => {
     const clean = h.split(":")[0].toLowerCase();
     return clean === "localhost" || clean === "127.0.0.1" || clean === "0.0.0.0" || clean === "::1";

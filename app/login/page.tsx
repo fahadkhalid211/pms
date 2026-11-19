@@ -16,7 +16,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Sign in to your Lumina PMS workspace.</CardDescription>
+          <CardDescription>Sign in to your Pent House PMS workspace.</CardDescription>
         </CardHeader>
         <CardContent>
           <React.Suspense fallback={<div className="py-4 text-center text-sm text-muted-foreground">Loading sign in form...</div>}>
@@ -30,7 +30,7 @@ export default function LoginPage() {
               </Link>
             </p>
             <p>
-              New to Lumina?{" "}
+              New to Pent House PMS?{" "}
               <Link href="/register" className="font-medium text-primary hover:underline">
                 Create an account
               </Link>

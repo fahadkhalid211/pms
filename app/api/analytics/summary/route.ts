@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getPortfolioAnalytics, getBenchmarkPortfolioAnalytics } from "@/lib/analytics";
 import { calculateFiftyOneModel, type SimulationParams } from "@/lib/fifty-one-london";
+import { generatePredictivePortfolioModel } from "@/lib/predictive-pms";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,8 @@ export async function GET(request: Request) {
       ) / 10,
     };
 
+    const predictiveModel = generatePredictivePortfolioModel();
+
     return NextResponse.json({
       success: true,
       data: {
@@ -67,6 +70,7 @@ export async function GET(request: Request) {
         portfolio,
         fiftyOneLondon,
         consolidated,
+        predictiveModel,
       },
     });
   } catch (error: any) {

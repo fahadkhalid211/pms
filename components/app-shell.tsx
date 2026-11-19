@@ -170,15 +170,15 @@ export function AppShell({
                 />
               ) : (
                 <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-primary-foreground font-bold text-sm shadow-sm"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-black text-white font-bold text-sm shadow-sm"
                   style={{ backgroundColor: branding?.primaryColor || undefined }}
                 >
-                  {(branding?.name || "L").charAt(0).toUpperCase()}
+                  {(branding?.name || "P").charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex flex-col truncate">
                 <span className="text-sm font-bold tracking-tight truncate text-foreground">
-                  {branding?.name || "Lumina PMS"}
+                  {branding?.name || "Pent House PMS"}
                 </span>
                 {branding?.branding?.tagline ? (
                   <span className="text-[10px] text-muted-foreground truncate font-normal">
@@ -186,7 +186,7 @@ export function AppShell({
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono text-muted-foreground">
-                    PMS Hospitality
+                    Luxury PMS Hospitality
                   </span>
                 )}
               </div>
@@ -196,7 +196,7 @@ export function AppShell({
             <Link
               href="/dashboard"
               className="mx-auto flex items-center justify-center"
-              title={branding?.name || "Lumina PMS"}
+              title={branding?.name || "Pent House PMS"}
             >
               {branding?.logoUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -207,10 +207,10 @@ export function AppShell({
                 />
               ) : (
                 <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-primary-foreground font-bold text-sm shadow-sm"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white font-bold text-sm shadow-sm"
                   style={{ backgroundColor: branding?.primaryColor || undefined }}
                 >
-                  {(branding?.name || "L").charAt(0).toUpperCase()}
+                  {(branding?.name || "P").charAt(0).toUpperCase()}
                 </div>
               )}
             </Link>

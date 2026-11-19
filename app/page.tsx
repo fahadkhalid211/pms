@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -57,7 +57,7 @@ export default function LandingPage() {
       guestName: "Sarah Jenkins",
       channel: "Airbnb",
       time: "10:14 AM",
-      property: "Azure Royal Penthouse · Miami, FL",
+      property: "Azure Royal Penthouse Â· Miami, FL",
       guestMessage: "Hi there! Our flight lands early around 11:30 AM. Is there any chance we can check in a couple of hours early?",
       aiResponse: "Hi Sarah! Welcome to Miami. I checked with our housekeeping team, and the Azure Penthouse is already fully sanitized and inspected. You're all set for early check-in at 11:30 AM! Your smart lock code (last 4 digits of your phone: 4821) has been activated. Enjoy your stay!",
       context: "Housekeeping: Clean & Inspected at 9:45 AM. Smart Lock: Active. Gap: None.",
@@ -67,7 +67,7 @@ export default function LandingPage() {
       guestName: "Marcus Vance",
       channel: "Vrbo",
       time: "3:42 PM",
-      property: "Whispering Pines Chalet · Aspen, CO",
+      property: "Whispering Pines Chalet Â· Aspen, CO",
       guestMessage: "Hey, we just arrived! What's the network name and password for the high-speed Wi-Fi in the main cabin?",
       aiResponse: "Welcome Marcus! The Wi-Fi network is 'Pines-Guest-5G' and the password is 'StayCozy2026!'. The router is located next to the living room media console. Let me know if you need any recommendations for dinner tonight!",
       context: "House Rule Verified: High-speed fiber active. Credentials verified.",
@@ -77,7 +77,7 @@ export default function LandingPage() {
       guestName: "Elena Rostova",
       channel: "Booking.com",
       time: "8:05 PM",
-      property: "Oceanview Sanctuary · San Diego, CA",
+      property: "Oceanview Sanctuary Â· San Diego, CA",
       guestMessage: "Good evening! We have an afternoon conference tomorrow. Would it be possible to extend our checkout from 11 AM to 1:30 PM?",
       aiResponse: "Good evening Elena! We don't have another guest checking in until Wednesday, so we're happy to grant you a complimentary late checkout until 1:30 PM. Take your time packing and safe travels on your conference!",
       context: "Calendar Check: Next check-in is 48h away. Turnover auto-rescheduled to 2:00 PM.",
@@ -87,7 +87,7 @@ export default function LandingPage() {
       guestName: "David Miller",
       channel: "Direct Booking",
       time: "1:22 PM",
-      property: "Cedar Ridge Lodge · Lake Tahoe, NV",
+      property: "Cedar Ridge Lodge Â· Lake Tahoe, NV",
       guestMessage: "Hello! We're looking at booking for 4 nights next month. Do you allow well-behaved Golden Retrievers?",
       aiResponse: "Hi David! Yes, Cedar Ridge Lodge is 100% dog-friendly for up to 2 trained dogs. There is a standard $50 pet sanitation fee per stay, and we even provide water bowls and dog treats upon arrival. Let me know if you'd like me to hold your dates!",
       context: "Pet Policy Rule: Allowed (max 2). Fee: $50 one-time.",
@@ -97,12 +97,12 @@ export default function LandingPage() {
 
   const faqs = [
     {
-      q: "Does Hospitable's AI sound robotic or like a real human host?",
+      q: "Does Pent House PMS's AI sound robotic or like a real human host?",
       a: "Our conversational AI is specifically trained on short-term rental hospitality data and your custom property rules. It speaks with the natural, warm, and professional tone of an experienced host, references your exact amenities and house rules, and knows when to escalate complex edge cases to you.",
     },
     {
-      q: "How does Hospitable prevent double-bookings across Airbnb, Vrbo, and Booking.com?",
-      a: "Hospitable uses sub-second, direct-API synchronization combined with hardware-grade database constraints. The instant a reservation or hold is placed on any channel, those dates are atomically blocked across all other connected calendars in milliseconds.",
+      q: "How does Pent House PMS prevent double-bookings across Airbnb, Vrbo, and Booking.com?",
+      a: "Pent House PMS uses sub-second, direct-API synchronization combined with hardware-grade database constraints. The instant a reservation or hold is placed on any channel, those dates are atomically blocked across all other connected calendars in milliseconds.",
     },
     {
       q: "Do my cleaners or maintenance staff need to download an app or pay for an account?",
@@ -110,31 +110,31 @@ export default function LandingPage() {
     },
     {
       q: "How do Direct Booking Websites handle payments, damage protection, and guest screening?",
-      a: "Hospitable provides a turnkey direct booking engine integrated with Stripe. You can accept credit cards with zero commission fees, automatically pre-authorize security deposits, enforce signed digital rental agreements, and verify guest identities before confirming.",
+      a: "Pent House PMS provides a turnkey direct booking engine integrated with Stripe. You can accept credit cards with zero commission fees, automatically pre-authorize security deposits, enforce signed digital rental agreements, and verify guest identities before confirming.",
     },
     {
-      q: "Which smart lock hardware is compatible with Hospitable?",
-      a: "We natively integrate with over 100 smart lock models including Schlage, Yale, August, RemoteLock, and Kwikset. Hospitable automatically generates a unique time-sensitive PIN (usually matching the last 4 digits of the guest's phone) that activates at check-in and deactivates at check-out.",
+      q: "Which smart lock hardware is compatible with Pent House PMS?",
+      a: "We natively integrate with over 100 smart lock models including Schlage, Yale, August, RemoteLock, and Kwikset. Pent House PMS automatically generates a unique time-sensitive PIN (usually matching the last 4 digits of the guest's phone) that activates at check-in and deactivates at check-out.",
     },
     {
-      q: "Can I try Hospitable without entering a credit card?",
+      q: "Can I try Pent House PMS without entering a credit card?",
       a: "Yes! You can start a full-featured 14-day free trial in less than 7 minutes with zero credit card required. Connect your listings, test automated messaging, and see how much time you save before deciding on a plan.",
     },
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-violet-600 selection:text-white font-sans antialiased">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 selection:bg-black selection:text-white font-sans antialiased">
       {/* Top Announcement Bar */}
-      <div className="relative z-50 border-b border-violet-100 bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 px-4 py-2 text-center text-xs font-medium text-violet-900">
+      <div className="relative z-50 border-b border-zinc-200 bg-gradient-to-r from-zinc-100 via-slate-100 to-neutral-100 px-4 py-2 text-center text-xs font-medium text-black">
         <div className="container mx-auto flex items-center justify-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold text-violet-700 border border-violet-200">
-            <Sparkles className="h-3 w-3 text-violet-600" strokeWidth={1.5} />
-            Hospitable AI 2.0
+          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-200 px-2.5 py-0.5 text-[11px] font-semibold text-black border border-zinc-300">
+            <Sparkles className="h-3 w-3 text-black" strokeWidth={1.5} />
+            Pent House AI 2.0
           </span>
           <span>Trusted by 500,000+ short-term rental listings worldwide.</span>
           <Link
             href="/register"
-            className="hidden sm:inline-flex items-center gap-1 font-semibold text-violet-700 underline underline-offset-4 hover:text-violet-900 transition"
+            className="hidden sm:inline-flex items-center gap-1 font-semibold text-black underline underline-offset-4 hover:text-black transition"
           >
             Start your 14-day free trial
             <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
@@ -145,13 +145,13 @@ export default function LandingPage() {
       {/* Main Navigation Header */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo with Hospitable Grape Branding */}
+          {/* Logo with Pent House PMS Grape Branding */}
           <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 text-white shadow-md shadow-violet-600/20">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-black via-zinc-800 to-neutral-900 text-white shadow-md shadow-black/10">
               <Compass className="h-5 w-5" strokeWidth={1.5} />
             </span>
             <span className="text-slate-900 font-extrabold tracking-tight text-xl">
-              Hospitable<span className="text-violet-600">.</span>
+              Pent House PMS<span className="text-black">.</span>
             </span>
           </Link>
 
@@ -187,7 +187,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/register"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-violet-600 px-4 text-sm font-semibold text-white shadow-md shadow-violet-600/20 transition hover:bg-violet-700"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-md shadow-black/10 transition hover:bg-zinc-900"
             >
               Start Free Trial
             </Link>
@@ -199,21 +199,21 @@ export default function LandingPage() {
       <main className="flex-1">
         <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 bg-white">
           {/* Subtle Ambient Background Gradients */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 h-[560px] w-full max-w-7xl bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(124,58,237,0.09),rgba(255,255,255,0))]" />
-          <div className="absolute top-44 left-1/4 -z-10 h-72 w-72 rounded-full bg-violet-100/50 blur-[90px]" />
-          <div className="absolute top-56 right-1/4 -z-10 h-72 w-72 rounded-full bg-purple-100/50 blur-[90px]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 h-[560px] w-full max-w-7xl bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,0,0,0.04),rgba(255,255,255,0))]" />
+          <div className="absolute top-44 left-1/4 -z-10 h-72 w-72 rounded-full bg-zinc-200/50 blur-[90px]" />
+          <div className="absolute top-56 right-1/4 -z-10 h-72 w-72 rounded-full bg-slate-100/50 blur-[90px]" />
 
           <div className="container mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             {/* Tagline Pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 text-xs font-semibold text-violet-700 mb-8 shadow-xs">
-              <Sparkles className="h-3.5 w-3.5 text-violet-600" strokeWidth={1.5} />
+            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-black mb-8 shadow-xs">
+              <Sparkles className="h-3.5 w-3.5 text-black" strokeWidth={1.5} />
               <span>The Operating System for Short-Term Rental Professionals</span>
             </div>
 
             {/* Master Headline */}
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl text-slate-950 leading-[1.08] max-w-4xl mx-auto">
               Put your short-term rentals on{" "}
-              <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-black via-zinc-800 to-neutral-900 bg-clip-text text-transparent">
                 autopilot.
               </span>
             </h1>
@@ -228,7 +228,7 @@ export default function LandingPage() {
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 px-8 text-base font-semibold text-white shadow-lg shadow-violet-600/25 transition-all hover:shadow-xl hover:shadow-violet-600/30"
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-black hover:bg-zinc-900 px-8 text-base font-semibold text-white shadow-lg shadow-black/15 transition-all hover:shadow-xl hover:shadow-black/20"
               >
                 Start 14-Day Free Trial
                 <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
@@ -237,7 +237,7 @@ export default function LandingPage() {
                 href="#unified-inbox"
                 className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-base font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900"
               >
-                <Eye className="h-4 w-4 text-violet-600" strokeWidth={1.5} />
+                <Eye className="h-4 w-4 text-black" strokeWidth={1.5} />
                 Explore Interactive Demo
               </a>
             </div>
@@ -271,7 +271,7 @@ export default function LandingPage() {
                     <span className="h-3 w-3 rounded-full bg-emerald-400 inline-block" />
                   </div>
                   <span className="ml-2 font-mono text-xs text-slate-500">
-                    hospitable-hub // unified-inbox // live-sync
+                    penthouse-hub // unified-inbox // live-sync
                   </span>
                 </div>
 
@@ -283,9 +283,9 @@ export default function LandingPage() {
                   <button
                     type="button"
                     onClick={() => setAutopilotMode((v) => !v)}
-                    className="flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
+                    className="flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-1 text-xs font-semibold text-black transition hover:bg-zinc-200"
                   >
-                    <Zap className={`h-3.5 w-3.5 ${autopilotMode ? "text-violet-600 fill-violet-600/20" : "text-slate-400"}`} strokeWidth={1.5} />
+                    <Zap className={`h-3.5 w-3.5 ${autopilotMode ? "text-black fill-violet-600/20" : "text-slate-400"}`} strokeWidth={1.5} />
                     <span>Autopilot: {autopilotMode ? "ON" : "REVIEW"}</span>
                   </button>
                 </div>
@@ -299,7 +299,7 @@ export default function LandingPage() {
                   onClick={() => setActiveScenario("early_checkin")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     activeScenario === "early_checkin"
-                      ? "bg-violet-600 text-white shadow-sm shadow-violet-600/25"
+                      ? "bg-black text-white shadow-sm shadow-black/15"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
@@ -310,7 +310,7 @@ export default function LandingPage() {
                   onClick={() => setActiveScenario("wifi")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     activeScenario === "wifi"
-                      ? "bg-violet-600 text-white shadow-sm shadow-violet-600/25"
+                      ? "bg-black text-white shadow-sm shadow-black/15"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
@@ -321,7 +321,7 @@ export default function LandingPage() {
                   onClick={() => setActiveScenario("late_checkout")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     activeScenario === "late_checkout"
-                      ? "bg-violet-600 text-white shadow-sm shadow-violet-600/25"
+                      ? "bg-black text-white shadow-sm shadow-black/15"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
@@ -332,7 +332,7 @@ export default function LandingPage() {
                   onClick={() => setActiveScenario("pet_policy")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     activeScenario === "pet_policy"
-                      ? "bg-violet-600 text-white shadow-sm shadow-violet-600/25"
+                      ? "bg-black text-white shadow-sm shadow-black/15"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
@@ -346,7 +346,7 @@ export default function LandingPage() {
                 <div className="lg:col-span-8 flex flex-col rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 sm:p-5">
                   <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold text-sm border border-violet-200">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 text-black font-bold text-sm border border-zinc-300">
                         {scenarios[activeScenario].guestName.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
@@ -354,7 +354,7 @@ export default function LandingPage() {
                           <span className="font-bold text-slate-900 text-sm">
                             {scenarios[activeScenario].guestName}
                           </span>
-                          <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 border border-violet-200">
+                          <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-semibold text-black border border-zinc-300">
                             {scenarios[activeScenario].channel}
                           </span>
                         </div>
@@ -382,20 +382,20 @@ export default function LandingPage() {
 
                     {/* AI Autonomous Answer */}
                     <div className="flex gap-3 justify-end">
-                      <div className="max-w-xl rounded-2xl rounded-tr-sm bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3 text-sm text-slate-900 border border-violet-200 shadow-xs">
-                        <div className="flex items-center gap-1.5 text-xs text-violet-700 font-bold mb-1">
-                          <Sparkles className="h-3 w-3 text-violet-600" strokeWidth={1.5} />
-                          Hospitable Autonomous AI Response
+                      <div className="max-w-xl rounded-2xl rounded-tr-sm bg-gradient-to-r from-violet-50 to-indigo-50 px-4 py-3 text-sm text-slate-900 border border-zinc-300 shadow-xs">
+                        <div className="flex items-center gap-1.5 text-xs text-black font-bold mb-1">
+                          <Sparkles className="h-3 w-3 text-black" strokeWidth={1.5} />
+                          Pent House PMS Autonomous AI Response
                         </div>
                         <p className="leading-relaxed text-slate-800">{scenarios[activeScenario].aiResponse}</p>
-                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-violet-200/60 pt-1.5">
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-zinc-300/60 pt-1.5">
                           <span>Verified against property house rules</span>
                           <span className="text-emerald-700 font-semibold">
                             {scenarios[activeScenario].confidence}
                           </span>
                         </div>
                       </div>
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs text-white font-medium shadow-md shadow-violet-600/30">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black text-xs text-white font-medium shadow-md shadow-black/20">
                         <Bot className="h-4 w-4" strokeWidth={1.5} />
                       </div>
                     </div>
@@ -407,7 +407,7 @@ export default function LandingPage() {
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                       <span>{scenarios[activeScenario].context}</span>
                     </div>
-                    <span className="text-xs font-semibold text-violet-700">
+                    <span className="text-xs font-semibold text-black">
                       Auto-dispatched via {scenarios[activeScenario].channel} API in 4s
                     </span>
                   </div>
@@ -426,15 +426,15 @@ export default function LandingPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Airbnb Calendar</span>
-                        <span className="text-emerald-700 font-semibold">Synced · 0.2s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced Â· 0.2s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Vrbo Calendar</span>
-                        <span className="text-emerald-700 font-semibold">Synced · 0.3s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced Â· 0.3s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1 border-b border-slate-100">
                         <span className="text-slate-700 font-medium">Booking.com</span>
-                        <span className="text-emerald-700 font-semibold">Synced · 0.4s ago</span>
+                        <span className="text-emerald-700 font-semibold">Synced Â· 0.4s ago</span>
                       </div>
                       <div className="flex items-center justify-between py-1">
                         <span className="text-slate-700 font-medium">Direct Booking Engine</span>
@@ -449,7 +449,7 @@ export default function LandingPage() {
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                         Smart Lock Automation
                       </h4>
-                      <Lock className="h-3.5 w-3.5 text-violet-600" strokeWidth={1.5} />
+                      <Lock className="h-3.5 w-3.5 text-black" strokeWidth={1.5} />
                     </div>
                     <div className="space-y-1.5 text-xs">
                       <div className="flex justify-between">
@@ -458,11 +458,11 @@ export default function LandingPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500">Assigned PIN:</span>
-                        <span className="font-mono text-emerald-700 font-bold">•••• 4821</span>
+                        <span className="font-mono text-emerald-700 font-bold">â€¢â€¢â€¢â€¢ 4821</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500">Access Window:</span>
-                        <span className="text-slate-700">11:30 AM – 11:00 AM</span>
+                        <span className="text-slate-700">11:30 AM â€“ 11:00 AM</span>
                       </div>
                       <div className="mt-2 text-[11px] text-slate-500 leading-tight">
                         Code auto-generated & sent upon confirmed booking. Deactivates strictly at checkout.
@@ -524,7 +524,7 @@ export default function LandingPage() {
                 <span className="text-[10px] text-slate-500">Vacation Rentals</span>
               </div>
               <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/80 bg-white shadow-xs">
-                <CreditCard className="h-6 w-6 text-violet-600 mb-1.5" strokeWidth={1.5} />
+                <CreditCard className="h-6 w-6 text-black mb-1.5" strokeWidth={1.5} />
                 <span className="text-xs font-bold text-slate-900">Stripe</span>
                 <span className="text-[10px] text-slate-500">Direct Payments</span>
               </div>
@@ -542,7 +542,7 @@ export default function LandingPage() {
                 <div className="text-xs text-slate-500 mt-1 font-medium">Short-term listings managed</div>
               </div>
               <div>
-                <div className="text-3xl font-extrabold text-violet-600">92%</div>
+                <div className="text-3xl font-extrabold text-black">92%</div>
                 <div className="text-xs text-slate-500 mt-1 font-medium">Guest questions automated</div>
               </div>
               <div>
@@ -561,7 +561,7 @@ export default function LandingPage() {
         <section className="py-24 bg-white" id="features">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Complete Operating System
               </span>
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-slate-950 mt-3">
@@ -579,7 +579,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFeatureTab("inbox")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   activeFeatureTab === "inbox"
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/25"
+                    ? "bg-black text-white shadow-md shadow-black/15"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                 }`}
               >
@@ -591,7 +591,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFeatureTab("channel")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   activeFeatureTab === "channel"
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/25"
+                    ? "bg-black text-white shadow-md shadow-black/15"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                 }`}
               >
@@ -603,7 +603,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFeatureTab("operations")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   activeFeatureTab === "operations"
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/25"
+                    ? "bg-black text-white shadow-md shadow-black/15"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                 }`}
               >
@@ -615,7 +615,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFeatureTab("direct")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   activeFeatureTab === "direct"
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/25"
+                    ? "bg-black text-white shadow-md shadow-black/15"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                 }`}
               >
@@ -627,7 +627,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFeatureTab("smartlocks")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   activeFeatureTab === "smartlocks"
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/25"
+                    ? "bg-black text-white shadow-md shadow-black/15"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/70"
                 }`}
               >
@@ -641,26 +641,26 @@ export default function LandingPage() {
               {activeFeatureTab === "inbox" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
-                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 border border-violet-200">
+                    <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-bold text-black border border-zinc-300">
                       Unified Communications
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl mt-3">
                       One inbox for all your guests, backed by AI that never sleeps.
                     </h3>
                     <p className="mt-4 text-slate-600 leading-relaxed text-sm sm:text-base">
-                      No more switching between Airbnb, Vrbo, Booking.com, and email apps. Hospitable unifies every message into a clean, searchable feed.
+                      No more switching between Airbnb, Vrbo, Booking.com, and email apps. Pent House PMS unifies every message into a clean, searchable feed.
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Trained on your listing:</strong> Answers questions about parking, Wi-Fi, heating, and check-in rules automatically.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Scheduled messaging triggers:</strong> Auto-send booking confirmations, check-in codes, mid-stay checkups, and review requests.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Host review mode:</strong> Autopilot can either draft responses for 1-click review or reply autonomously.</span>
                       </li>
                     </ul>
@@ -674,28 +674,28 @@ export default function LandingPage() {
                       <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>1. Immediate Confirmation</span>
-                          <span className="text-violet-600">Trigger: Booking</span>
+                          <span className="text-black">Trigger: Booking</span>
                         </div>
                         <p className="text-slate-600 mt-1">Confirms stay, sends house rules, and prompts for ID verification.</p>
                       </div>
                       <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>2. Pre-Arrival Guide</span>
-                          <span className="text-violet-600">Trigger: Check-in - 48h</span>
+                          <span className="text-black">Trigger: Check-in - 48h</span>
                         </div>
                         <p className="text-slate-600 mt-1">Provides directions, parking instructions, and early check-in options.</p>
                       </div>
                       <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>3. Smart Door Access</span>
-                          <span className="text-violet-600">Trigger: Check-in Day</span>
+                          <span className="text-black">Trigger: Check-in Day</span>
                         </div>
                         <p className="text-slate-600 mt-1">Dispatches unique time-sensitive smart lock PIN and Wi-Fi password.</p>
                       </div>
                       <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200/70">
                         <div className="flex justify-between font-bold text-slate-900">
                           <span>4. Checkout & Review Followup</span>
-                          <span className="text-violet-600">Trigger: Checkout + 2h</span>
+                          <span className="text-black">Trigger: Checkout + 2h</span>
                         </div>
                         <p className="text-slate-600 mt-1">Thanks guest, finalizes folio, and invites them to leave a 5-star review.</p>
                       </div>
@@ -707,26 +707,26 @@ export default function LandingPage() {
               {activeFeatureTab === "channel" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
-                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 border border-violet-200">
+                    <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-bold text-black border border-zinc-300">
                       Zero Double-Bookings
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl mt-3">
                       Direct 2-way sync across all channels in sub-seconds.
                     </h3>
                     <p className="mt-4 text-slate-600 leading-relaxed text-sm sm:text-base">
-                      Never worry about double-bookings or mismatched rates again. When a date books on Airbnb, Hospitable blocks it on Vrbo, Booking.com, and your direct site instantly.
+                      Never worry about double-bookings or mismatched rates again. When a date books on Airbnb, Pent House PMS blocks it on Vrbo, Booking.com, and your direct site instantly.
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Sub-second API sync:</strong> Uses official platform APIs, not sluggish iCal calendars.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Database-level concurrency:</strong> Database unique constraints physically prevent two guests from reserving the same night.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Gap night rule engine:</strong> Automatically adjusts minimum-night requirements to sell orphan calendar gaps.</span>
                       </li>
                     </ul>
@@ -741,15 +741,15 @@ export default function LandingPage() {
                       </span>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70">
-                      <div className="text-violet-700 font-bold mb-1 font-sans">Booking Event Received:</div>
-                      <div className="text-slate-600 font-sans">Channel: Airbnb · Guest: Alexander Wright</div>
+                      <div className="text-black font-bold mb-1 font-sans">Booking Event Received:</div>
+                      <div className="text-slate-600 font-sans">Channel: Airbnb Â· Guest: Alexander Wright</div>
                       <div className="text-slate-600 font-sans">Dates: Nov 12 - Nov 16 (4 nights)</div>
                     </div>
                     <div className="space-y-1.5 pl-2 border-l-2 border-violet-500 font-sans">
-                      <div className="text-emerald-700 font-medium">✓ Atomic RoomNight rows inserted (4 nights locked)</div>
-                      <div className="text-emerald-700 font-medium">✓ Vrbo API calendar block pushed (latency: 180ms)</div>
-                      <div className="text-emerald-700 font-medium">✓ Booking.com OTA availability updated (latency: 220ms)</div>
-                      <div className="text-emerald-700 font-medium">✓ Direct Booking engine date disabled</div>
+                      <div className="text-emerald-700 font-medium">âœ“ Atomic RoomNight rows inserted (4 nights locked)</div>
+                      <div className="text-emerald-700 font-medium">âœ“ Vrbo API calendar block pushed (latency: 180ms)</div>
+                      <div className="text-emerald-700 font-medium">âœ“ Booking.com OTA availability updated (latency: 220ms)</div>
+                      <div className="text-emerald-700 font-medium">âœ“ Direct Booking engine date disabled</div>
                     </div>
                   </div>
                 </div>
@@ -758,7 +758,7 @@ export default function LandingPage() {
               {activeFeatureTab === "operations" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
-                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 border border-violet-200">
+                    <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-bold text-black border border-zinc-300">
                       Team & Turnover Coordination
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl mt-3">
@@ -769,15 +769,15 @@ export default function LandingPage() {
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>No app needed for cleaners:</strong> Cleaners receive tasks via SMS and web link on any phone.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Photo verification & damage checklists:</strong> Require photo proof of cleaned areas and supply restocks.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Maintenance tickets & blocks:</strong> Take damaged rooms out of inventory immediately to prevent bookings during repairs.</span>
                       </li>
                     </ul>
@@ -791,8 +791,8 @@ export default function LandingPage() {
                     <div className="space-y-2.5 text-xs">
                       <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 102 · Aspen Pine Chalet</div>
-                          <div className="text-slate-500">Assigned: Elena Rostova · Checkout 11:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 102 Â· Aspen Pine Chalet</div>
+                          <div className="text-slate-500">Assigned: Elena Rostova Â· Checkout 11:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
@@ -800,8 +800,8 @@ export default function LandingPage() {
                       </div>
                       <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 304 · Azure Penthouse</div>
-                          <div className="text-slate-500">Assigned: Carlos Mendez · Checkout 11:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 304 Â· Azure Penthouse</div>
+                          <div className="text-slate-500">Assigned: Carlos Mendez Â· Checkout 11:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
@@ -809,8 +809,8 @@ export default function LandingPage() {
                       </div>
                       <div className="rounded-lg bg-slate-50 p-3 border border-slate-200/70 flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-slate-900">Unit 208 · Coastal Haven</div>
-                          <div className="text-slate-500">Assigned: Sarah Jenkins · Checkout 10:00 AM</div>
+                          <div className="font-bold text-slate-900">Unit 208 Â· Coastal Haven</div>
+                          <div className="text-slate-500">Assigned: Sarah Jenkins Â· Checkout 10:00 AM</div>
                         </div>
                         <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700 font-bold border border-emerald-200">
                           Inspected
@@ -824,7 +824,7 @@ export default function LandingPage() {
               {activeFeatureTab === "direct" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
-                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 border border-violet-200">
+                    <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-bold text-black border border-zinc-300">
                       0% Commission Direct Bookings
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl mt-3">
@@ -835,15 +835,15 @@ export default function LandingPage() {
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Built-in Stripe checkout:</strong> Process payments, deposits, and security authorizations seamlessly.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Google Vacation Rentals:</strong> Automatically showcase your properties on Google with zero fees.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Guest screening & contracts:</strong> Enforce ID verification and signed digital terms before confirming.</span>
                       </li>
                     </ul>
@@ -865,7 +865,7 @@ export default function LandingPage() {
                           <span>-$288.00</span>
                         </div>
                         <div className="flex justify-between text-slate-600 border-t border-slate-200/70 pt-2">
-                          <span>Hospitable Direct Booking Fee:</span>
+                          <span>Pent House PMS Direct Booking Fee:</span>
                           <span className="text-emerald-700 font-mono font-bold">$0.00 (0%)</span>
                         </div>
                         <div className="flex justify-between text-emerald-700 font-bold border-t border-slate-200/70 pt-2 text-sm">
@@ -881,26 +881,26 @@ export default function LandingPage() {
               {activeFeatureTab === "smartlocks" && (
                 <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                   <div>
-                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 border border-violet-200">
+                    <span className="rounded-full bg-zinc-200 px-3 py-1 text-xs font-bold text-black border border-zinc-300">
                       Hardware & Smart Devices
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl mt-3">
                       Automated keyless entry that works like magic.
                     </h3>
                     <p className="mt-4 text-slate-600 leading-relaxed text-sm sm:text-base">
-                      No more meeting guests with physical keys or changing lockbox codes manually. Hospitable connects directly to your smart locks.
+                      No more meeting guests with physical keys or changing lockbox codes manually. Pent House PMS connects directly to your smart locks.
                     </p>
                     <ul className="mt-6 space-y-3 text-sm text-slate-700">
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Unique guest door codes:</strong> Generated automatically using the last 4 digits of the guest&apos;s phone number.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>Time-restricted security:</strong> Code only functions between official check-in and checkout times.</span>
                       </li>
                       <li className="flex items-start gap-2.5">
-                        <Check className="h-4 w-4 text-violet-600 mt-1 shrink-0" strokeWidth={1.5} />
+                        <Check className="h-4 w-4 text-black mt-1 shrink-0" strokeWidth={1.5} />
                         <span><strong>100+ lock integrations:</strong> Supports Schlage, Yale, August, RemoteLock, Kwikset, Nuki, and Igloohome.</span>
                       </li>
                     </ul>
@@ -910,19 +910,19 @@ export default function LandingPage() {
                     <div className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-wider">Compatible Smart Hardware</div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
-                        <Lock className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                        <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>Schlage Encode</span>
                       </div>
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
-                        <Lock className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                        <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>Yale Assure 2</span>
                       </div>
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
-                        <Lock className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                        <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>August Wi-Fi Lock</span>
                       </div>
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/70 flex items-center gap-2 font-medium text-slate-800">
-                        <Lock className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                        <Lock className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                         <span>RemoteLock Enterprise</span>
                       </div>
                     </div>
@@ -937,11 +937,11 @@ export default function LandingPage() {
         <section className="border-t border-slate-200/70 bg-slate-50/70 py-20" id="calculator">
           <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Interactive Value Calculator
               </span>
               <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl mt-2">
-                Calculate your time saved with Hospitable.
+                Calculate your time saved with Pent House PMS.
               </h2>
               <p className="mt-3 text-sm text-slate-600">
                 See exactly how many hours of manual messaging and cleaner coordination you will eliminate every single week.
@@ -954,7 +954,7 @@ export default function LandingPage() {
                   <label htmlFor="property-slider" className="text-sm font-bold text-slate-900">
                     How many properties do you manage?
                   </label>
-                  <span className="text-2xl font-black text-violet-600">
+                  <span className="text-2xl font-black text-black">
                     {propertyCount} {propertyCount === 1 ? "Listing" : "Listings"}
                   </span>
                 </div>
@@ -978,7 +978,7 @@ export default function LandingPage() {
               {/* Dynamic Metrics Output */}
               <div className="grid gap-6 sm:grid-cols-3 border-t border-slate-100 pt-8 text-center">
                 <div className="rounded-xl bg-slate-50 p-5 border border-slate-200/70">
-                  <Clock className="h-6 w-6 text-violet-600 mx-auto mb-2" strokeWidth={1.5} />
+                  <Clock className="h-6 w-6 text-black mx-auto mb-2" strokeWidth={1.5} />
                   <div className="text-3xl font-black text-slate-900">{hoursSavedPerWeek} hrs</div>
                   <div className="text-xs text-slate-600 mt-1 font-medium">Saved per week on messaging</div>
                 </div>
@@ -999,9 +999,9 @@ export default function LandingPage() {
               <div className="mt-8 text-center">
                 <Link
                   href="/register"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 px-8 text-sm font-semibold text-white shadow-md shadow-violet-600/25 transition-all"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black hover:bg-zinc-900 px-8 text-sm font-semibold text-white shadow-md shadow-black/15 transition-all"
                 >
-                  Get Your Time Back — Try Free
+                  Get Your Time Back â€” Try Free
                   <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                 </Link>
               </div>
@@ -1009,18 +1009,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Comparison Matrix: Hospitable vs Manual vs Legacy PMS */}
+        {/* Comparison Matrix: Pent House PMS vs Manual vs Legacy PMS */}
         <section className="py-24 bg-white" id="comparison">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Why Hosts Switch
               </span>
               <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl mt-2">
-                Hospitable vs The Alternatives
+                Pent House PMS vs The Alternatives
               </h2>
               <p className="mt-3 text-sm text-slate-600">
-                Compare Hospitable to manual hosting and outdated legacy PMS software.
+                Compare Pent House PMS to manual hosting and outdated legacy PMS software.
               </p>
             </div>
 
@@ -1029,8 +1029,8 @@ export default function LandingPage() {
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
                     <th className="p-4 sm:p-5 font-bold text-slate-900 w-1/3">Capability</th>
-                    <th className="p-4 sm:p-5 font-bold text-violet-700 bg-violet-50/70 border-x border-violet-100 w-1/4">
-                      Hospitable AI
+                    <th className="p-4 sm:p-5 font-bold text-black bg-zinc-100/70 border-x border-zinc-200 w-1/4">
+                      Pent House AI
                     </th>
                     <th className="p-4 sm:p-5 font-bold text-slate-700 w-1/5">Manual Hosting</th>
                     <th className="p-4 sm:p-5 font-bold text-slate-700 w-1/5">Legacy PMS</th>
@@ -1041,7 +1041,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       AI Guest Messaging Autopilot
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Autonomous 24/7 AI</span>
@@ -1068,7 +1068,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Channel Calendar Sync
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Sub-second Direct API</span>
@@ -1095,7 +1095,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Direct Booking Engine
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>0% Commission + Stripe</span>
@@ -1122,7 +1122,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Smart Lock PIN Automation
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>100+ Locks Supported</span>
@@ -1149,7 +1149,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Cleaner Schedules & Web Portal
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>Free SMS & Web Links</span>
@@ -1176,7 +1176,7 @@ export default function LandingPage() {
                     <td className="p-4 sm:p-5 font-semibold text-slate-900">
                       Time to Setup & Launch
                     </td>
-                    <td className="p-4 sm:p-5 font-semibold text-violet-900 bg-violet-50/40 border-x border-violet-100">
+                    <td className="p-4 sm:p-5 font-semibold text-black bg-zinc-100/40 border-x border-zinc-200">
                       <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
                         <Check className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
                         <span>7 Minutes Self-Serve</span>
@@ -1208,7 +1208,7 @@ export default function LandingPage() {
         <section className="py-24 bg-slate-50/70 border-t border-slate-200/70">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Host Stories
               </span>
               <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl mt-2">
@@ -1227,13 +1227,13 @@ export default function LandingPage() {
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
                   </div>
                   <p className="text-sm text-slate-700 leading-relaxed italic">
-                    &ldquo;Hospitable&apos;s AI literally answered a guest&apos;s late-night Wi-Fi question while I was asleep on a camping trip. My response rate is 100% and Superhost status is locked.&rdquo;
+                    &ldquo;Pent House PMS&apos;s AI literally answered a guest&apos;s late-night Wi-Fi question while I was asleep on a camping trip. My response rate is 100% and Superhost status is locked.&rdquo;
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">David K.</div>
-                    <div className="text-slate-500">Superhost · 4 Listings</div>
+                    <div className="text-slate-500">Superhost Â· 4 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1257,7 +1257,7 @@ export default function LandingPage() {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">Claire &amp; Marc V.</div>
-                    <div className="text-slate-500">Property Managers · 18 Listings</div>
+                    <div className="text-slate-500">Property Managers Â· 18 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1281,7 +1281,7 @@ export default function LandingPage() {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900">Jason R.</div>
-                    <div className="text-slate-500">Boutique Stays · 12 Listings</div>
+                    <div className="text-slate-500">Boutique Stays Â· 12 Listings</div>
                   </div>
                   <span className="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700 font-semibold border border-emerald-200">
                     Verified Host
@@ -1292,11 +1292,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Transparent Hospitable Pricing Matrix */}
+        {/* Transparent Pent House PMS Pricing Matrix */}
         <section className="border-t border-slate-200/70 bg-white py-24" id="pricing">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Transparent Pricing
               </span>
               <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl mt-2">
@@ -1350,23 +1350,23 @@ export default function LandingPage() {
 
                   <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-200/70 pt-6">
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Up to 2 properties included</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Unified Inbox (Airbnb, Vrbo, Booking)</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Standard AI automated messaging</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Sub-second channel calendar sync</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Smart lock code generation</span>
                     </li>
                   </ul>
@@ -1381,8 +1381,8 @@ export default function LandingPage() {
               </div>
 
               {/* Plan 2: Professional (Featured) */}
-              <div className="relative rounded-2xl border-2 border-violet-600 bg-white p-8 flex flex-col justify-between shadow-xl shadow-violet-500/10 ring-4 ring-violet-50">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-violet-600 px-3 py-1 text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">
+              <div className="relative rounded-2xl border-2 border-violet-600 bg-white p-8 flex flex-col justify-between shadow-xl shadow-black/10 ring-4 ring-violet-50">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-black px-3 py-1 text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">
                   Most Popular
                 </div>
 
@@ -1401,27 +1401,27 @@ export default function LandingPage() {
 
                   <ul className="mt-8 space-y-3 text-xs text-slate-800 border-t border-slate-200/80 pt-6">
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span><strong>Everything in Host, plus:</strong></span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
-                      <span>Hospitable AI 2.0 Autonomous Autopilot</span>
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
+                      <span>Pent House AI 2.0 Autonomous Autopilot</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Commission-Free Direct Booking Site</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Cleaner portals & photo verification</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Stripe payments & deposit authorizations</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Google Vacation Rentals distribution</span>
                     </li>
                   </ul>
@@ -1429,7 +1429,7 @@ export default function LandingPage() {
 
                 <Link
                   href="/register"
-                  className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-sm font-semibold text-white shadow-md shadow-violet-600/25 transition-all"
+                  className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl bg-black hover:bg-zinc-900 text-sm font-semibold text-white shadow-md shadow-black/15 transition-all"
                 >
                   Start 14-Day Free Trial
                 </Link>
@@ -1452,23 +1452,23 @@ export default function LandingPage() {
 
                   <ul className="mt-8 space-y-3 text-xs text-slate-700 border-t border-slate-200/70 pt-6">
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span><strong>Everything in Professional, plus:</strong></span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Custom Owner Portals & automated statements</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Multi-brand custom colors & domain white-labeling</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>Custom API access & webhooks</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-violet-600 shrink-0" strokeWidth={1.5} />
+                      <Check className="h-4 w-4 text-black shrink-0" strokeWidth={1.5} />
                       <span>99.9% Uptime SLA & Priority 24/7 phone support</span>
                     </li>
                   </ul>
@@ -1489,14 +1489,14 @@ export default function LandingPage() {
         <section className="py-24 bg-slate-50/70 border-t border-slate-200/70" id="faq">
           <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <span className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+              <span className="text-xs font-bold tracking-wider text-black uppercase">
                 Got Questions?
               </span>
               <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl mt-2">
                 Frequently Asked Questions
               </h2>
               <p className="mt-3 text-sm text-slate-600">
-                Everything you need to know about setting up Hospitable for your properties.
+                Everything you need to know about setting up Pent House PMS for your properties.
               </p>
             </div>
 
@@ -1515,7 +1515,7 @@ export default function LandingPage() {
                     >
                       <span>{faq.q}</span>
                       <ChevronDown
-                        className={`h-4 w-4 text-violet-600 transition-transform duration-200 shrink-0 ml-4 ${
+                        className={`h-4 w-4 text-black transition-transform duration-200 shrink-0 ml-4 ${
                           isOpen ? "rotate-180" : ""
                         }`}
                         strokeWidth={1.5}
@@ -1536,7 +1536,7 @@ export default function LandingPage() {
         {/* High-Impact Bottom Call to Action */}
         <section className="py-20 bg-white">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-800 p-10 sm:p-16 text-center text-white shadow-2xl shadow-violet-600/20">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-800 p-10 sm:p-16 text-center text-white shadow-2xl shadow-black/10">
               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none" />
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/20 mb-6 backdrop-blur-xs">
@@ -1549,13 +1549,13 @@ export default function LandingPage() {
               </h2>
 
               <p className="mx-auto mt-4 max-w-2xl text-base text-violet-100">
-                Join 500,000+ short-term rental listings worldwide who save 15+ hours every week with Hospitable.
+                Join 500,000+ short-term rental listings worldwide who save 15+ hours every week with Pent House PMS.
               </p>
 
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link
                   href="/register"
-                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white hover:bg-violet-50 px-8 text-base font-bold text-violet-700 shadow-lg shadow-black/10 transition-all"
+                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white hover:bg-zinc-100 px-8 text-base font-bold text-black shadow-lg shadow-black/10 transition-all"
                 >
                   Start 14-Day Free Trial
                   <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
@@ -1587,18 +1587,18 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Hospitable Brand Footer */}
+      {/* Pent House PMS Brand Footer */}
       <footer className="border-t border-slate-200/80 bg-slate-50 py-16 text-xs text-slate-600">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 grid-cols-2 md:grid-cols-5 mb-12">
             {/* Brand Column */}
             <div className="col-span-2">
               <Link href="/" className="flex items-center gap-2.5 text-lg font-bold text-slate-900 mb-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 text-white shadow-sm">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-white shadow-sm">
                   <Compass className="h-4 w-4" strokeWidth={1.5} />
                 </span>
                 <span className="text-slate-900 font-extrabold text-lg">
-                  Hospitable<span className="text-violet-600">.</span>
+                  Pent House PMS<span className="text-black">.</span>
                 </span>
               </Link>
               <p className="text-slate-600 max-w-sm leading-relaxed">
@@ -1616,7 +1616,7 @@ export default function LandingPage() {
               <ul className="space-y-2">
                 <li><a href="#unified-inbox" className="hover:text-slate-900 transition">Unified Inbox</a></li>
                 <li><a href="#features" className="hover:text-slate-900 transition">Channel Manager</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition">Hospitable AI</a></li>
+                <li><a href="#features" className="hover:text-slate-900 transition">Pent House AI</a></li>
                 <li><a href="#features" className="hover:text-slate-900 transition">Direct Booking Sites</a></li>
                 <li><a href="#features" className="hover:text-slate-900 transition">Turnovers & Cleaning</a></li>
                 <li><a href="#features" className="hover:text-slate-900 transition">Smart Lock Sync</a></li>
@@ -1653,7 +1653,7 @@ export default function LandingPage() {
 
           <div className="border-t border-slate-200/80 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
             <div>
-              © 2026 Hospitable. All rights reserved. Built for professional vacation rental hosts.
+              Â© 2026 Pent House PMS. All rights reserved. Built for professional vacation rental hosts.
             </div>
             <div className="flex gap-6 font-medium">
               <span>Zero-Emoji Clean Line Design</span>
@@ -1666,3 +1666,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
