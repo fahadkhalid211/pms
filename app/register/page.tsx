@@ -7,6 +7,8 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const registerSchema = z.object({
   name: z.string().min(2, "Please enter your full name"),
   email: z.string().email("Please enter a valid email address"),
@@ -35,6 +37,7 @@ export default function RegisterPage() {
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ name, email, password, organizationName }),
     });
     const json = await response.json();
